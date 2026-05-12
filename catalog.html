@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Каталог — Метиз Электрод</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
+</head>
+<body>
+
+  <!-- ШАПКА -->
+  <header class="shop-header">
+    <div class="shop-header__container">
+      <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
+      <nav class="shop-nav">
+        <a href="/">Главная</a>
+        <a href="/catalog" class="active">Каталог</a>
+        <a href="/about">О нас</a>
+        <a href="/contacts">Контакты</a>
+      </nav>
+      <div class="shop-header__actions">
+        <div id="auth-actions" style="display: flex; gap: 8px;">
+          <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
+          <button class="icon-btn" onclick="handleLogout()" id="logout-btn" style="display:none; color: #EF4444;"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+        <button class="icon-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-count">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section style="background:var(--gray-bg);border-bottom:1px solid var(--dark);padding:80px 40px;text-align:center;">
+       <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:4px;color:var(--brand);margin-bottom:1rem;">Industrial Catalog</div>
+       <h1 style="font-size:80px;font-weight:900;text-transform:uppercase;letter-spacing:-3px;line-height:0.85;">Каталог<br/>Товаров</h1>
+    </section>
+
+    <!-- Фильтры категорий и поиск -->
+    <div class="category-tags-grid" id="filters">
+       <!-- Categories will be loaded here dynamically as .cat-tag-item -->
+    </div>
+
+    <div class="catalog-controls">
+       <div class="search-wrapper">
+          <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию или артикулу...">
+          <i class="fas fa-search search-icon"></i>
+       </div>
+       
+       <select id="sortSelect" class="sort-select">
+          <option value="default">Сортировка (По умолчанию)</option>
+          <option value="price-asc">Цена: По возрастанию</option>
+          <option value="price-desc">Цена: По убыванию</option>
+          <option value="name">По названию (А-Я)</option>
+       </select>
+    </div>
+
+    <section class="catalog-section" style="padding-top: 40px;">
+      <div class="products-grid" id="productsGrid">
+        <!-- Products will be loaded here -->
+      </div>
+    </section>
+
+    <section class="promo-section" style="cursor:pointer;" onclick="navigate('/contacts')">
+       <div class="promo-bg-text">МЕТИЗЭЛЕКТРОД</div>
+       <div class="promo-content">
+          <h2 class="promo-title">Оптовые<br/>Продажи<br/>Склады</h2>
+          <button class="promo-btn">Запросить прайс</button>
+       </div>
+    </section>
+  </main>
+</body>
+</html>

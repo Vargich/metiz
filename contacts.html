@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Контакты — Метиз Электрод</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
+</head>
+<body>
+  <header class="shop-header">
+    <div class="shop-header__container">
+      <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
+      <nav class="shop-nav">
+        <a href="/">Главная</a>
+        <a href="/catalog">Каталог</a>
+        <a href="/about">О нас</a>
+        <a href="/contacts" class="active">Контакты</a>
+      </nav>
+      <div class="shop-header__actions">
+        <div id="auth-actions" style="display: flex; gap: 8px;">
+          <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
+          <button class="icon-btn" onclick="handleLogout()" id="logout-btn" style="display:none; color: #EF4444;"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+        <button class="icon-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-count">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="about-section border-b border-dark">
+      <!-- INTERACTIVE MAP ZONE (Left - Now Sidebar) -->
+      <div class="about-sidebar" style="padding:0; overflow:hidden; display:flex; flex-direction:column; min-height:800px; flex: 1; border-right:1px solid var(--dark); background: white;">
+         <div id="map" style="width:100%; flex: 1 1 60%; filter: grayscale(1) invert(1) contrast(0.8) brightness(1.2);"></div>
+         <div id="shops" style="width:100%; flex: 1 1 40%; overflow-y:auto; background:var(--dark); color:white; border-top:2px solid var(--brand);">
+            <div style="padding:40px; opacity:0.5; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:2px;">Загрузка филиалов...</div>
+         </div>
+      </div>
+
+      <!-- CONTACT INFO PANEL (Right - Now Content) -->
+      <div class="about-content" style="background:var(--gray-bg); width: 450px; flex: 0 0 450px; padding: 60px; border-right: none;">
+        <h2 class="about-tag">Связь с нами</h2>
+        <div class="about-title" style="font-size: clamp(32px, 4vw, 56px); margin-bottom: 40px;">Наши<br/><span class="text-outline">Линии</span><br/>Связи</div>
+        
+        <div class="contacts-grid" style="margin-top:60px; display:flex; flex-direction:column; gap:40px; border:none; background:none;">
+           <div class="contact-box" style="text-align:left; padding:0; border:none;">
+             <div class="contact-tag">Отдел продаж</div>
+             <div class="contact-value" style="font-size:24px;">+7(84457) 9-00-99</div>
+             <div class="contact-sub">Консультации и наличие</div>
+           </div>
+           
+           <div class="contact-box" style="text-align:left; padding:0; border:none;">
+             <div class="contact-tag">Оптовые закупки</div>
+             <div class="contact-value" style="font-size:24px;">+7(961)089-38-12</div>
+             <div class="contact-sub">Спецпредложения для компаний</div>
+           </div>
+
+           <div class="contact-box" style="text-align:left; padding:0; border:none;">
+             <div class="contact-tag">Электронная почта</div>
+             <div class="contact-value" style="font-size:18px;">metiz-elektrod@mail.ru</div>
+             <div class="contact-sub">Для официальных запросов</div>
+           </div>
+        </div>
+
+        <div style="margin-top:60px; padding-top:40px; border-top:1px solid rgba(0,0,0,0.1);">
+           <div style="font-size:10px; font-weight:900; color:var(--brand); text-transform:uppercase; margin-bottom:12px;">Центральный офис</div>
+           <p style="font-size:13px; line-height:1.6; opacity:0.7;">г. Камышин, 2-й железнодорожный переезд, корпус 1.<br/>Работаем без выходных для вашего удобства.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="border-top:1px solid var(--dark);">
+    <div style="padding:40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;max-width:1300px;margin:0 auto;">
+      <div style="font-size:10px;font-weight:900;text-transform:uppercase;opacity:0.3;">© <span id="current-year"></span> MetizElektrod Industrial</div>
+    </div>
+  </footer>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Админ-панель — Метиз Электрод</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
+</head>
+<body>
+  <header class="shop-header">
+    <div class="shop-header__container">
+      <a href="/" class="shop-logo">Метиз<span class="text-brand">Админ</span></a>
+      <nav class="shop-nav">
+        <a href="/account">Назад в кабинет</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content" style="padding: 40px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 40px;">
+        <h1 class="about-title" style="margin:0;">Админ-панель</h1>
+        <div style="display:flex; gap:10px;">
+          <button onclick="switchTab('products')" id="tabBtnProducts" class="hero-btn">Товары</button>
+          <button onclick="switchTab('orders')" id="tabBtnOrders" class="hero-btn" style="background:white; color:var(--dark); border:1px solid var(--dark);">Заказы</button>
+        </div>
+      </div>
+      
+      <!-- PRODUCTS TAB -->
+      <div id="tabProducts">
+        <div style="background: var(--gray-bg); padding: 40px; border: 2px solid var(--dark); margin-bottom: 40px;">
+          <h3 class="about-tag" id="formTitle">Добавить новый товар</h3>
+          <form id="productForm" style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+            <input type="hidden" id="pId">
+            <input type="text" id="pName" placeholder="Название" required style="padding:15px; border:1px solid var(--dark);">
+            <input type="text" id="pArticle" placeholder="Артикул" style="padding:15px; border:1px solid var(--dark);">
+            <input type="number" id="pPrice" placeholder="Цена (₽)" required style="padding:15px; border:1px solid var(--dark);">
+            <input type="number" id="pQuantity" placeholder="Количество" style="padding:15px; border:1px solid var(--dark);">
+            <select id="pCategory" style="padding:15px; border:1px solid var(--dark);"></select>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+              <label style="font-size:10px; font-weight:900;">ИЗОБРАЖЕНИЕ (оставьте пустым чтобы не менять)</label>
+              <input type="file" id="pImageFile" accept="image/*" style="padding:10px; border:1px solid var(--dark); background:white;">
+            </div>
+            <textarea id="pDescription" placeholder="Описание" style="grid-column: span 2; padding:15px; border:1px solid var(--dark); min-height:80px;"></textarea>
+            <div style="grid-column: span 2; display:flex; gap:10px;">
+              <button type="submit" id="submitBtn" class="hero-btn" style="flex:1;">Сохранить</button>
+              <button type="button" id="cancelEditBtn" class="hero-btn" style="display:none; background:#6B7280;">Отмена</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="catalog-section" style="padding:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 class="about-tag">Список товаров</h3>
+            <div style="display:flex; align-items:center; gap:20px;">
+              <select id="adminCategoryFilter" style="padding:10px; border:1px solid var(--dark); font-size:10px; font-weight:900; text-transform:uppercase;">
+                <option value="all">Все категории</option>
+              </select>
+              <div style="font-size:10px; font-weight:900;">Всего: <span id="totalProducts">0</span></div>
+            </div>
+          </div>
+          <div class="products-grid" id="adminProductsGrid"></div>
+        </div>
+      </div>
+
+      <!-- ORDERS TAB -->
+      <div id="tabOrders" style="display:none;">
+        <div style="background: white; border: 2px solid var(--dark); padding: 40px;">
+           <h3 class="about-tag">Все заказы</h3>
+           <div id="adminOrdersList" style="margin-top:20px;">
+              <!-- Orders listing -->
+           </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    .order-card {
+      border: 1px solid var(--dark);
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+    .order-card header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .order-items-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .order-items-table th { text-align: left; opacity: 0.5; padding: 8px 0; font-weight: 900; }
+    .order-items-table td { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+  </style>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
