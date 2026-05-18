@@ -62,7 +62,7 @@ export function initYandexMap() {
         const shopsContainer = document.getElementById("shops");
         if (shopsContainer) {
             shopsContainer.innerHTML = "";
-            shopsContainer.style.background = "var(--dark)";
+            shopsContainer.style.background = "white";
         }
 
         shopList.forEach((city, cityIdx) => {
@@ -100,8 +100,7 @@ export function initYandexMap() {
                       <div class="shop-item-tag">Склад/Магазин</div>
                       <h4 class="shop-item-name">${shop.name}</h4>
                       <p class="shop-item-time">${shop.timework}</p>
-                      <div class="shop-item-action">Смотреть на карте <i class="fas fa-arrow-right"></i></div>
-                   `;
+                      `;
                    item.onclick = () => {
                       myMap.setCenter(shop.coordinates, 15, { duration: 500 });
                       openFullscreenCard(shopData);

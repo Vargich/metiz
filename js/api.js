@@ -1,19 +1,11 @@
-// API Service for talking to our Node.js Backend (SQL Version)
-
 const API = {
     async fetch(url, options = {}) {
-        // Base headers
         const headers = { ...options.headers };
-        
-        // If it's a JSON body and no content-type is specified, set it
         if (options.body && typeof options.body === 'string' && !headers['Content-Type']) {
             headers['Content-Type'] = 'application/json';
         }
 
-        const res = await fetch(url, {
-            ...options,
-            headers
-        });
+        const res = await fetch(url, { ...options, headers });
         if (!res.ok) {
             const err = await res.json();
             throw new Error(err.error || 'Server Error');
@@ -38,26 +30,23 @@ const API = {
             return API.fetch('/api/auth/logout', { method: 'POST' });
         },
         async me() {
-            try {
-                return await API.fetch('/api/auth/me');
-            } catch (e) {
-                return null;
-            }
+            try { return await API.fetch('/api/auth/me'); } catch (e) { return null; }
+        },
+        async updateProfile(data) {
+            return API.fetch('/api/users/me', {
+                method: 'PUT',
+                body: JSON.stringify(data) // Теперь можно передавать {name} или {email}
+            });
         }
     },
 
     categories: {
-        async getAll() {
-            return API.fetch('/api/categories');
-        }
+        async getAll() { return API.fetch('/api/categories'); }
     },
 
     products: {
-        async getAll() {
-            return API.fetch('/api/products');
-        },
+        async getAll() { return API.fetch('/api/products'); },
         async add(formData) {
-            // Check if it's FormData (for image upload) or JSON
             const isFormData = formData instanceof FormData;
             return API.fetch('/api/products', {
                 method: 'POST',
@@ -73,32 +62,18 @@ const API = {
                 body: isFormData ? formData : JSON.stringify(formData)
             });
         },
-        async delete(id) {
-            return API.fetch(`/api/products/${id}`, { method: 'DELETE' });
-        }
+        async delete(id) { return API.fetch(`/api/products/${id}`, { method: 'DELETE' }); }
     },
 
     orders: {
-        async getAll() {
-            return API.fetch('/api/orders');
-        },
-        async getItems(orderId) {
-            return API.fetch(`/api/orders/${orderId}/items`);
-        },
+        async getAll() { return API.fetch('/api/orders'); },
+        async getItems(orderId) { return API.fetch(`/api/orders/${orderId}/items`); },
         async updateStatus(orderId, status) {
-            return API.fetch(`/api/orders/${orderId}/status`, {
-                method: 'PUT',
-                body: JSON.stringify({ status })
-            });
+            return API.fetch(`/api/orders/${orderId}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
         },
-        async getMine() {
-            return API.fetch('/api/orders');
-        },
+        async getMine() { return API.fetch('/api/orders'); },
         async create(orderData) {
-            return API.fetch('/api/orders', {
-                method: 'POST',
-                body: JSON.stringify(orderData)
-            });
+            return API.fetch('/api/orders', { method: 'POST', body: JSON.stringify(orderData) });
         }
     }
 };

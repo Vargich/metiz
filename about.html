@@ -17,6 +17,7 @@
         <a href="/about" class="active">О нас</a>
         <a href="/contacts">Контакты</a>
       </nav>
+      
       <div class="shop-header__actions">
         <div id="auth-actions" style="display: flex; gap: 8px;">
           <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
@@ -30,7 +31,7 @@
   <main id="main-content">
     <section class="about-section border-b border-dark">
       <div class="about-content">
-        <h2 class="about-tag">About us</h2>
+        <h2 class="about-tag">о нас</h2>
         <div class="about-title">Надёжность<br/>с 2006<br/><span class="text-outline">года</span></div>
         <p class="about-p">
           Метиз Электрод — это не просто магазин. Это промышленный хаб, обеспечивающий бесперебойные поставки крепежа, электродов и инструментов для строительства и производства.
@@ -44,18 +45,18 @@
       </div>
       <div class="about-sidebar">
         <div style="height:100%; display:flex; flex-direction:column; justify-content:center;">
-          <h3 style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--brand);margin-bottom:32px;">Почему мы?</h3>
+          <h3 style="font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--brand);margin-bottom:32px;">Почему мы?</h3>
           <div class="about-list">
              <div class="about-list-item">
-               <h4>Складской запас</h4>
+               <h2>Складской запас</h2>
                <p>Мы держим более 1000 позиций всегда в наличии, чтобы вы не ждали поставку неделями.</p>
              </div>
              <div class="about-list-item">
-               <h4>Сертификация</h4>
+               <h2>Сертификация</h2>
                <p>Вся продукция соответствует ГОСТ и DIN, имеет необходимые паспорта качества.</p>
              </div>
              <div class="about-list-item">
-               <h4>Гибкость</h4>
+               <h2>Гибкость</h2>
                <p>Работаем как с физическими лицами, так и с крупными заводами через НДС.</p>
              </div>
           </div>
@@ -65,8 +66,19 @@
   </main>
 
   <footer style="border-top:1px solid var(--dark);">
-    <div style="padding:40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;max-width:1300px;margin:0 auto;">
-      <div style="font-size:10px;font-weight:900;text-transform:uppercase;opacity:0.3;">© <span id="current-year"></span> MetizElektrod Industrial</div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© <span id="current-year"></span> MetizElektrod Industrial</div>
+      
+      <div class="footer-links">
+        <a href="/admin-login">Админ-панель</a>
+        <a href="#">Политика</a>
+        <a href="#">Условия</a>
+      </div>
+      
+      <div class="footer-socials">
+        <div class="social-btn">VK</div>
+        <div class="social-btn">TG</div>
+      </div>
     </div>
   </footer>
 

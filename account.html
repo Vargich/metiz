@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
 </head>
 <body>
+  <!-- ШАПКА -->
   <header class="shop-header">
     <div class="shop-header__container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
@@ -17,6 +18,7 @@
         <a href="/about">О нас</a>
         <a href="/contacts">Контакты</a>
       </nav>
+      
       <div class="shop-header__actions">
         <div id="auth-actions" style="display: flex; gap: 8px;">
           <button class="icon-btn" onclick="openAuthModal()" id="login-btn" style="display:none;"><i class="fas fa-user"></i></button>
@@ -31,9 +33,44 @@
     <section class="about-section border-b border-dark">
       <div class="about-content">
         <h2 class="about-tag">Личный кабинет</h2>
-        <div class="about-title" id="userName">Загрузка...</div>
-        <p class="about-p" id="userEmail"></p>
         
+        <!-- БЛОК ИМЕНИ С КНОПКОЙ РЕДАКТИРОВАНИЯ -->
+        <div style="display:flex; align-items:center; gap: 16px; margin-bottom: 8px;">
+          <div class="about-title" id="userName" style="margin-bottom: 0;">Загрузка...</div>
+          <button onclick="toggleEditName()" id="editNameBtn" style="background:none; border:none; color:var(--brand); cursor:pointer; font-size: 24px; transition: 0.3s;" title="Изменить имя">
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
+
+        <!-- ФОРМА РЕДАКТИРОВАНИЯ ИМЕНИ -->
+        <div id="editNameForm" style="display:none; margin-bottom: 24px; align-items: center; gap: 10px;">
+          <input type="text" id="newNameInput" placeholder="Ваше новое имя" style="padding: 12px; border: 2px solid var(--dark); font-weight: 700; outline: none; font-size: 16px; width: 100%; max-width: 300px;">
+          <button onclick="saveNewName()" class="hero-btn" style="padding: 12px 20px;"><i class="fas fa-save"></i> Сохранить</button>
+          <button onclick="toggleEditName()" style="background:none; border:none; color:#EF4444; cursor:pointer; font-size: 24px;" title="Отмена"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- КОНТАКТНЫЕ ДАННЫЕ (ТЕЛЕФОН И ПОЧТА) -->
+        <div style="margin-top: 20px; font-size: 13px; margin-bottom: 24px;">
+          <div style="opacity: 0.5; font-weight: 900; font-size: 9px; text-transform: uppercase;">Телефон</div>
+          <div style="font-weight: 700; margin-bottom: 12px; font-size: 16px;" id="userPhone">Загрузка...</div>
+
+          <div style="opacity: 0.5; font-weight: 900; font-size: 9px; text-transform: uppercase;">Электронная почта</div>
+          <div style="display:flex; align-items:center; gap: 16px;">
+            <div style="font-weight: 700; font-size: 16px;" id="userEmail">Загрузка...</div>
+            <button onclick="toggleEditEmail()" id="editEmailBtn" style="background:none; border:none; color:var(--brand); cursor:pointer; font-size: 18px; transition: 0.3s;" title="Добавить/Изменить Email">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+
+          <!-- ФОРМА РЕДАКТИРОВАНИЯ EMAIL -->
+          <div id="editEmailForm" style="display:none; margin-top: 8px; align-items: center; gap: 10px;">
+            <input type="email" id="newEmailInput" placeholder="Введите Email" style="padding: 10px; border: 2px solid var(--dark); font-weight: 700; outline: none; font-size: 14px; width: 100%; max-width: 300px;">
+            <button onclick="saveNewEmail()" class="hero-btn" style="padding: 10px 16px; font-size: 10px;"><i class="fas fa-save"></i> Сохранить</button>
+            <button onclick="toggleEditEmail()" style="background:none; border:none; color:#EF4444; cursor:pointer; font-size: 20px;" title="Отмена"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+        
+        <!-- ССЫЛКА НА ПАНЕЛЬ АДМИНА (видна только админам) -->
         <div id="adminLink" style="display:none; margin-bottom: 2rem;">
           <a href="/admin" class="hero-btn" style="background:var(--brand);">Панель администратора</a>
         </div>
@@ -43,6 +80,8 @@
           <div class="about-grid-item">Статус: Постоянный клиент</div>
         </div>
       </div>
+      
+      <!-- САЙДБАР С ИСТОРИЕЙ ЗАКАЗОВ -->
       <div class="about-sidebar">
         <h3 style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--brand);margin-bottom:32px;">Ваши заказы</h3>
         <div id="ordersList" class="about-list">
@@ -50,10 +89,25 @@
         </div>
       </div>
     </section>
+
+    <!-- МОДАЛЬНОЕ ОКНО: СОДЕРЖИМОЕ ЗАКАЗА ДЛЯ КЛИЕНТА -->
+    <div id="userOrderModal" class="modal-overlay">
+      <div class="modal-content" style="max-width: 600px;">
+        <button type="button" onclick="closeUserOrderModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+        <h2 id="modalUserOrderTitle" class="about-title" style="font-size: 24px; margin-bottom: 24px; text-transform: uppercase;">Содержимое заказа</h2>
+        
+        <div style="background: var(--gray-bg); padding: 16px; border: 1px solid var(--dark); max-height: 300px; overflow-y: auto;" id="userOrderItemsList">
+           Загрузка...
+        </div>
+      </div>
+    </div>
+  </main> <!-- Вот этот тег у вас уже есть -->
   </main>
 
-  <footer style="border-top:1px solid var(--dark); padding: 40px; text-align: center;">
-    <div style="font-size:10px;font-weight:900;text-transform:uppercase;opacity:0.3;">© <span id="current-year"></span> MetizElektrod Industrial</div>
+  <footer style="border-top:1px solid var(--dark);">
+    <div class="footer-bottom" style="justify-content: center;">
+      <div class="footer-copy">© <span id="current-year"></span> MetizElektrod Industrial</div>
+    </div>
   </footer>
 
   <script type="module" src="/js/app.js"></script>

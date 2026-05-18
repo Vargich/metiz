@@ -12,32 +12,30 @@
   <div style="background:white; border:2px solid var(--dark); padding:40px; width:100%; max-width:400px; box-shadow: 20px 20px 0 var(--dark);">
     <div style="margin-bottom:2rem;">
       <div style="width:48px;height:48px;background:var(--brand);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
-        <i class="fas fa-lock" style="color:white;"></i>
+        <i class="fas fa-user-shield" style="color:white; font-size: 20px;"></i>
       </div>
-      <h2 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;">Вход для Админа</h2>
-      <p style="font-size:10px; opacity:0.5; margin-top:5px; font-weight:900; text-transform:uppercase;">Только для персонала</p>
+      <h2 style="font-size:1.5rem;font-weight:900;text-transform:uppercase; letter-spacing: -1px;">Панель<br/>Управления</h2>
+      <p style="font-size:10px; opacity:0.5; margin-top:5px; font-weight:900; text-transform:uppercase;">Доступ только для персонала</p>
     </div>
 
     <div style="margin-bottom:2rem;">
       <input type="text" id="adminContact" placeholder="EMAIL ИЛИ ТЕЛЕФОН" 
-        style="width:100%;padding:1rem;border:2px solid var(--dark);font-weight:700;outline:none;margin-bottom:1rem;" />
+        style="width:100%;padding:15px;border:2px solid var(--dark);font-weight:700;outline:none;margin-bottom:1rem;font-size:12px;" />
       <input type="password" id="adminPassword" placeholder="ПАРОЛЬ" 
-        style="width:100%;padding:1rem;border:2px solid var(--dark);font-weight:700;outline:none;margin-bottom:1rem;" />
+        style="width:100%;padding:15px;border:2px solid var(--dark);font-weight:700;outline:none;margin-bottom:1rem;font-size:12px;" />
     </div>
 
-    <button onclick="handleAdminLogin()" style="width:100%;padding:1rem;background:var(--dark);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;">Войти в систему</button>
+    <button onclick="handleAdminLogin()" style="width:100%;padding:15px;background:var(--dark);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;letter-spacing: 1px; transition: 0.3s;" onmouseover="this.style.background='var(--brand)'" onmouseout="this.style.background='var(--dark)'">Авторизоваться</button>
     
-    <a href="/" style="display:block; text-align:center; margin-top:20px; font-size:10px; font-weight:900; color:inherit; text-decoration:none; opacity:0.5;">НА ГЛАВНУЮ</a>
+    <a href="/" style="display:block; text-align:center; margin-top:20px; font-size:10px; font-weight:900; color:inherit; text-decoration:none; opacity:0.5; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">НА ГЛАВНУЮ САЙТА</a>
   </div>
 
-  <script type="module">
-    import API from './js/api.js';
-    
+  <script>
     window.handleAdminLogin = async () => {
       const contact = document.getElementById('adminContact').value;
       const password = document.getElementById('adminPassword').value;
 
-      if (!contact || !password) return alert('Заполните поле');
+      if (!contact || !password) return alert('Заполните все поля!');
 
       try {
         const response = await fetch('/api/admin/login', {
@@ -47,16 +45,22 @@
         });
         
         const data = await response.json();
-        if (response.ok) {
-          localStorage.setItem('user', JSON.stringify(data.user));
-          window.location.href = '/admin';
+        if (response.ok && data.user) {
+          // Сохраняем признак админа в хранилище
+          localStorage.setItem('adminUser', JSON.stringify(data.user));
+          window.location.href = '/admin'; // Перекидываем в админку
         } else {
-          alert(data.error || 'Ошибка входа');
+          alert(data.error || 'Неверный логин или пароль');
         }
       } catch (err) {
-        alert('Ошибка сервера');
+        alert('Ошибка соединения с сервером');
       }
     };
+
+    // Поддержка входа по клавише Enter
+    document.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') handleAdminLogin();
+    });
   </script>
 </body>
 </html>
