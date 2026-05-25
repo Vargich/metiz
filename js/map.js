@@ -1,21 +1,30 @@
-
 export function initYandexMap() {
     const mapEl = document.getElementById("map");
     if (!mapEl) return;
 
-    // Wait for ymaps if not immediately available
+    // ВАЖНО ДЛЯ SPA: Очищаем контейнер перед новой загрузкой карты
+    mapEl.innerHTML = ""; 
+
+    // Запускаем инициализацию карты
+    const loadMap = () => {
+        ymaps.ready(init);
+    };
+
+    // Если Я.Карты еще не скачаны (человек первый раз зашел на Контакты) - качаем их
     if (typeof ymaps === 'undefined') {
-        const checkYmaps = setInterval(() => {
-            if (typeof ymaps !== 'undefined') {
-                clearInterval(checkYmaps);
-                ymaps.ready(init);
-            }
-        }, 100);
-        return;
+        const script = document.createElement('script');
+        script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=33642748-9cc0-49a1-8516-cef1e3433a34";
+        script.type = "text/javascript";
+        script.onload = loadMap;
+        document.head.appendChild(script);
+    } else {
+        // Если уже скачаны (перешел туда-сюда) - просто запускаем
+        loadMap();
     }
 
-    ymaps.ready(init);
-
+    // ===========================================
+    // ВАША ОРИГИНАЛЬНАЯ ЛОГИКА 
+    // ===========================================
     function init() {
         const shopList = [
             {
@@ -58,6 +67,7 @@ export function initYandexMap() {
             zoom: 11,
             controls: ["zoomControl"],
         });
+        myMap.behaviors.disable('scrollZoom');
 
         const shopsContainer = document.getElementById("shops");
         if (shopsContainer) {
@@ -96,10 +106,13 @@ export function initYandexMap() {
                 if (shopsContainer) {
                    const item = document.createElement('div');
                    item.className = 'shop-list-item-industrial';
+                   // Немного затемним фон кнопок магазинов, раз фон контейнера белый
+                   item.style.color = '#000';
+                   item.style.borderBottom = '1px solid #e5e7eb';
                    item.innerHTML = `
-                      <div class="shop-item-tag">Склад/Магазин</div>
-                      <h4 class="shop-item-name">${shop.name}</h4>
-                      <p class="shop-item-time">${shop.timework}</p>
+                      <div class="shop-item-tag" style="color:var(--brand); font-weight:900; font-size:10px; text-transform:uppercase;">Склад/Магазин</div>
+                      <h4 class="shop-item-name" style="margin-top:4px;">${shop.name}</h4>
+                      <p class="shop-item-time" style="opacity:0.6; font-size:12px;">${shop.timework}</p>
                       `;
                    item.onclick = () => {
                       myMap.setCenter(shop.coordinates, 15, { duration: 500 });
@@ -112,6 +125,7 @@ export function initYandexMap() {
         });
     }
 
+    // Модальное окно (ваш красивый дизайн)
     window.openFullscreenCard = function(shopData) {
         let modal = document.getElementById("shop-fullscreen-modal");
         if (!modal) {
@@ -121,37 +135,31 @@ export function initYandexMap() {
         }
 
         modal.innerHTML = `
-            <div class="modal-overlay-industrial" onclick="closeFullscreenCard()">
-                <div class="modal-card-industrial" onclick="event.stopPropagation()">
-                    <button class="modal-close-industrial" onclick="closeFullscreenCard()"><i class="fas fa-times"></i></button>
-                    <div class="modal-content-industrial">
-                        <div class="modal-label-industrial">Локация пункта</div>
-                        <h2 class="modal-title-industrial">${shopData.address}</h2>
-                        <div class="modal-info-block-industrial">
-                            <div class="info-label">Режим работы</div>
-                            <div class="info-value">${shopData.time}</div>
+            <div class="modal-overlay-industrial" onclick="closeFullscreenCard()" style="z-index: 9000; position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center;">
+                <div class="modal-card-industrial" onclick="event.stopPropagation()" style="background:white; border:2px solid var(--dark); max-width:400px; position:relative; box-shadow: 15px 15px 0 var(--dark);">
+                    <button class="modal-close-industrial" onclick="closeFullscreenCard()" style="position:absolute; right:-20px; top:-20px; background:var(--brand); border:2px solid var(--dark); color:white; width:40px; height:40px; cursor:pointer;"><i class="fas fa-times"></i></button>
+                    <div class="modal-content-industrial" style="padding:40px;">
+                        <div class="modal-label-industrial" style="color:var(--brand); font-weight:900; font-size:10px; letter-spacing:2px; text-transform:uppercase;">Локация пункта</div>
+                        <h2 class="modal-title-industrial" style="font-size:24px; font-weight:900; line-height:1.2; text-transform:uppercase; margin:16px 0;">${shopData.address}</h2>
+                        <div class="modal-info-block-industrial" style="background:#f3f4f6; padding:16px; margin: 24px 0;">
+                            <div class="info-label" style="opacity:0.5; font-size:10px; font-weight:900; text-transform:uppercase; margin-bottom:8px;">Режим работы</div>
+                            <div class="info-value" style="font-weight:700;">${shopData.time}</div>
                         </div>
-                        <a href="${shopData.route}" target="_blank" class="modal-btn-industrial">
+                        <a href="${shopData.route}" target="_blank" class="modal-btn-industrial hero-btn" style="text-decoration:none; display:block; text-align:center; padding:16px;">
                            ПРОЛОЖИТЬ МАРШРУТ <i class="fas fa-external-link-alt ml-2"></i>
                         </a>
                     </div>
                 </div>
             </div>
         `;
-
-        modal.style.display = 'block';
-        setTimeout(() => modal.classList.add("show"), 10);
         document.body.style.overflow = "hidden";
     }
 
     window.closeFullscreenCard = function () {
         const modal = document.getElementById("shop-fullscreen-modal");
         if (modal) {
-            modal.classList.remove("show");
+            modal.remove(); // Просто вырезаем его из дерева чтобы не плодились баги
             document.body.style.overflow = "";
-            setTimeout(() => {
-                if (!modal.classList.contains("show")) modal.style.display = "none";
-            }, 300);
         }
     };
 }

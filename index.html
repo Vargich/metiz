@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=33642748-9cc0-49a1-8516-cef1e3433a34" type="text/javascript"></script>
+  <script src="https://api-maps.yandex.ru/2.1/?apikey={{YANDEX_MAPS_API_KEY}}"></script>
   <meta name="description" content="Метизы, сварочное оборудование, инструмент и промышленный прокат" />
 </head>
 <body>
@@ -60,9 +60,13 @@
           </div>
 
           <div id="authCodeStep" style="display:none; margin-bottom:1rem;">
-            <input type="text" id="authCode" placeholder="КОД ИЗ СМС / ПОЧТЫ" maxlength="6"
+            <input type="text" id="authCode" placeholder="КОД" maxlength="4"
               style="width:100%;padding:1rem;border:2px solid var(--dark);font-weight:700;outline:none;text-align:center;letter-spacing:10px;font-size:20px;" />
             <div id="codePreview" style="font-size:10px; opacity:0.5; margin-top:5px; text-align:center;"></div>
+            <div style="text-align:center; margin-top:10px;">
+              <button id="resendCodeBtn" onclick="resendAuthCode()" style="background:none;border:none;color:var(--brand);font-size:10px;font-weight:900;text-transform:uppercase;cursor:pointer;opacity:1;transition:0.3s;">Отправить повторно</button>
+              <span id="resendTimer" style="font-size:10px; font-weight:900; opacity:0.5; display:none; margin-left:8px;">(60 сек)</span>
+            </div>
           </div>
 
           <div id="authNameStep" style="display:none; margin-bottom:1rem;">
@@ -84,7 +88,7 @@
 
   <!-- ШАПКА -->
   <header class="shop-header">
-    <div class="shop-header__container">
+    <div class="container shop-header__container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
       
       <nav class="shop-nav">
@@ -156,7 +160,27 @@
     <section class="categories-grid" id="homeCategories">
       <!-- Dynamically loaded from DB -->
     </section>
-
+    <section class="hits-section">
+      <div style=" margin: 0 auto;">
+        <h2 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; color: var(--brand); margin-bottom: 8px;">Рекомендуем</h2>
+        <div style="font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 40px; line-height: 1.1;">Лучшие<br/><span class="text-outline">Позиции</span></div>
+        
+        <div class="products-grid" id="promoProductsContainer">
+          <!-- Товары подгрузятся сюда скриптом -->
+          <p style="font-size: 11px; opacity:0.5; text-transform:uppercase; font-weight:900;">Загрузка рекомендаций...</p>
+        </div>
+      </div>
+    </section>
+    <section class="new-section">
+      <div  style=" margin: 0 auto;">
+          <h2 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; color: #10B981; margin-bottom: 8px;">Новинки</h2>
+          <div style="font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 40px; line-height: 1.1;">Свежие<br/><span class="text-outline">Поступления</span></div>
+          
+          <div class="products-grid" id="newProductsContainer">
+              <p style="font-size: 11px; opacity:0.5; text-transform:uppercase; font-weight:900;">Загрузка новинок...</p>
+          </div>
+      </div>
+  </section>
     <!-- About Section -->
     <section id="about" class="about-section border-b border-dark">
       <div class="about-content">
@@ -252,7 +276,7 @@
     </div>
     
     <div class="footer-bottom">
-      <div class="footer-copy">© <span id="current-year"></span> MetizElektrod Industrial</div>
+      <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
       
       <div class="footer-links">
         

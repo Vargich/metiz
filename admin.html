@@ -232,6 +232,22 @@
       border-color: var(--brand);
       transform: scale(1.05);
     }
+
+    .suggested-img {
+      animation: pulse-suggested 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-suggested {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      }
+
+      50% {
+        box-shadow: 0 0 8px var(--brand);
+      }
+    }
   </style>
 </head>
 
@@ -241,12 +257,11 @@
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Админ</span></a>
       <nav class="shop-nav">
         <a href="/">На сайт</a>
-        <button onclick="openSettingsModal()" style="background:none;border:none;cursor:pointer;font-weight:900;font-size:10px;text-transform:uppercase;color:var(--brand); letter-spacing: 1px; margin-right: 15px;">Настройки</button>
+        <button onclick="openSettingsModal()"
+          style="background:none;border:none;cursor:pointer;font-weight:900;font-size:10px;text-transform:uppercase;color:var(--brand); letter-spacing: 1px; margin-right: 15px;">Настройки</button>
         <button onclick="logout()"
           style="background:none;border:none;cursor:pointer;font-weight:900;font-size:10px;text-transform:uppercase;color:#EF4444; letter-spacing: 1px;">Выйти</button>
-     
-        </nav>
-      
+      </nav>
     </div>
   </header>
 
@@ -269,6 +284,10 @@
                 id="productCount">0</span></div>
           </div>
           <div style="display:flex; gap:16px;">
+            <button class="hero-btn" onclick="openExcelHelp()"
+              style="background:white; color:var(--dark); border:1px solid var(--dark);">
+              <i class="fas fa-question-circle"></i> Справка
+            </button>
             <button class="excel-btn" onclick="document.getElementById('excelFile').click()">
               <i class="fas fa-file-excel"></i> Импорт Excel
             </button>
@@ -378,12 +397,13 @@
                 <th>Email</th>
                 <th>Телефон</th>
                 <th>Роль</th>
+                <th style="width: 130px;">Скидка</th>
                 <th>Регистрация</th>
               </tr>
             </thead>
             <tbody id="adminUsersList">
               <tr>
-                <td colspan="5" style="text-align:center;">Загрузка...</td>
+                <td colspan="7" style="text-align:center;">Загрузка...</td>
               </tr>
             </tbody>
           </table>
@@ -429,11 +449,21 @@
         </div>
 
         <div>
-          <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Остаток (шт)</label>
+          <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Остаток</label>
           <input type="number" id="mQuantity" value="0"
             style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
         </div>
-
+        <div>
+          <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Единица измерения</label>
+          <select id="mUnit"
+              style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
+              <option value="шт">шт (штуки)</option>
+              <option value="кг">кг (килограммы)</option>
+              <option value="м">м (метры)</option>
+              <option value="уп">уп (упаковка)</option>
+              <option value="компл">компл (комплект)</option>
+          </select>
+      </div>
         <div>
           <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Статус (Бейдж)</label>
           <select id="mBadge"
@@ -489,7 +519,6 @@
         привязать к товару</p>
 
       <div id="galleryContainer" class="gallery-grid">
-        <!-- Фотографии загружаются сюда -->
       </div>
     </div>
   </div>
@@ -504,7 +533,7 @@
       <p id="modalOrderCustomer" style="font-size: 13px; font-weight: 700; margin-bottom: 24px; opacity: 0.7;"></p>
 
       <div
-        style="background: var(--gray-bg); padding: 16px; border: 1px solid var(--dark); margin-bottom: 24px; max-height: 200px; overflow-y: auto;"
+        style="background: var(--gray-bg); padding: 16px; border: 1px solid var(--dark); margin-bottom: 24px; max-height: 250px; overflow-y: auto;"
         id="modalOrderItems"></div>
 
       <form id="orderForm" style="display:flex; flex-direction: column; gap: 16px;">
@@ -521,7 +550,7 @@
           </select>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 10px;">
-          <button type="submit" class="hero-btn" style="flex:1; justify-content:center;">Обновить статус</button>
+          <button type="submit" class="hero-btn" style="flex:1; justify-content:center;">Сохранить изменения</button>
         </div>
       </form>
     </div>
@@ -529,20 +558,25 @@
 
   <div id="settingsModal" class="modal-overlay">
     <div class="modal-content" style="max-width: 400px;">
-      <button type="button" onclick="closeSettingsModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+      <button type="button" onclick="closeSettingsModal()"
+        style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
       <h2 class="about-title" style="font-size: 20px; margin-bottom: 24px; text-transform: uppercase;">Смена данных</h2>
-      
+
       <div style="margin-bottom: 15px;">
-        <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Новый Email или Телефон</label>
-        <input type="text" id="sContact" placeholder="Оставьте пустым, если не меняете" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
+        <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Новый Email или
+          Телефон</label>
+        <input type="text" id="sContact" placeholder="Оставьте пустым, если не меняете"
+          style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
       </div>
-      
+
       <div style="margin-bottom: 24px;">
         <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Новый пароль</label>
-        <input type="password" id="sPassword" placeholder="Минимум 6 символов" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
+        <input type="password" id="sPassword" placeholder="Минимум 6 символов"
+          style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
       </div>
-      
-      <button onclick="saveAdminSettings()" class="hero-btn" style="width: 100%; justify-content:center;">Сохранить изменения</button>
+
+      <button onclick="saveAdminSettings()" class="hero-btn" style="width: 100%; justify-content:center;">Сохранить
+        изменения</button>
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -553,6 +587,8 @@
     let categoriesData = [];
     let ordersData = [];
     let usersData = [];
+    let currentOrderId = null;
+    let currentOrderItems = [];
 
     function checkAuth() {
       if (!localStorage.getItem('adminUser')) {
@@ -583,6 +619,34 @@
       if (tabId === 'users') loadUsers();
     }
 
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '—';
+        return d.toLocaleDateString('ru-RU');
+      } catch (err) {
+        return '—';
+      }
+    }
+
+    // Навешиваем обработчик клика на таблицу товаров методом делегирования
+    document.getElementById('adminProductsList').addEventListener('click', function(e) {
+      if (e.target.closest('.action-btn')) return; 
+      const tr = e.target.closest('tr');
+      if (!tr) return;
+      const id = tr.dataset.id;
+      if (id) viewProduct(id);
+    });
+
+    // Навешиваем обработчик клика на таблицу заказов методом делегирования
+    document.getElementById('adminOrdersList').addEventListener('click', function(e) {
+      const tr = e.target.closest('tr');
+      if (!tr) return;
+      const id = tr.dataset.id;
+      if (id) viewOrder(id);
+    });
+
     // ==========================================
     // ЛОГИКА: КАТЕГОРИИ
     // ==========================================
@@ -590,7 +654,6 @@
       try {
         const res = await fetch(API_BASE + '/categories', { cache: 'no-store' });
         const data = await res.json();
-        // ИСПРАВЛЕНИЕ: правильно считываем JSON один раз
         categoriesData = Array.isArray(data) ? data : [];
         const opts = '<option value="">Выберите категорию</option>' + categoriesData.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         document.getElementById('mCategory').innerHTML = opts;
@@ -609,6 +672,7 @@
           <td style="font-weight:700; opacity:0.7;">/${c.slug}</td>
           <td style="font-weight:900;">${c.product_count || 0} шт.</td>
           <td style="text-align: right;">
+            <button class="action-btn" title="Изменить" style="margin-right: 4px;" onclick="editCategory(${c.id}, '${c.name.replace(/'/g, "\\'")}', event)"><i class="fas fa-edit"></i> Изменить</button>
             <button class="action-btn delete" title="Удалить" onclick="deleteCategory(${c.id}, event)"><i class="fas fa-trash"></i></button>
           </td>
         </tr>`).join('');
@@ -628,6 +692,27 @@
       } catch (err) { alert(err.message); }
     });
 
+    async function editCategory(id, currentName, event) {
+      event.stopPropagation();
+      const newName = prompt("Введите новое название категории:", currentName);
+      if (newName === null) return;
+      const trimmed = newName.trim();
+      if (!trimmed) return alert("Название не может быть пустым");
+      try {
+        const res = await fetch(`${API_BASE}/categories/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: trimmed })
+        });
+        if (res.ok) {
+          loadCategories();
+        } else {
+          const data = await res.json();
+          alert(data.error || "Ошибка при изменении категории");
+        }
+      } catch (err) { alert("Ошибка соединения"); }
+    }
+
     async function deleteCategory(id, event) {
       event.stopPropagation();
       const cat = categoriesData.find(c => c.id == id);
@@ -640,20 +725,129 @@
     // ==========================================
     // ЛОГИКА: ГАЛЕРЕЯ КАРТИНОК
     // ==========================================
+
+    function extractKeywords(productName) {
+      if (!productName) return [];
+
+      const keywordMap = {
+        'болт': ['bolt', 'болт'],
+        'гайка': ['gaika', 'гайк', 'nut'],
+        'шайба': ['shaib', 'шайб', 'washer'],
+        'шпилька': ['shpil', 'шпил', 'stud'],
+        'анкер': ['anker', 'анкер'],
+        'дюбель': ['dyubel', 'дюбел', 'dowel'],
+        'шуруп': ['shurup', 'шуруп', 'screw'],
+        'гвоздь': ['gvozd', 'гвозд', 'nail'],
+        'заклёп': ['zaklep', 'заклё', 'rivet'],
+        'сварк': ['svar', 'свар', 'weld'],
+        'электрод': ['elektrod', 'электрод', 'electrode'],
+        'инвертор': ['invert', 'инверт'],
+        'цепь': ['cep', 'цеп', 'chain'],
+        'трос': ['tros', 'трос', 'cable'],
+        'струбцин': ['strub', 'струб', 'clamp'],
+        'дрель': ['drel', 'дрел', 'drill'],
+        'перфоратор': ['perfor', 'перфор'],
+        'болгарк': ['bolgark', 'болгарк', 'ushm', 'grinder'],
+        'уголок': ['ugolok', 'уголок', 'corner'],
+        'арматур': ['armatur', 'арматур'],
+        'профтруб': ['proftrub', 'профтруб', 'profile'],
+        'труба': ['truba', 'pipe'],
+        'лист': ['list', 'sheet'],
+        'каска': ['kaska', 'каска', 'helmet'],
+        'перчат': ['perchat', 'перчат', 'glove'],
+        'очки': ['ochki', 'очк', 'glasses'],
+        'круг': ['krug', 'круг', 'disc', 'wheel'],
+        'диск': ['disk', 'disc'],
+        'респиратор': ['respir', 'респир'],
+        'молоток': ['molotok', 'молот', 'hammer'],
+        'отвертк': ['otvert', 'отверт', 'screwdriver'],
+        'ключ': ['kluch', 'ключ', 'wrench'],
+        'зубило': ['zubilo', 'зубил', 'chisel'],
+      };
+
+      const keywords = [];
+      const words = productName.split(/[\s,.\-()]+/);
+
+      words.forEach(word => {
+        if (word.length < 2) return;
+        for (const [key, variants] of Object.entries(keywordMap)) {
+          if (word.toLowerCase().includes(key)) {
+            keywords.push(...variants);
+            break; 
+          }
+        }
+      });
+
+      return [...new Set(keywords)]; 
+    }
+
     async function openGallery() {
       document.getElementById('galleryModal').classList.add('open');
       const container = document.getElementById('galleryContainer');
       container.innerHTML = '<p style="font-size:11px;">Загрузка библиотеки...</p>';
+
+      const productName = document.getElementById('mName').value.trim().toLowerCase();
+
       try {
         const res = await fetch(API_BASE + '/images', { cache: 'no-store' });
         const images = await res.json();
+
         if (images.length === 0) {
-          container.innerHTML = '<p style="font-size:11px;">Библиотека пуста</p>';
+          container.innerHTML = '<p style="font-size:11px;">Библиотека пуста. Загрузите изображения через форму товара.</p>';
           return;
         }
-        container.innerHTML = images.map(url => `<img src="${url}" class="gallery-img" onclick="selectGalleryImage('${url}')">`).join('');
+
+        const keywords = extractKeywords(productName);
+
+        let suggestedImages = [];
+        let otherImages = [];
+
+        images.forEach(url => {
+          const fileName = url.toLowerCase();
+          const isSuggested = keywords.some(keyword => fileName.includes(keyword));
+          if (isSuggested) {
+            suggestedImages.push(url);
+          } else {
+            otherImages.push(url);
+          }
+        });
+
+        let html = '';
+
+        if (suggestedImages.length > 0 && productName) {
+          html += `
+                    <div style="grid-column:1/-1; margin-bottom:12px; background:var(--gray-bg); padding:10px; border-left:3px solid var(--brand);">
+                        <span style="font-size:10px; font-weight:900; color:var(--brand); text-transform:uppercase;">
+                            💡 Предложено для «${productName}» (${suggestedImages.length} шт.)
+                        </span>
+                    </div>
+                `;
+          html += suggestedImages.map(url => `
+                    <img src="${url}" class="gallery-img" onclick="selectGalleryImage('${url}')" 
+                         style="border:2px solid var(--brand);" 
+                         title="Подходит по названию">
+                `).join('');
+
+          if (otherImages.length > 0) {
+            html += `
+                        <div style="grid-column:1/-1; margin:16px 0 8px; border-top:1px solid rgba(0,0,0,0.1); padding-top:12px;">
+                            <span style="font-size:9px; font-weight:900; opacity:0.4; text-transform:uppercase;">
+                                Все изображения (${otherImages.length} шт.)
+                            </span>
+                        </div>
+                    `;
+          }
+        }
+
+        html += otherImages.map(url => `
+                <img src="${url}" class="gallery-img" onclick="selectGalleryImage('${url}')">
+            `).join('');
+
+        container.innerHTML = html;
+
       } catch (err) {
-        container.innerHTML = '<p style="font-size:11px; color:red;">Ошибка загрузки</p>';
+        console.error('Ошибка галереи:', err);
+        container.innerHTML = '<p style="font-size:11px; color:red;">Ошибка загрузки библиотеки</p>';
       }
     }
 
@@ -675,7 +869,7 @@
       if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          preview.innerHTML = `<img src="${e.target.result}" style="max-height:100px; border: 1px solid #ccc; display:block;"><div style="font-size:9px; font-weight:900; color:#10B981; margin-top:4px;">НОВЫЙ ФАЙЛ ГОТОВ</div>`;
+          preview.innerHTML = `<img src="${e.target.result}" style="max-height:100px; border:1px solid #ccc; display:block;"><div style="font-size:9px; font-weight:900; color:#10B981; margin-top:4px;">✅ НОВЫЙ ФАЙЛ ГОТОВ К ЗАГРУЗКЕ</div>`;
           preview.style.display = 'block';
         }
         reader.readAsDataURL(file);
@@ -705,22 +899,23 @@
       tbody.innerHTML = productsData.map(p => {
         const cat = categoriesData.find(c => c.id == p.category_id);
         const isLowStock = p.quantity < 2;
-        const imgSrc = (p.image && p.image.length > 5) ? p.image : null;
+        
 
         return `
-          <tr onclick="viewProduct(${p.id})" class="${isLowStock ? 'row-low-stock' : ''}">
-            <td style="text-align:center;">${imgSrc ? `<img src="${imgSrc}" style="width:32px; height:32px; object-fit:contain;">` : `<div style="font-size:20px;">📦</div>`}</td>
-            <td style="font-weight:900; opacity:0.5;">#${p.id}</td>
-            <td style="font-weight:700; opacity:0.7;">${p.article || '—'}</td>
-            <td style="font-weight:900;">${p.name}${isLowStock ? '<br><span class="low-stock-warning">Осталось мало</span>' : ''}</td>
-            <td><span style="background:var(--gray-bg); padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700;">${cat ? cat.name : 'Без категории'}</span></td>
-            <td style="font-weight:900; color:${isLowStock ? '#EF4444' : '#10B981'};">${p.quantity} шт.</td>
-            <td style="font-weight:900; color:var(--brand);">${Number(p.price).toLocaleString()} ₽</td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button class="action-btn" title="Копировать" style="margin-right: 4px;" onclick="copyProduct(${p.id}, event)"><i class="fas fa-copy" style="margin-right:4px;"></i> Копия</button>
-              <button class="action-btn delete" title="Удалить" onclick="deleteProduct(${p.id}, event)"><i class="fas fa-trash"></i></button>
-            </td>
-          </tr>`;
+            <tr data-id="${p.id}" class="${isLowStock ? 'row-low-stock' : ''}">
+                <td style="text-align:center;">${(p.image && p.image.length > 5) ? `<img src="${p.image}" style="width:32px; height:32px; object-fit:contain;">` : '<div style="font-size:20px;">📦</div>'}</td>
+                <td style="font-weight:900; opacity:0.5;">#${p.id}</td>
+                <td style="font-weight:700; opacity:0.7;">${p.article || '—'}</td>
+                <td style="font-weight:900;">${p.name}${isLowStock ? '<br><span class="low-stock-warning">Осталось мало</span>' : ''}</td>
+                <td><span style="background:var(--gray-bg); padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700;">${cat ? cat.name : 'Без категории'}</span></td>
+                <td style="font-weight:900; color:${isLowStock ? '#EF4444' : '#10B981'};">${p.quantity} ${p.unit || 'шт'}</td>
+                <td style="font-weight:900; color:var(--brand);">${Number(p.price).toLocaleString()} ₽</td>
+                <td style="text-align: right; white-space: nowrap;">
+                    <button class="action-btn" title="Копировать" style="margin-right: 4px;" onclick="copyProduct(${p.id}, event)"><i class="fas fa-copy"></i> Копия</button>
+                    <button class="action-btn delete" title="Удалить" onclick="deleteProduct(${p.id}, event)"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
       }).join('');
     }
 
@@ -741,6 +936,7 @@
       document.getElementById('mQuantity').value = p.quantity;
       document.getElementById('mCategory').value = p.category_id || '';
       document.getElementById('mBadge').value = p.badge || '';
+      document.getElementById('mUnit').value = p.unit || 'шт';
       document.getElementById('mImageFile').value = '';
       document.getElementById('mExistingImage').value = '';
 
@@ -778,6 +974,177 @@
       openProductModal();
     }
 
+    // ==========================================
+    // ЛОГИКА: ЗАКАЗЫ И РЕДАКТИРОВАНИЕ СОСТАВА
+    // ==========================================
+    async function loadOrders() {
+      try {
+        const res = await fetch(API_BASE + '/orders?all=true', { cache: 'no-store' });
+        const data = await res.json();
+        ordersData = Array.isArray(data) ? data : [];
+
+        const tbody = document.getElementById('adminOrdersList');
+        if (ordersData.length === 0) return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Нет заказов</td></tr>';
+
+        const statuses = { 'new': { text: 'Новый', class: 'status-new' }, 'processing': { text: 'В обработке', class: 'status-processing' }, 'shipped': { text: 'Отправлен', class: 'status-shipped' }, 'completed': { text: 'Выполнен', class: 'status-completed' }, 'cancelled': { text: 'Отменен', class: 'status-cancelled' } };
+        tbody.innerHTML = ordersData.map(o => {
+          const st = statuses[o.status] || statuses['new'];
+          return `<tr data-id="${o.id}">
+            <td style="font-weight:900;">#${o.id}</td>
+            <td style="opacity:0.6; font-size:11px;">${formatDate(o.created_at)}</td>
+            <td style="font-weight:700;">
+              ${o.user_name || '—'}<br>
+              <span style="font-size:10px; opacity:0.6;">${o.user_phone || ''}</span><br>
+              <span style="font-size:10px; opacity:0.6;">${o.user_email || ''}</span>
+            </td>
+            <td style="font-weight:900;">${Number(o.total).toLocaleString()} ₽</td>
+            <td><span class="status-badge ${st.class}">${st.text}</span></td>
+          </tr>`;
+        }).join('');
+      } catch (err) { console.error("Orders Load Error", err) }
+    }
+
+    function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
+
+    async function viewOrder(id) {
+      const o = ordersData.find(x => x.id == id);
+      if (!o) return;
+      currentOrderId = id;
+      document.getElementById('oId').value = o.id;
+      document.getElementById('oStatus').value = o.status || 'new';
+      document.getElementById('modalOrderTitle').textContent = `Заказ #${o.id}`;
+      document.getElementById('modalOrderCustomer').innerHTML = `
+        Клиент: ${o.user_name || '—'}<br>
+        <span style="font-size:11px; opacity:0.7;">Тел: ${o.user_phone || 'не указан'}</span><br>
+        <span style="font-size:11px; opacity:0.7;">Email: ${o.user_email || 'не указан'}</span>
+      `;
+      document.getElementById('orderModal').classList.add('open');
+
+      try {
+        const res = await fetch(`${API_BASE}/orders/${id}/items`, { cache: 'no-store' });
+        currentOrderItems = await res.json();
+        renderOrderItemsEdit();
+      } catch (e) {
+        document.getElementById('modalOrderItems').innerHTML = 'Ошибка загрузки товаров';
+      }
+    }
+
+    function renderOrderItemsEdit() {
+      const container = document.getElementById('modalOrderItems');
+      if (!container) return;
+
+      let html = '';
+      if (currentOrderItems.length === 0) {
+        html += '<p style="font-size:11px; opacity:0.5; margin-bottom: 12px;">В заказе нет товаров</p>';
+      } else {
+        html += currentOrderItems.map((item, idx) => {
+          const qty = Number(item.quantity);
+          const isFractional = qty % 1 !== 0;
+          const displayQty = isFractional ? qty.toFixed(1) : qty;
+          const unit = item.product_unit || 'шт';
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:8px; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:8px; gap: 8px;">
+              <span style="font-weight:700; flex: 1;">${item.product_name || 'Неизвестный товар'}</span>
+              <div style="display:flex; align-items:center; gap: 4px;">
+                <input type="number" value="${displayQty}" step="0.1" min="0.1" 
+                       style="width: 60px; padding: 4px; border: 1px solid var(--dark); font-size:11px; text-align:center;"
+                       onchange="updateOrderItemQty(${idx}, this.value)">
+                <span style="font-size: 10px; font-weight: 700;">${unit}</span>
+                <span style="margin: 0 4px; color: var(--brand); font-weight: 700;">${item.price} ₽</span>
+                <button type="button" class="action-btn delete" style="width: 24px; height: 24px; padding: 0; line-height: 24px;" 
+                        onclick="removeOrderItem(${idx})">&times;</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      html += `
+        <div style="margin-top: 16px; padding-top: 12px; border-top: 2px dashed var(--dark); display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <select id="addOrderProdSelect" style="flex: 1; padding: 8px; border: 1px solid var(--dark); font-size:11px; font-weight: 700;">
+            <option value="">-- Добавить товар --</option>
+            ${productsData.map(p => `<option value="${p.id}">${p.name} (${p.price} ₽ - ост. ${p.quantity} ${p.unit})</option>`).join('')}
+          </select>
+          <input type="number" id="addOrderProdQty" value="1" step="0.1" min="0.1" style="width: 50px; padding: 8px; border: 1px solid var(--dark); font-size:11px; text-align: center;">
+          <button type="button" class="action-btn" onclick="addOrderItem()" style="padding: 0 12px; height: 32px; background: var(--dark); color: white;">+</button>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    window.updateOrderItemQty = function(idx, value) {
+      const qty = parseFloat(value);
+      if (isNaN(qty) || qty <= 0) return;
+      currentOrderItems[idx].quantity = qty;
+    };
+
+    window.removeOrderItem = function(idx) {
+      currentOrderItems.splice(idx, 1);
+      renderOrderItemsEdit();
+    };
+
+    window.addOrderItem = function() {
+      const select = document.getElementById('addOrderProdSelect');
+      const qtyInput = document.getElementById('addOrderProdQty');
+      if (!select || !qtyInput) return;
+
+      const prodId = parseInt(select.value);
+      const qty = parseFloat(qtyInput.value);
+
+      if (!prodId) return alert('Выберите товар!');
+      if (isNaN(qty) || qty <= 0) return alert('Введите корректное количество!');
+
+      const p = productsData.find(x => x.id === prodId);
+      if (!p) return;
+
+      const existing = currentOrderItems.find(item => item.product_id === prodId);
+      if (existing) {
+        existing.quantity += qty;
+      } else {
+        currentOrderItems.push({
+          product_id: prodId,
+          product_name: p.name,
+          product_unit: p.unit || 'шт',
+          quantity: qty,
+          price: p.price
+        });
+      }
+
+      renderOrderItemsEdit();
+    };
+
+    document.getElementById('orderForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const statusRes = await fetch(`${API_BASE}/orders/${document.getElementById('oId').value}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: document.getElementById('oStatus').value })
+      });
+
+      if (!statusRes.ok) {
+        const err = await statusRes.json();
+        alert(err.error || "Ошибка сохранения статуса");
+        return;
+      }
+
+      const itemsRes = await fetch(`${API_BASE}/orders/${currentOrderId}/items`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: currentOrderItems })
+      });
+
+      if (itemsRes.ok) {
+        closeOrderModal();
+        loadOrders();
+        loadProducts(); 
+      } else {
+        const err = await itemsRes.json();
+        alert(err.error || "Ошибка сохранения товаров заказа");
+      }
+    });
+
     document.getElementById('productForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const id = document.getElementById('mId').value;
@@ -791,6 +1158,7 @@
       formData.append('quantity', document.getElementById('mQuantity').value);
       formData.append('category_id', document.getElementById('mCategory').value);
       formData.append('badge', document.getElementById('mBadge').value);
+      formData.append('unit', document.getElementById('mUnit').value);
 
       const fileInput = document.getElementById('mImageFile');
       if (fileInput.files.length > 0) {
@@ -818,95 +1186,175 @@
     }
 
     // ==========================================
-    // ЛОГИКА: ЗАКАЗЫ И ПОЛЬЗОВАТЕЛИ
+    // ЛОГИКА: ПОЛЬЗОВАТЕЛИ
     // ==========================================
-    async function loadOrders() {
-      try {
-        const res = await fetch(API_BASE + '/orders?all=true', { cache: 'no-store' });
-        // ИСПРАВЛЕНИЕ: Читаем JSON только один раз!
-        const data = await res.json();
-        ordersData = Array.isArray(data) ? data : [];
-
-        const tbody = document.getElementById('adminOrdersList');
-        if (ordersData.length === 0) return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Нет заказов</td></tr>';
-
-        const statuses = { 'new': { text: 'Новый', class: 'status-new' }, 'processing': { text: 'В обработке', class: 'status-processing' }, 'shipped': { text: 'Отправлен', class: 'status-shipped' }, 'completed': { text: 'Выполнен', class: 'status-completed' }, 'cancelled': { text: 'Отменен', class: 'status-cancelled' } };
-        tbody.innerHTML = ordersData.map(o => {
-          const st = statuses[o.status] || statuses['new'];
-          return `<tr onclick="viewOrder(${o.id})"><td style="font-weight:900;">#${o.id}</td><td style="opacity:0.6; font-size:11px;">${new Date(o.created_at).toLocaleDateString('ru-RU')}</td><td style="font-weight:700;">${o.user_name || o.user_email || 'Гость'}</td><td style="font-weight:900;">${Number(o.total).toLocaleString()} ₽</td><td><span class="status-badge ${st.class}">${st.text}</span></td></tr>`;
-        }).join('');
-      } catch (err) { console.error("Orders Load Error", err) }
-    }
-
-    function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
-
-    async function viewOrder(id) {
-      const o = ordersData.find(x => x.id == id);
-      if (!o) return;
-      document.getElementById('oId').value = o.id;
-      document.getElementById('oStatus').value = o.status || 'new';
-      document.getElementById('modalOrderTitle').textContent = `Заказ #${o.id}`;
-      document.getElementById('modalOrderCustomer').textContent = `Клиент: ${o.user_name || o.user_email || 'Неизвестно'}`;
-      document.getElementById('orderModal').classList.add('open');
-
-      try {
-        const res = await fetch(`${API_BASE}/orders/${id}/items`, { cache: 'no-store' });
-        const items = await res.json();
-        let itemsHtml = items.length > 0 ? items.map(i => `<div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:8px;"><span style="font-weight:700;">${i.product_name || 'Неизвестный товар'}</span><span>${i.quantity} шт. x ${i.price} ₽</span></div>`).join('') : '<p style="font-size:11px; opacity:0.5;">Пустой заказ</p>';
-        document.getElementById('modalOrderItems').innerHTML = itemsHtml;
-      } catch (e) { }
-    }
-
-    document.getElementById('orderForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      await fetch(`${API_BASE}/orders/${document.getElementById('oId').value}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: document.getElementById('oStatus').value }) });
-      closeOrderModal(); loadOrders();
-    });
-
     async function loadUsers() {
       try {
         const res = await fetch(API_BASE + '/users', { cache: 'no-store' });
         usersData = await res.json();
         const tbody = document.getElementById('adminUsersList');
-        if (usersData.length === 0) return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Нет пользователей</td></tr>';
+        if (usersData.length === 0) return tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Нет пользователей</td></tr>';
+        
         tbody.innerHTML = usersData.map(u => `
-  <tr>
-    <td style="font-weight:900; opacity:0.5;">#${u.id}</td>
-    <td style="font-weight:900;">${u.name || '—'}</td>
-    <td style="font-weight:700; color:var(--brand);">${u.email || '—'}</td>
-    <td style="font-weight:700; opacity:0.8;">${u.phone || '—'}</td>
-    <td>${u.is_admin ? '<span style="color:#EF4444; font-weight:900;">Админ</span>' : 'Клиент'}</td>
-    <td style="font-size:11px; opacity:0.6;">${u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU') : '—'}</td>
-  </tr>
-`).join('');
-      } catch (err) { }
+          <tr>
+            <td style="font-weight:900; opacity:0.5;">#${u.id}</td>
+            <td style="font-weight:900;">${u.name || '—'}</td>
+            <td style="font-weight:700; color:var(--brand);">${u.email || '—'}</td>
+            <td style="font-weight:700; opacity:0.8;">${u.phone || '—'}</td>
+            <td>${u.is_admin ? '<span style="color:#EF4444; font-weight:900;">Админ</span>' : 'Клиент'}</td>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-weight:900; color:var(--brand);">${u.discount || 0}%</span>
+                <button class="action-btn" style="height:24px; padding:0 6px; font-size:9px;" onclick="changeUserDiscount(${u.id}, ${u.discount || 0}, event)">✏️ Скидка</button>
+              </div>
+            </td>
+            <td style="font-size:11px; opacity:0.6;">${formatDate(u.created_at)}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error("Ошибка при загрузке пользователей:", err);
+        document.getElementById('adminUsersList').innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Ошибка при чтении данных</td></tr>';
+      }
+    }
+
+    async function changeUserDiscount(userId, currentDiscount, event) {
+      event.stopPropagation();
+      const newDiscount = prompt("Укажите размер персональной скидки клиента (0-100%):", currentDiscount);
+      if (newDiscount === null) return;
+      const val = parseInt(newDiscount);
+      if (isNaN(val) || val < 0 || val > 100) return alert("Введите корректное число процентов от 0 до 100");
+      try {
+        const res = await fetch(`${API_BASE}/users/${userId}/discount`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ discount: val })
+        });
+        if (res.ok) {
+          loadUsers();
+        } else {
+          const data = await res.json();
+          alert(data.error || "Ошибка при обновлении скидки");
+        }
+      } catch (err) { alert("Ошибка сети"); }
+    }
+
+    // ==========================================
+    // ЛОГИКА: ИМПОРТ EXCEL
+    // ==========================================
+    async function uploadExcel() {
+      const fileInput = document.getElementById('excelFile');
+      const statusDiv = document.getElementById('excelStatus');
+      if (!fileInput.files.length) return;
+
+      const file = fileInput.files[0];
+      statusDiv.textContent = 'Обработка файла...';
+
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet);
+
+          statusDiv.textContent = `Загрузка ${json.length} товаров...`;
+
+          let successCount = 0;
+          for (const row of json) {
+            const name = row['Название'] || row['Name'] || row['name'];
+            if (!name) continue;
+
+            const article = row['Артикул'] || row['Article'] || row['article'] || '';
+            const price = parseFloat(row['Цена'] || row['Price'] || row['price'] || 0);
+            const quantity = parseFloat(row['Остаток'] || row['Quantity'] || row['quantity'] || 0);
+            const unit = row['Единица измерения'] || row['Unit'] || row['unit'] || 'шт';
+            const catName = row['Категория'] || row['Category'] || row['category'];
+            const badge = row['Бейдж'] || row['Badge'] || row['badge'] || '';
+
+            let category_id = null;
+            if (catName) {
+              const cat = categoriesData.find(c => c.name.toLowerCase() === catName.toLowerCase());
+              if (cat) {
+                category_id = cat.id;
+              } else {
+                try {
+                  const catRes = await fetch(API_BASE + '/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: catName })
+                  });
+                  if (catRes.ok) {
+                    await loadCategories(); 
+                    const newCat = categoriesData.find(c => c.name.toLowerCase() === catName.toLowerCase());
+                    if (newCat) category_id = newCat.id;
+                  }
+                } catch (catErr) {
+                  console.warn("Не удалось создать категорию при импорте:", catName);
+                }
+              }
+            }
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('article', article);
+            formData.append('price', price);
+            formData.append('quantity', quantity);
+            formData.append('unit', unit);
+            if (category_id) formData.append('category_id', category_id);
+            if (badge) formData.append('badge', badge);
+
+            const res = await fetch(API_BASE + '/products', {
+              method: 'POST',
+              body: formData
+            });
+            if (res.ok) successCount++;
+          }
+
+          statusDiv.textContent = `Успешно импортировано: ${successCount} из ${json.length} товаров.`;
+          fileInput.value = '';
+          await loadProducts();
+        } catch (err) {
+          console.error(err);
+          statusDiv.textContent = 'Ошибка обработки Excel файла.';
+        }
+      };
+      reader.readAsArrayBuffer(file);
     }
 
     function openSettingsModal() { document.getElementById('settingsModal').classList.add('open'); }
-function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('open'); }
+    function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('open'); }
 
-async function saveAdminSettings() {
-    const contact = document.getElementById('sContact').value.trim();
-    const password = document.getElementById('sPassword').value.trim();
-    
-    if (!contact && !password) return alert('Заполните хотя  бы одно поле для изменения!');
-    
-    try {
+    async function saveAdminSettings() {
+      const contact = document.getElementById('sContact').value.trim();
+      const password = document.getElementById('sPassword').value.trim();
+
+      if (!contact && !password) return alert('Заполните хотя бы одно поле для изменения!');
+
+      try {
         const res = await fetch('/api/admin/settings', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contact, password })
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contact, password })
         });
         const data = await res.json();
-        
+
         if (res.ok) {
-            alert('Данные успешно изменены! При изменении логина, используйте его при следующем входе.');
-            closeSettingsModal();
+          alert('Данные успешно изменены! При изменении логина, используйте его при следующем входе.');
+          closeSettingsModal();
         } else {
-            alert('Ошибка: ' + (data.error || 'Не удалось сохранить'));
+          alert('Ошибка: ' + (data.error || 'Не удалось сохранить'));
         }
-    } catch (err) { alert('Ошибка сети'); }
-}
+      } catch (err) { alert('Ошибка сети'); }
+    }
+
+    function openExcelHelp() {
+      document.getElementById('excelHelpModal').classList.add('open');
+    }
+
+    function closeExcelHelp() {
+      document.getElementById('excelHelpModal').classList.remove('open');
+    }
   </script>
 </body>
 
