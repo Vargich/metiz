@@ -2,15 +2,12 @@ export function initYandexMap() {
     const mapEl = document.getElementById("map");
     if (!mapEl) return;
 
-    // ВАЖНО ДЛЯ SPA: Очищаем контейнер перед новой загрузкой карты
-    mapEl.innerHTML = ""; 
+    mapEl.innerHTML = "";
 
-    // Запускаем инициализацию карты
     const loadMap = () => {
         ymaps.ready(init);
     };
 
-    // Если Я.Карты еще не скачаны (человек первый раз зашел на Контакты) - качаем их
     if (typeof ymaps === 'undefined') {
         const script = document.createElement('script');
         script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=33642748-9cc0-49a1-8516-cef1e3433a34";
@@ -18,13 +15,9 @@ export function initYandexMap() {
         script.onload = loadMap;
         document.head.appendChild(script);
     } else {
-        // Если уже скачаны (перешел туда-сюда) - просто запускаем
         loadMap();
     }
 
-    // ===========================================
-    // ВАША ОРИГИНАЛЬНАЯ ЛОГИКА 
-    // ===========================================
     function init() {
         const shopList = [
             {
@@ -75,10 +68,10 @@ export function initYandexMap() {
             shopsContainer.style.background = "white";
         }
 
-        shopList.forEach((city, cityIdx) => {
+        shopList.forEach((city) => {
             const cityCollection = new ymaps.GeoObjectCollection();
 
-            city.shops.forEach((shop, shopIdx) => {
+            city.shops.forEach((shop) => {
                 const shopData = {
                     address: shop.name,
                     time: shop.timework,
@@ -104,28 +97,26 @@ export function initYandexMap() {
                 cityCollection.add(shopPlacemark);
 
                 if (shopsContainer) {
-                   const item = document.createElement('div');
-                   item.className = 'shop-list-item-industrial';
-                   // Немного затемним фон кнопок магазинов, раз фон контейнера белый
-                   item.style.color = '#000';
-                   item.style.borderBottom = '1px solid #e5e7eb';
-                   item.innerHTML = `
+                    const item = document.createElement('div');
+                    item.className = 'shop-list-item-industrial';
+                    item.style.color = '#000';
+                    item.style.borderBottom = '1px solid #e5e7eb';
+                    item.innerHTML = `
                       <div class="shop-item-tag" style="color:var(--brand); font-weight:900; font-size:10px; text-transform:uppercase;">Склад/Магазин</div>
                       <h4 class="shop-item-name" style="margin-top:4px;">${shop.name}</h4>
                       <p class="shop-item-time" style="opacity:0.6; font-size:12px;">${shop.timework}</p>
                       `;
-                   item.onclick = () => {
-                      myMap.setCenter(shop.coordinates, 15, { duration: 500 });
-                      openFullscreenCard(shopData);
-                   };
-                   shopsContainer.appendChild(item);
+                    item.onclick = () => {
+                        myMap.setCenter(shop.coordinates, 15, { duration: 500 });
+                        openFullscreenCard(shopData);
+                    };
+                    shopsContainer.appendChild(item);
                 }
             });
             myMap.geoObjects.add(cityCollection);
         });
     }
 
-    // Модальное окно (ваш красивый дизайн)
     window.openFullscreenCard = function(shopData) {
         let modal = document.getElementById("shop-fullscreen-modal");
         if (!modal) {
@@ -158,8 +149,69 @@ export function initYandexMap() {
     window.closeFullscreenCard = function () {
         const modal = document.getElementById("shop-fullscreen-modal");
         if (modal) {
-            modal.remove(); // Просто вырезаем его из дерева чтобы не плодились баги
+            modal.remove();
             document.body.style.overflow = "";
         }
     };
+}
+
+// Мини-карта для корзины — загружает точки из API
+export function initPickupMap(containerId, onSelectCallback) {
+    const mapEl = document.getElementById(containerId);
+    if (!mapEl) return;
+
+    mapEl.innerHTML = "";
+
+    const loadMap = async () => {
+        await ymaps.ready();
+        try {
+            const res = await fetch('/api/pickup-points');
+            const points = await res.json();
+            initPickup(mapEl, points, onSelectCallback);
+        } catch (e) {
+            console.error('Ошибка загрузки пунктов выдачи:', e);
+        }
+    };
+
+    if (typeof ymaps === 'undefined') {
+        const script = document.createElement('script');
+        script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=33642748-9cc0-49a1-8516-cef1e3433a34";
+        script.type = "text/javascript";
+        script.onload = loadMap;
+        document.head.appendChild(script);
+    } else {
+        loadMap();
+    }
+}
+
+function initPickup(container, points, onSelectCallback) {
+    if (points.length === 0) return;
+
+    const map = new ymaps.Map(container, {
+        center: [50.108462, 45.307467],
+        zoom: 11,
+        controls: ["zoomControl"]
+    });
+    map.behaviors.disable('scrollZoom');
+
+    points.forEach(point => {
+        const coords = point.coords ? JSON.parse(point.coords) : [50.1, 45.4];
+        const placemark = new ymaps.Placemark(
+            coords,
+            {
+                hintContent: point.name,
+                balloonContent: `<strong>${point.name}</strong><br>${point.address}<br>${point.worktime || ''}`
+            },
+            { preset: "islands#redDotIcon" }
+        );
+
+        placemark.events.add("click", function () {
+            if (onSelectCallback) onSelectCallback(point);
+            map.setCenter(coords, 14, { duration: 400 });
+        });
+
+        map.geoObjects.add(placemark);
+    });
+
+    container._mapInstance = map;
 }

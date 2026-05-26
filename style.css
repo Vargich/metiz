@@ -2240,3 +2240,104 @@ body {
     padding: 40px 0 !important;
   }
 }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+
+/* Блок количества для весовых/мерных товаров */
+.qty-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.qty-control__stepper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--dark);
+    background: white;
+}
+
+.qty-control__btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.qty-control__btn:hover {
+    background: var(--gray-bg);
+}
+
+.qty-control__btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.qty-control__input {
+    width: 40px;
+    height: 28px;
+    border: none;
+    border-left: 1px solid var(--gray-bg);
+    border-right: 1px solid var(--gray-bg);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.qty-control__input::-webkit-outer-spin-button,
+.qty-control__input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty-control__unit {
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.4;
+    text-transform: lowercase;
+}
+
+.qty-control__cart-btn {
+    width: 30px;
+    height: 30px;
+    background: var(--dark);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.qty-control__cart-btn:hover {
+    background: var(--brand);
+}
+
+.qty-control__cart-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

@@ -33,6 +33,12 @@
           <span style="font-size: 10px; font-weight: 900; text-transform: uppercase;">Итого к оплате:</span>
           <span id="cartTotal" style="font-size: 24px; font-weight: 900; color: var(--brand);">0 ₽</span>
         </div>
+        <div id="pickupSelect" style="margin-bottom: 20px;">
+    <label style="font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block;">Пункт самовывоза</label>
+    <select id="pickupPoint" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; font-size: 11px;">
+        <option value="">Выберите магазин</option>
+    </select>
+</div>
         <button onclick="checkout()" style="width:100%;padding:1rem;background:var(--dark);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;">Оформить заказ</button>
       </div>
     </div>
@@ -253,27 +259,25 @@
         <span>БОЛТЫ • ГАЙКИ • ШАЙБЫ • ШПИЛЬКИ • АНКЕРЫ • ДЮБЕЛИ • ШУРУПЫ • ГВОЗДИ • ЗАКЛЁПКИ • ШТИФТЫ • ТРОСЫ • ЦЕПИ • СВАРОЧНЫЕ АППАРАТЫ • ЭЛЕКТРОДЫ • ПРОВОЛОКА • ГАЗОРЕЗКА • ДРЕЛИ • УШМ • ПЕРФОРАТОРЫ •</span>
       </div>
     </div>
+
+    <section class="footer-benefits">
+    <div class="benefit-item">
+        <div class="benefit-title">Налоги</div>
+        <div class="benefit-desc">Работаем с НДС</div>
+    </div>
+    <div class="benefit-item">
+        <div class="benefit-title">Склад</div>
+        <div class="benefit-desc">1000+ позиций в наличии</div>
+    </div>
+    <div class="benefit-item">
+        <div class="benefit-title">Оплата</div>
+        <div class="benefit-desc">Безнал и наличные</div>
+    </div>
+</section>
   </main>
 
   <footer style="border-top:1px solid var(--dark);">
-    <div class="footer-benefits">
-      <!-- <div class="benefit-item">
-        <div class="benefit-title">Доставка</div>
-        <div class="benefit-desc">По области и в регионы</div>
-      </div> -->
-      <div class="benefit-item">
-        <div class="benefit-title">Налоги</div>
-        <div class="benefit-desc">Работаем с НДС</div>
-      </div>
-      <div class="benefit-item">
-        <div class="benefit-title">Склад</div>
-        <div class="benefit-desc">1000+ позиций в наличии</div>
-      </div>
-      <div class="benefit-item">
-        <div class="benefit-title">Оплата</div>
-        <div class="benefit-desc">Безнал и наличные</div>
-      </div>
-    </div>
+    
     
     <div class="footer-bottom">
       <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>

@@ -5,22 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Политика конфиденциальности — Метиз Электрод</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
 </head>
 <body>
   <header class="shop-header">
-    <div class="shop-header__container">
+    <div class="container shop-header__container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
+      
       <nav class="shop-nav">
-        <a href="/">Главная</a>
+        <a href="/" class="active">Главная</a>
         <a href="/catalog">Каталог</a>
         <a href="/about">О нас</a>
         <a href="/contacts">Контакты</a>
       </nav>
+      
+      <div class="shop-header__actions">
+        <div id="auth-actions" style="display: flex; gap: 8px;">
+          <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
+          <button class="icon-btn" onclick="handleLogout()" id="logout-btn" style="display:none; color: #EF4444;"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+        <button class="icon-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-count">0</span></button>
+      </div>
     </div>
   </header>
 
   <main id="main-content">
-    <section class="about-section border-b border-dark" style="min-height: 60vh;">
+    <section class="about-section  border-dark" style="min-height: 60vh;">
       <div style="padding: 60px 40px; max-width: 900px; margin: 0 auto; width: 100%;">
         <h2 class="about-tag">Документ</h2>
         <div class="about-title" style="font-size: 32px; margin-bottom: 40px;">Политика обработки персональных данных</div>
@@ -55,15 +65,34 @@
     </section>
   </main>
   
-  <footer style="border-top:1px solid var(--dark);">
-    <div class="footer-bottom">
-      <div class="footer-copy">© <span id="current-year"></span> MetizElektrod Industrial</div>
-      <div class="footer-links">
-        <a href="/policy">Политика конфиденциальности</a>
-        <a href="/terms">Пользовательское соглашение</a>
-      </div>
+ <footer style="border-top:1px solid var(--dark);">
+    <div class="footer-benefits">
+        <div class="benefit-item">
+            <div class="benefit-title">Налоги</div>
+            <div class="benefit-desc">Работаем с НДС</div>
+        </div>
+        <div class="benefit-item">
+            <div class="benefit-title">Склад</div>
+            <div class="benefit-desc">1000+ позиций в наличии</div>
+        </div>
+        <div class="benefit-item">
+            <div class="benefit-title">Оплата</div>
+            <div class="benefit-desc">Безнал и наличные</div>
+        </div>
     </div>
-  </footer>
+    <div class="footer-bottom">
+        <div class="footer-copy">© <span id="current-year"></span> MetizElektrod Industrial</div>
+        <div class="footer-links">
+            <a href="/policy">Политика</a>
+            <a href="/terms">Условия</a>
+        </div>
+        <div class="footer-socials">
+            <div class="social-btn">VK</div>
+            <div class="social-btn">TG</div>
+        </div>
+    </div>
+</footer>
+<script type="module" src="/js/app.js"></script>
   <script type="module" src="/js/app.js"></script>
 </body>
 </html>

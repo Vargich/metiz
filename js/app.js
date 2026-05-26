@@ -1,6 +1,7 @@
 import API from "./api.js";
-import { initYandexMap } from "./map.js";
+import { initYandexMap, initPickupMap } from "./map.js";
 window.initYandexMap = initYandexMap;
+window.initPickupMap = initPickupMap;
 let currentUser = null;
 let allProducts = [];
 let allCategories = [];
@@ -15,13 +16,13 @@ let authStep = 1;
 async function bootstrap() {
   const savedCart = localStorage.getItem("cart");
   if (savedCart) {
-      try {
-          cart = JSON.parse(savedCart);
-      } catch(e) {
-          cart = [];
-      }
+    try {
+      cart = JSON.parse(savedCart);
+    } catch (e) {
+      cart = [];
+    }
   }
-  ensureModalsExist(); 
+  ensureModalsExist();
 
   const yearEl = document.getElementById("current-year");
   if (yearEl) yearEl.innerText = new Date().getFullYear();
@@ -143,13 +144,18 @@ async function loadPage(path, triggerPushState = true) {
     if (newMain) {
       window.scrollTo(0, 0);
       main.innerHTML = newMain.innerHTML;
+      const progressBar = document.getElementById("scroll-progress");
+      if (progressBar) progressBar.style.width = "0%";
       updateHeaderActive(new URL(path, window.location.origin).pathname);
       initPageFunctions(
         new URL(path, window.location.origin).pathname,
-        new URL(path, window.location.origin).searchParams
+        new URL(path, window.location.origin).searchParams,
       );
-      enforceRKN();
+      
     }
+      if (currentUser) updateUIForLoggedInUser(currentUser);
+      updateCartBadge();
+      enforceRKN();
   } catch (err) {
     console.error("Navigation error:", err);
   } finally {
@@ -162,19 +168,19 @@ function updateHeaderActive(path) {
     const href = a.getAttribute("href");
     a.classList.toggle(
       "active",
-      href === path || (path === "/" && (href === "/" || href === "/index"))
+      href === path || (path === "/" && (href === "/" || href === "/index")),
     );
   });
 }
 
 function initPageFunctions(
   path = window.location.pathname,
-  params = new URLSearchParams(window.location.search)
+  params = new URLSearchParams(window.location.search),
 ) {
   if (path === "/" || path === "/index") {
     initHomeCategories();
-    initPromoProducts(); 
-    initNewProducts(); 
+    initPromoProducts();
+    initNewProducts();
   } else if (path.includes("catalog")) initCatalog(params);
   else if (path.includes("account")) initAccount();
   else if (path.includes("contacts")) {
@@ -191,73 +197,123 @@ async function initNewProducts() {
   if (!container) return;
 
   try {
-      const products = await API.products.getAll();
-      const news = products.filter(p => p.badge === "new" && p.quantity > 0);
+    const products = await API.products.getAll();
+    const news = products.filter((p) => p.badge === "new" && p.quantity > 0);
 
-      if (news.length === 0) {
-          container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Новинки скоро появятся</p>';
-          return;
-      }
+    if (news.length === 0) {
+      container.innerHTML =
+        '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Новинки скоро появятся</p>';
+      return;
+    }
 
-      container.innerHTML = news.map(p => {
-          const hasImg = p.image && p.image.length > 5;
-          const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
+    container.innerHTML = news
+      .map((p) => {
+        const hasImg = p.image && p.image.length > 5;
+        const imgHtml = hasImg
+          ? `<img src="${p.image}" alt="${p.name}">`
+          : "📦";
 
-          let inCartQty = 0;
-          cart.forEach(item => {
-            try {
-                const itemStr = typeof item === 'string' ? item : JSON.stringify(item);
-                const parsed = JSON.parse(itemStr);
-                if (parsed && typeof parsed === 'object' && String(parsed.id) === String(p.id)) {
-                    inCartQty += parsed.qty;
-                } else if (typeof parsed === 'number' && String(parsed) === String(p.id)) {
-                    inCartQty += 1;
-                }
-            } catch (e) {
-                if (String(item) === String(p.id)) {
-                    inCartQty += 1;
-                }
+        let inCartQty = 0;
+        cart.forEach((item) => {
+          try {
+            const itemStr =
+              typeof item === "string" ? item : JSON.stringify(item);
+            const parsed = JSON.parse(itemStr);
+            if (
+              parsed &&
+              typeof parsed === "object" &&
+              String(parsed.id) === String(p.id)
+            ) {
+              inCartQty += parsed.qty;
+            } else if (
+              typeof parsed === "number" &&
+              String(parsed) === String(p.id)
+            ) {
+              inCartQty += 1;
             }
+          } catch (e) {
+            if (String(item) === String(p.id)) {
+              inCartQty += 1;
+            }
+          }
         });
 
-          const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
-          const outOfStock = (p.quantity || 0) <= 0;
+        const imgAction = hasImg
+          ? `onclick="window.openImageModal('${p.image}')"`
+          : "";
+        const outOfStock = (p.quantity || 0) <= 0;
 
-          return `<div class="product-card" style="${outOfStock ? "filter:grayscale(1);opacity:0.7;" : ""}">
-              <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
-                  ${imgHtml}
-                  <div class="product-badge new">✨ Новинка</div>
-                  ${inCartQty > 0 ? `<div style="position:absolute;top:10px;right:10px;background:#10B981;color:white;min-width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;padding:0 6px;white-space:nowrap;">${(p.unit === "кг" || p.unit === "м") ? inCartQty.toFixed(1) + " " + p.unit : inCartQty}</div>` : ""}
-              </div>
-              <div class="product-info">
-                  <div style="font-size:9px;font-weight:900;text-transform:uppercase;opacity:0.3;margin-bottom:6px;">${p.category_name || "Без категории"}</div>
-                  <h3 style="font-size:12px;font-weight:900;text-transform:uppercase;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;min-height:28px;">${p.name}</h3>
-                  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;">
-                      <div style="font-size:16px;font-weight:900;color:var(--brand);">
-                          ${Number(p.price).toLocaleString()} ₽
-                          <span style="font-size:10px;font-weight:500;opacity:0.5;">/${p.unit || "шт"}</span>
-                      </div>
-                      ${(p.unit === "кг" || p.unit === "м") ? `
-                          <div style="display:flex;align-items:center;gap:4px;">
-                              <input type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="width:50px;padding:4px;border:1px solid var(--dark);font-size:10px;text-align:center;" ${outOfStock ? "disabled" : ""}>
-                              <span style="font-size:9px;font-weight:700;">${p.unit}</span>
-                              <button onclick="window.addToCartWithQty('${p.id}')" class="icon-btn" style="background:var(--dark);color:white;border:none;width:32px;height:32px;font-size:12px;" ${outOfStock ? "disabled" : ""}>
-                                  <i class="fas fa-shopping-cart"></i>
-                              </button>
-                          </div>
-                      ` : `
-                          <button onclick="window.addToCart('${p.id}')" class="icon-btn" style="background:var(--dark);color:white;border:none;width:32px;height:32px;font-size:12px;" ${outOfStock ? "disabled" : ""}>
-                              <i class="fas fa-shopping-cart"></i>
-                          </button>
-                      `}
-                  </div>
-              </div>
-          </div>`;
-      }).join("");
+        return `<div class="product-card" style="${outOfStock ? "filter:grayscale(1);opacity:0.7;" : ""}">
+    
+    <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
+        ${imgHtml}
+        
+        <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
+        ${
+          p.badge === "hit" || p.badge === "new"
+            ? `<div class="product-badge ${p.badge === "new" ? "new" : ""}">${p.badge === "hit" ? "🔥 Хит" : "✨ Новинка"}</div>`
+            : ""
+        }
+        
+        <!-- Пузырек с корзиной -->
+        ${
+          inCartQty > 0
+            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; box-shadow: 2px 2px 0 var(--dark);">
+                   ${p.unit === "кг" || p.unit === "м" ? inCartQty.toFixed(1) + " " + p.unit : inCartQty}
+               </div>`
+            : ""
+        }
+    </div>
 
+    <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
+        <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
+            ${p.category_name || "Без категории"}
+        </div>
+        
+        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
+            ${p.name}
+        </h3>
+        
+        <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
+        <div style="margin-top:auto;">
+            
+            <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
+            <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
+                ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || "шт"}</span>
+            </div>
+            
+            ${
+              p.unit === "кг" || p.unit === "м"
+                ? `
+                <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
+                <div class="qty-control" style="width:100%; display:flex; gap:6px;">
+                    <div class="qty-control__stepper" style="flex:1;">
+                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? "disabled" : ""}>−</button>
+                        <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? "disabled" : ""}>
+                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? "disabled" : ""}>+</button>
+                    </div>
+                    <!-- Доп кнопка добавления в корзину -->
+                    <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? "disabled" : ""}>
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                </div>
+            `
+                : `
+                <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
+                <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? "disabled" : ""}>
+                    В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
+                </button>
+            `
+            }
+        </div>
+    </div>
+</div>`;
+      })
+      .join("");
   } catch (err) {
-      console.error("New products error:", err);
-      container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить новинки</p>';
+    console.error("New products error:", err);
+    container.innerHTML =
+      '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить новинки</p>';
   }
 }
 
@@ -291,10 +347,11 @@ async function initHomeCategories() {
       <a href="/catalog?category=${c.slug}" class="category-card">
         <div class="category-icon">${icons[c.slug] || icons["default"]}</div>
         <h3 class="category-title">${c.name}</h3>
-        <div class="category-footer"><span>${c.product_count || 0
-          } товаров</span><div class="category-arrow"><i class="fas fa-chevron-right"></i></div></div>
+        <div class="category-footer"><span>${
+          c.product_count || 0
+        } товаров</span><div class="category-arrow"><i class="fas fa-chevron-right"></i></div></div>
       </a>
-    `
+    `,
       )
       .join("");
   } catch (err) {
@@ -323,7 +380,7 @@ async function initCatalog(params) {
         <div class="skeleton-box" style="width:32px; height:32px; border-radius:4px;"></div>
       </div>
     </div>
-  `
+  `,
     )
     .join("");
   grid.innerHTML = skeletonHtml;
@@ -334,17 +391,19 @@ async function initCatalog(params) {
       API.categories.getAll(),
     ]);
     allProducts = products;
-     allCategories = cats; 
+    allCategories = cats;
     const catGrid = document.getElementById("filters");
     if (catGrid) {
       catGrid.innerHTML =
-        `<div class="cat-tag-item ${currentFilter === "all" ? "active" : ""
+        `<div class="cat-tag-item ${
+          currentFilter === "all" ? "active" : ""
         }" data-id="all">Все товары</div>` +
         cats
           .map(
             (c) =>
-              `<div class="cat-tag-item ${currentFilter == c.slug ? "active" : ""
-              }" data-id="${c.slug}">${c.name}</div>`
+              `<div class="cat-tag-item ${
+                currentFilter == c.slug ? "active" : ""
+              }" data-id="${c.slug}">${c.name}</div>`,
           )
           .join("");
       catGrid.querySelectorAll(".cat-tag-item").forEach((item) => {
@@ -354,13 +413,13 @@ async function initCatalog(params) {
             .forEach((i) => i.classList.remove("active"));
           item.classList.add("active");
           currentFilter = item.dataset.id;
-          
+
           window.history.replaceState(
             {},
             "",
             currentFilter === "all"
               ? "/catalog"
-              : `/catalog?category=${currentFilter}`
+              : `/catalog?category=${currentFilter}`,
           );
           renderProducts();
         };
@@ -368,7 +427,7 @@ async function initCatalog(params) {
     }
     setTimeout(() => {
       renderProducts();
-    }, 300); 
+    }, 300);
 
     const searchInput = document.getElementById("searchInput");
     if (searchInput)
@@ -401,7 +460,7 @@ function renderProducts() {
 
     // Ищем категорию по slug в сохраненном массиве категорий
     const targetCategory = allCategories.find((c) => c.slug === currentFilter);
-    
+
     // Если категория найдена, сравниваем ID товара с ID этой категории
     return targetCategory ? p.category_id == targetCategory.id : false;
   });
@@ -422,67 +481,93 @@ function renderProducts() {
       const hasImg = p.image && p.image.length > 5;
       const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
       let inCartQty = 0;
-      cart.forEach(item => {
+      cart.forEach((item) => {
         try {
-            const itemStr = typeof item === 'string' ? item : JSON.stringify(item);
-            const parsed = JSON.parse(itemStr);
-            if (parsed && typeof parsed === 'object' && String(parsed.id) === String(p.id)) {
-                inCartQty += parsed.qty;
-            } else if (typeof parsed === 'number' && String(parsed) === String(p.id)) {
-                inCartQty += 1;
-            }
+          const itemStr =
+            typeof item === "string" ? item : JSON.stringify(item);
+          const parsed = JSON.parse(itemStr);
+          if (
+            parsed &&
+            typeof parsed === "object" &&
+            String(parsed.id) === String(p.id)
+          ) {
+            inCartQty += parsed.qty;
+          } else if (
+            typeof parsed === "number" &&
+            String(parsed) === String(p.id)
+          ) {
+            inCartQty += 1;
+          }
         } catch (e) {
-            if (String(item) === String(p.id)) {
-                inCartQty += 1;
-            }
+          if (String(item) === String(p.id)) {
+            inCartQty += 1;
+          }
         }
-    });
+      });
       const outOfStock = (p.quantity || 0) <= 0;
       const imgAction = hasImg
         ? `onclick="window.openImageModal('${p.image}')"`
         : "";
 
-      return `<div class="product-card" style="${outOfStock ? "filter:grayscale(1);opacity:0.7;" : ""
-        }">
-      <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
+      return `<div class="product-card" style="${outOfStock ? 'filter:grayscale(1);opacity:0.7;' : ''}">
+    
+    <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
         ${imgHtml}
-        ${inCartQty > 0 ? `<div style="position:absolute;top:10px;right:10px;background:var(--brand);color:white;min-width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;padding:0 6px;white-space:nowrap;">${(p.unit === 'кг' || p.unit === 'м') ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}</div>` : ""}
-      </div>
-      <div class="product-info">
-        <div style="font-size:9px;font-weight:900;text-transform:uppercase;opacity:0.3;margin-bottom:6px;">${p.category_name || "Без категории"
-        }</div>
         
-        <h3 style="font-size:12px;font-weight:900;text-transform:uppercase;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;min-height:28px;">
+        <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
+        ${p.badge === 'hit' || p.badge === 'new' ? 
+           `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? '🔥 Хит' : '✨ Новинка'}</div>` 
+        : ''}
+        
+        <!-- Пузырек с корзиной -->
+        ${inCartQty > 0 
+            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; box-shadow: 2px 2px 0 var(--dark);">
+                   ${p.unit === 'кг' || p.unit === 'м' ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}
+               </div>` 
+            : ''}
+    </div>
+
+    <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
+        <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
+            ${p.category_name || 'Без категории'}
+        </div>
+        
+        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
             ${p.name}
         </h3>
         
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;">
-        <div style="font-size:16px;font-weight:900;color:var(--brand);">
-            ${Number(p.price).toLocaleString()} ₽
-            <span style="font-size:10px; font-weight:500; opacity:0.5;">/${p.unit || 'шт'}</span>
-        </div>
-        ${(p.unit === 'кг' || p.unit === 'м') ? `
-            <div style="display:flex;align-items:center;gap:4px;">
-                <input type="number" 
-                       id="qty-${p.id}" 
-                       value="0.1" 
-                       min="0.1" 
-                       step="0.1" 
-                       style="width:50px;padding:4px;border:1px solid var(--dark);font-size:10px;text-align:center;"
-                       ${outOfStock ? 'disabled' : ''}>
-                <span style="font-size:9px;font-weight:700;">${p.unit}</span>
-                <button onclick="window.addToCartWithQty('${p.id}')" class="icon-btn" style="background:var(--dark);color:white;border:none;width:32px;height:32px;font-size:12px;" ${outOfStock ? 'disabled' : ''}>
-                    <i class="fas fa-shopping-cart"></i>
-                </button>
+        <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
+        <div style="margin-top:auto;">
+            
+            <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
+            <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
+                ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || 'шт'}</span>
             </div>
-        ` : `
-            <button onclick="window.addToCart('${p.id}')" class="icon-btn" style="background:var(--dark);color:white;border:none;width:32px;height:32px;font-size:12px;" ${outOfStock ? 'disabled' : ''}>
-                <i class="fas fa-shopping-cart"></i>
-            </button>
-        `}
+            
+            ${(p.unit === 'кг' || p.unit === 'м') 
+            ? `
+                <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
+                <div class="qty-control" style="width:100%; display:flex; gap:6px;">
+                    <div class="qty-control__stepper" style="flex:1;">
+                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? 'disabled' : ''}>−</button>
+                        <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? 'disabled' : ''}>
+                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? 'disabled' : ''}>+</button>
+                    </div>
+                    <!-- Доп кнопка добавления в корзину -->
+                    <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                </div>
+            ` 
+            : `
+                <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
+                <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? 'disabled' : ''}>
+                    В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
+                </button>
+            `}
+        </div>
     </div>
-      </div>
-    </div>`;
+</div>`;
     })
     .join("");
 }
@@ -492,33 +577,37 @@ async function initAccount() {
   const userNameEl = document.getElementById("userName");
   if (!userNameEl) return;
   const data = await API.auth.me();
-  if (!data || !data.user) {
-    navigate("/");
-    return;
-  }
+  if (!data || !data.user) { navigate("/"); return; }
   const user = data.user;
 
   userNameEl.innerText = user.displayName || user.name || "Пользователь";
   const phoneEl = document.getElementById("userPhone");
   const emailEl = document.getElementById("userEmail");
+  
+  const companyCheck = document.getElementById('isCompany');
+const companyFields = document.getElementById('companyFields');
+const companyNameEl = document.getElementById('userCompanyName');
+const companyInnEl = document.getElementById('userCompanyInn');
+const companyAddressEl = document.getElementById('userCompanyAddress');
+
+if (companyCheck) {
+    companyCheck.checked = user.is_company == 1;
+    companyCheck.onchange = async function() {
+        await API.auth.updateProfile({ is_company: this.checked ? 1 : 0 });
+        if (companyFields) companyFields.style.display = this.checked ? 'block' : 'none';
+    };
+}
+
+if (companyFields) {
+    companyFields.style.display = user.is_company == 1 ? 'block' : 'none';
+}
+
+if (companyNameEl) companyNameEl.value = user.company_name || '';
+if (companyInnEl) companyInnEl.value = user.company_inn || '';
+if (companyAddressEl) companyAddressEl.value = user.company_address || '';
+
   if (phoneEl) phoneEl.innerText = user.phone || "Не указан";
   if (emailEl) emailEl.innerText = user.email || "Не указана";
-
-  let discountWrap = document.getElementById("userDiscountWrap");
-  if (!discountWrap) {
-    if (emailEl) {
-      emailEl.parentElement.insertAdjacentHTML('afterend', `
-        <div id="userDiscountWrap" style="margin-top: 12px;">
-          <div style="opacity: 0.5; font-weight: 900; font-size: 9px; text-transform: uppercase;">Персональная скидка</div>
-          <div style="font-weight: 700; font-size: 16px; color: var(--brand);" id="userDiscount">0%</div>
-        </div>
-      `);
-    }
-  }
-  const discountEl = document.getElementById("userDiscount");
-  if (discountEl) {
-    discountEl.innerText = `${user.discount || 0}%`;
-  }
 
   const adminLink = document.getElementById("adminLink");
   if (user.isAdmin && adminLink) adminLink.style.display = "block";
@@ -537,46 +626,42 @@ async function initAccount() {
         cancelled: "Отменен",
       };
 
-      ordersList.innerHTML = orders
-        .map((order) => {
+      ordersList.innerHTML = orders.map((order) => {
           const canCancel = ["new", "processing"].includes(order.status);
           const stName = statusDict[order.status] || order.status;
-          const color =
-            order.status === "cancelled"
-              ? "#EF4444"
-              : order.status === "completed"
-                ? "#10B981"
-                : "var(--dark)";
+          const color = order.status === "cancelled" ? "#EF4444" : order.status === "completed" ? "#10B981" : "var(--dark)";
+          
+          // Бухгалтерское форматирование суммы! Избавляемся от микроскопических копеек
+          const formattedTotal = Number(order.total).toLocaleString('ru-RU', { maximumFractionDigits: 2 });
 
           return `<div class="about-list-item" style="border:1px solid var(--dark); padding:16px; margin-bottom:16px; background:white;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <h4 style="margin:0; font-size:14px; font-weight:900;">Заказ #${order.id
-            }</h4>
+            <h4 style="margin:0; font-size:14px; font-weight:900;">Заказ #${order.id}</h4>
             <span style="font-size:10px; font-weight:900; text-transform:uppercase; color:${color}; background:var(--gray-bg); padding:4px 8px; border-radius:4px;">${stName}</span>
           </div>
-          <p style="margin-bottom:16px; font-weight:700; opacity:0.8; font-size:12px;">${new Date(
-              order.created_at
-            ).toLocaleDateString()} | ${order.total} ₽</p>
+          <p style="margin-bottom:16px; font-weight:700; opacity:0.8; font-size:12px;">${new Date(order.created_at).toLocaleDateString()} | ${formattedTotal} ₽</p>
           <div style="display:flex; gap:8px;">
-          <button onclick="viewUserOrder(${order.id}, '${order.status}', '${order.created_at
-            }')" class="hero-btn" style="padding:8px; font-size:9px; flex:1; justify-content:center;"><i class="fas fa-eye" style="margin-right:4px;"></i> Инфо</button>
+          <button onclick="viewUserOrder(${order.id}, '${order.status}', '${order.created_at}')" class="hero-btn" style="padding:8px; font-size:9px; flex:1; justify-content:center;"><i class="fas fa-eye" style="margin-right:4px;"></i> Инфо</button>
             ${canCancel
               ? `<button onclick="cancelUserOrder(${order.id})" class="hero-btn" style="padding:8px; font-size:9px; flex:1; justify-content:center; background:none; border:1px solid #EF4444; color:#EF4444;"><i class="fas fa-times" style="margin-right:4px;"></i> Отменить</button>`
               : ""
             }
           </div>
         </div>`;
-        })
-        .join("");
+        }).join("");
     } else {
-      if (ordersList)
-        ordersList.innerHTML =
-          '<p style="opacity:0.5;">История заказов пуста</p>';
+      if (ordersList) ordersList.innerHTML = '<p style="opacity:0.5;">История заказов пуста</p>';
     }
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) { console.error(e); }
 }
+
+window.saveCompanyField = async function(field, value) {
+    try {
+        await API.auth.updateProfile({ [field]: value });
+    } catch (err) {
+        console.error('Ошибка сохранения:', err);
+    }
+};
 
 // ===== АВТОРИЗАЦИЯ =====
 function openAuthModal() {
@@ -595,10 +680,10 @@ async function handleAuth() {
   const nameInput = document.getElementById("authName");
   const actionBtn = document.getElementById("authActionBtn");
   const codePreview = document.getElementById("codePreview");
-  const consentCheckbox = document.getElementById("pd-consent"); 
+  const consentCheckbox = document.getElementById("pd-consent");
 
   let contact = contactInput.value.trim();
-  if (!contact.includes("@")) contact = contact.replace(/\D/g, ""); 
+  if (!contact.includes("@")) contact = contact.replace(/\D/g, "");
 
   if (!contact) {
     alert("Пожалуйста, введите email или номер телефона");
@@ -608,7 +693,7 @@ async function handleAuth() {
   if (authStep === 1) {
     if (consentCheckbox && !consentCheckbox.checked) {
       alert(
-        "Для продолжения необходимо дать согласие на обработку персональных данных!"
+        "Для продолжения необходимо дать согласие на обработку персональных данных!",
       );
       return;
     }
@@ -621,7 +706,7 @@ async function handleAuth() {
       const res = await API.auth.requestCode(contact);
 
       authCurrentContact = contact;
-      authStep = 2; 
+      authStep = 2;
 
       if (contactStep) contactStep.style.display = "none";
       if (codeStep) codeStep.style.display = "block";
@@ -638,12 +723,11 @@ async function handleAuth() {
       }
     } catch (err) {
       alert("Ошибка: " + (err.message || "Не удалось отправить код"));
-      actionBtn.innerText = originalBtnText; 
+      actionBtn.innerText = originalBtnText;
     } finally {
-      actionBtn.disabled = false; 
+      actionBtn.disabled = false;
     }
-  }
-  else if (authStep === 2) {
+  } else if (authStep === 2) {
     const code = codeInput.value.trim();
     const name = nameInput ? nameInput.value.trim() : "";
 
@@ -671,7 +755,7 @@ async function handleAuth() {
       alert("Ошибка: " + (err.message || "Неверный код"));
       actionBtn.innerText = originalBtnText;
     } finally {
-      actionBtn.disabled = false; 
+      actionBtn.disabled = false;
     }
   }
 }
@@ -695,8 +779,9 @@ function updateUIForLoggedInUser(user) {
   const loginBtn = document.getElementById("login-btn");
   const logoutBtn = document.getElementById("logout-btn");
   if (loginBtn && user) {
-    loginBtn.innerHTML = `<div style="width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;background:var(--brand);color:white;">${(user.displayName || user.name || "U")[0]
-      }</div>`;
+    loginBtn.innerHTML = `<div style="width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;background:var(--brand);color:white;">${
+      (user.displayName || user.name || "U")[0]
+    }</div>`;
     loginBtn.onclick = () => navigate("/account");
   }
   if (logoutBtn && user) logoutBtn.style.display = "flex";
@@ -706,56 +791,56 @@ function updateUIForLoggedInUser(user) {
 function updateCartBadge() {
   const badge = document.getElementById("cart-count");
   if (!badge) return;
-  
+
   const uniqueIds = new Set();
-  cart.forEach(item => {
-      try {
-          const parsed = JSON.parse(item);
-          uniqueIds.add(String(parsed.id));
-      } catch (e) {
-          uniqueIds.add(String(item));
-      }
+  cart.forEach((item) => {
+    try {
+      const parsed = JSON.parse(item);
+      uniqueIds.add(String(parsed.id));
+    } catch (e) {
+      uniqueIds.add(String(item));
+    }
   });
-  
+
   badge.innerText = uniqueIds.size;
 }
 
 async function addToCart(productId) {
   if (allProducts.length === 0) allProducts = await API.products.getAll();
   const p = allProducts.find((item) => String(item.id) === String(productId));
-  
+
   let currentQty = 0;
-  cart.forEach(item => {
-      try {
-          const parsed = JSON.parse(item);
-          if (String(parsed.id) === String(productId)) {
-              currentQty += parsed.qty;
-          }
-      } catch (e) {
-          if (String(item) === String(productId)) {
-              currentQty += 1;
-          }
+  cart.forEach((item) => {
+    try {
+      const parsed = JSON.parse(item);
+      if (String(parsed.id) === String(productId)) {
+        currentQty += parsed.qty;
       }
+    } catch (e) {
+      if (String(item) === String(productId)) {
+        currentQty += 1;
+      }
+    }
   });
-  
+
   if (p && currentQty >= p.quantity) {
-      showToast(`Осталось всего ${p.quantity} ${p.unit || 'шт'}.`, "error");
-      return;
+    showToast(`Осталось всего ${p.quantity} ${p.unit || "шт"}.`, "error");
+    return;
   }
-  
+
   cart.push(String(productId));
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartBadge();
-  
+
   if (p) showToast(`Добавлено: ${p.name}`);
-  
+
   const cartBtn = document.querySelector('[onclick="openCart()"]');
   if (cartBtn) {
-      cartBtn.classList.remove("cart-pulse");
-      void cartBtn.offsetWidth;
-      cartBtn.classList.add("cart-pulse");
+    cartBtn.classList.remove("cart-pulse");
+    void cartBtn.offsetWidth;
+    cartBtn.classList.add("cart-pulse");
   }
-  
+
   if (window.location.pathname.includes("catalog")) renderProducts();
   if (document.getElementById("promoProductsContainer")) initPromoProducts();
   if (document.getElementById("newProductsContainer")) initNewProducts();
@@ -764,39 +849,43 @@ async function addToCart(productId) {
 // Безопасное изменение штучного количества по знаку минус
 async function updateCartQuantity(productId, delta) {
   if (delta > 0) {
-      if (allProducts.length === 0) allProducts = await API.products.getAll();
-      const p = allProducts.find((item) => String(item.id) === String(productId));
-      let currentQty = 0;
-      cart.forEach(item => {
-          try {
-              const parsed = JSON.parse(item);
-              if (parsed && typeof parsed === 'object' && String(parsed.id) === String(productId)) {
-                  currentQty += parsed.qty;
-              }
-          } catch (e) {
-              if (String(item) === String(productId)) currentQty += 1;
-          }
-      });
-      if (p && currentQty + delta > p.quantity) {
-          alert("Доступно только " + p.quantity + " " + (p.unit || "шт"));
-          return;
+    if (allProducts.length === 0) allProducts = await API.products.getAll();
+    const p = allProducts.find((item) => String(item.id) === String(productId));
+    let currentQty = 0;
+    cart.forEach((item) => {
+      try {
+        const parsed = JSON.parse(item);
+        if (
+          parsed &&
+          typeof parsed === "object" &&
+          String(parsed.id) === String(productId)
+        ) {
+          currentQty += parsed.qty;
+        }
+      } catch (e) {
+        if (String(item) === String(productId)) currentQty += 1;
       }
-      cart.push(String(productId));
+    });
+    if (p && currentQty + delta > p.quantity) {
+      alert("Доступно только " + p.quantity + " " + (p.unit || "шт"));
+      return;
+    }
+    cart.push(String(productId));
   } else {
-      // Удаляем ровно одну штучную позицию товара, игнорируя JSON-строки весовых товаров
-      for (let i = cart.length - 1; i >= 0; i--) {
-          const itemStr = String(cart[i]);
-          let isMatch = false;
-          if (itemStr.startsWith('{')) {
-              isMatch = false; 
-          } else {
-              isMatch = (itemStr === String(productId));
-          }
-          if (isMatch) {
-              cart.splice(i, 1);
-              break;
-          }
+    // Удаляем ровно одну штучную позицию товара, игнорируя JSON-строки весовых товаров
+    for (let i = cart.length - 1; i >= 0; i--) {
+      const itemStr = String(cart[i]);
+      let isMatch = false;
+      if (itemStr.startsWith("{")) {
+        isMatch = false;
+      } else {
+        isMatch = itemStr === String(productId);
       }
+      if (isMatch) {
+        cart.splice(i, 1);
+        break;
+      }
+    }
   }
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartBadge();
@@ -809,24 +898,24 @@ async function updateCartQuantity(productId, delta) {
 async function updateCartWeightQty(productId, newQty) {
   newQty = parseFloat(newQty);
   if (isNaN(newQty) || newQty <= 0) {
-      cart = cart.filter(item => {
-          try {
-              const parsed = JSON.parse(item);
-              return String(parsed.id) !== String(productId);
-          } catch (e) {
-              return String(item) !== String(productId);
-          }
-      });
+    cart = cart.filter((item) => {
+      try {
+        const parsed = JSON.parse(item);
+        return String(parsed.id) !== String(productId);
+      } catch (e) {
+        return String(item) !== String(productId);
+      }
+    });
   } else {
-      cart = cart.filter(item => {
-          try {
-              const parsed = JSON.parse(item);
-              return String(parsed.id) !== String(productId);
-          } catch (e) {
-              return String(item) !== String(productId);
-          }
-      });
-      cart.push(JSON.stringify({ id: productId, qty: newQty, unit: null }));
+    cart = cart.filter((item) => {
+      try {
+        const parsed = JSON.parse(item);
+        return String(parsed.id) !== String(productId);
+      } catch (e) {
+        return String(item) !== String(productId);
+      }
+    });
+    cart.push(JSON.stringify({ id: productId, qty: newQty, unit: null }));
   }
 
   localStorage.setItem("cart", JSON.stringify(cart));
@@ -838,15 +927,22 @@ async function updateCartWeightQty(productId, newQty) {
 
 async function openCart() {
   const savedCart = localStorage.getItem("cart");
-  if (savedCart) {
-      try {
-          cart = JSON.parse(savedCart);
-      } catch(e) {
-          cart = [];
-      }
-  }
-  document.getElementById("cartModal")?.classList.add("open");
-  await renderCart();
+    if (savedCart) {
+        try { cart = JSON.parse(savedCart); } catch (e) { cart = []; }
+    }
+    document.getElementById("cartModal")?.classList.add("open");
+
+    try {
+        const res = await fetch('/api/shops');
+        const shops = await res.json();
+        const select = document.getElementById('pickupPoint');
+        if (select) {
+            select.innerHTML = '<option value="">Выберите магазин</option>' +
+                shops.map(s => `<option value="${s.id}">${s.address} — ${s.phone} (${s.worktime || ''})</option>`).join('');
+        }
+    } catch (e) { console.error(e); }
+
+    await renderCart();
 }
 
 function closeCart() {
@@ -854,16 +950,16 @@ function closeCart() {
 }
 
 function removeFromCart(productId) {
-  cart = cart.filter(item => {
-      try {
-          const parsed = JSON.parse(item);
-          if (parsed && typeof parsed === 'object' && parsed.id) {
-              return String(parsed.id) !== String(productId);
-          }
-          return String(item) !== String(productId);
-      } catch (e) {
-          return String(item) !== String(productId);
+  cart = cart.filter((item) => {
+    try {
+      const parsed = JSON.parse(item);
+      if (parsed && typeof parsed === "object" && parsed.id) {
+        return String(parsed.id) !== String(productId);
       }
+      return String(item) !== String(productId);
+    } catch (e) {
+      return String(item) !== String(productId);
+    }
   });
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartBadge();
@@ -881,162 +977,229 @@ async function renderCart() {
 
   const savedCart = localStorage.getItem("cart");
   if (savedCart) {
-      try {
-          cart = JSON.parse(savedCart);
-      } catch(e) {
-          cart = [];
-      }
+    try {
+      cart = JSON.parse(savedCart);
+    } catch (e) {
+      cart = [];
+    }
   }
 
   if (cart.length === 0) {
-      container.innerHTML = '<p style="opacity:0.5;text-align:center;padding:40px 0;">Корзина пуста</p>';
-      if (footer) footer.style.display = "none";
-      return;
+    container.innerHTML =
+      '<p style="opacity:0.5;text-align:center;padding:40px 0;">Корзина пуста</p>';
+    if (footer) footer.style.display = "none";
+    return;
   }
 
   const products = await API.products.getAll();
-  const discount = (currentUser && currentUser.discount) ? Number(currentUser.discount) : 0;
+  const discount =
+    currentUser && currentUser.discount ? Number(currentUser.discount) : 0;
 
-  const parsedCart = cart.map(item => {
-      try {
-          const itemStr = typeof item === 'string' ? item : JSON.stringify(item);
-          const parsed = JSON.parse(itemStr);
-          if (parsed && typeof parsed === 'object' && parsed.id) {
-              return { id: String(parsed.id), qty: parsed.qty || 1, unit: parsed.unit || null };
-          }
-          return { id: String(itemStr), qty: 1, unit: null };
-      } catch (e) {
-          return { id: String(item), qty: 1, unit: null };
+  const parsedCart = cart.map((item) => {
+    try {
+      const itemStr = typeof item === "string" ? item : JSON.stringify(item);
+      const parsed = JSON.parse(itemStr);
+      if (parsed && typeof parsed === "object" && parsed.id) {
+        return {
+          id: String(parsed.id),
+          qty: parsed.qty || 1,
+          unit: parsed.unit || null,
+        };
       }
+      return { id: String(itemStr), qty: 1, unit: null };
+    } catch (e) {
+      return { id: String(item), qty: 1, unit: null };
+    }
   });
 
   const grouped = {};
-  parsedCart.forEach(item => {
-      const key = item.id;
-      if (!grouped[key]) {
-          const product = products.find(p => String(p.id) === key);
-          if (!product) return;
-          grouped[key] = { ...product, count: 0, totalQty: 0 };
-      }
-      grouped[key].count++;
-      grouped[key].totalQty += item.qty;
+  parsedCart.forEach((item) => {
+    const key = item.id;
+    if (!grouped[key]) {
+      const product = products.find((p) => String(p.id) === key);
+      if (!product) return;
+      grouped[key] = { ...product, count: 0, totalQty: 0 };
+    }
+    grouped[key].count++;
+    grouped[key].totalQty += item.qty;
   });
 
   const groupedArray = Object.values(grouped);
 
   if (groupedArray.length === 0) {
-      cart = [];
-      localStorage.setItem("cart", JSON.stringify(cart));
-      updateCartBadge();
-      container.innerHTML = '<p style="opacity:0.5;text-align:center;padding:40px 0;">Корзина пуста</p>';
-      if (footer) footer.style.display = "none";
-      return;
+    cart = [];
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartBadge();
+    container.innerHTML =
+      '<p style="opacity:0.5;text-align:center;padding:40px 0;">Корзина пуста</p>';
+    if (footer) footer.style.display = "none";
+    return;
   }
 
   if (footer) footer.style.display = "block";
 
   let total = 0;
-  container.innerHTML = groupedArray.map(item => {
+  container.innerHTML = groupedArray
+    .map((item) => {
       const isWeight = item.unit === "кг" || item.unit === "м";
       const displayQty = isWeight ? item.totalQty.toFixed(1) : item.count;
-      
-      const originalPrice = Number(item.price);
-      const discountedPrice = discount > 0 ? Math.round(originalPrice * (1 - discount / 100) * 100) / 100 : originalPrice;
 
-      const lineTotal = isWeight ? discountedPrice * item.totalQty : discountedPrice * item.count;
+      const originalPrice = Number(item.price);
+      const discountedPrice =
+        discount > 0
+          ? Math.round(originalPrice * (1 - discount / 100) * 100) / 100
+          : originalPrice;
+
+      const lineTotal = isWeight
+        ? discountedPrice * item.totalQty
+        : discountedPrice * item.count;
       total += lineTotal;
 
-      const imgHtml = (item.image && item.image.length > 5)
+      const imgHtml =
+        item.image && item.image.length > 5
           ? `<img src="${item.image}" style="width:100%;height:100%;object-fit:contain;">`
           : "📦";
 
-      let priceLabel = '';
+      let priceLabel = "";
       if (discount > 0) {
-          priceLabel = `<span style="text-decoration: line-through; opacity: 0.5; font-size: 11px; margin-right: 4px;">${originalPrice.toLocaleString()} ₽</span> 
+        priceLabel = `<span style="text-decoration: line-through; opacity: 0.5; font-size: 11px; margin-right: 4px;">${originalPrice.toLocaleString()} ₽</span> 
                        <strong>${discountedPrice.toLocaleString()} ₽</strong>`;
       } else {
-          priceLabel = `<strong>${originalPrice.toLocaleString()} ₽</strong>`;
+        priceLabel = `<strong>${originalPrice.toLocaleString()} ₽</strong>`;
       }
 
       return `<div style="display:flex;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid rgba(0,0,0,0.1);">
-          <div style="width:50px;height:50px;background:var(--gray-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:${item.image && item.image.length > 5 ? "16px" : "24px"};">
-              ${imgHtml}
+    <div style="width:50px;height:50px;background:var(--gray-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:${item.image && item.image.length > 5 ? "16px" : "24px"};">
+        ${imgHtml}
+    </div>
+    <div style="flex:1;">
+        <div style="font-weight:700;font-size:12px;">${item.name}</div>
+        <div style="color:var(--brand);font-weight:900;">
+            ${priceLabel}/${item.unit || "шт"}
+        </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+        ${isWeight
+          ? `
+          <!-- Весовой контроллер для Корзины (0.1 шаг) -->
+          <div style="display:flex; align-items:center; border:1px solid var(--dark); background:white;">
+              <button type="button" onclick="window.changeCartWeightQty('${item.id}', -0.1)" style="width:24px; height:24px; border:none; background:none; cursor:pointer;">−</button>
+              <input type="number" id="cart-qty-${item.id}" value="${displayQty}" min="0.1" step="0.1" onchange="window.updateCartWeightQty('${item.id}', this.value)" style="width:44px; border:none; border-left:1px solid rgba(0,0,0,0.1); border-right:1px solid rgba(0,0,0,0.1); font-size:11px; text-align:center; outline:none; height:24px; padding:0;">
+              <button type="button" onclick="window.changeCartWeightQty('${item.id}', 0.1)" style="width:24px; height:24px; border:none; background:none; cursor:pointer;">+</button>
           </div>
-          <div style="flex:1;">
-              <div style="font-weight:700;font-size:12px;">${item.name}</div>
-              <div style="color:var(--brand);font-weight:900;">
-                  ${priceLabel}/${item.unit || "шт"}
-              </div>
+          <span style="font-weight:700;font-size:11px;">${item.unit}</span>
+          `
+          : `
+          <!-- Штучный контроллер для Корзины (1 шт шаг) -->
+          <div style="display:flex; align-items:center; border:1px solid var(--dark); background:white;">
+              <button onclick="window.updateCartQuantity('${item.id}', -1)" style="width:24px; height:24px; border:none; background:none; cursor:pointer;">−</button>
+              <div style="width:34px; font-weight:700; font-size:11px; text-align:center; border-left:1px solid rgba(0,0,0,0.1); border-right:1px solid rgba(0,0,0,0.1); line-height:24px; background:#fff;">${displayQty}</div>
+              <button onclick="window.updateCartQuantity('${item.id}', 1)" style="width:24px; height:24px; border:none; background:none; cursor:pointer;">+</button>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-              ${isWeight ? `
-                  <input type="number" id="cart-qty-${item.id}" value="${displayQty}" min="0.1" step="0.1" onchange="window.updateCartWeightQty('${item.id}', this.value)" style="width:60px;padding:6px;border:1px solid var(--dark);font-size:11px;text-align:center;">
-                  <span style="font-weight:700;font-size:11px;">${item.unit}</span>
-              ` : `
-                  <button onclick="window.updateCartQuantity('${item.id}', -1)" style="width:24px;height:24px;border:1px solid var(--dark);background:white;cursor:pointer;">−</button>
-                  <span style="font-weight:700;">${displayQty}</span>
-                  <button onclick="window.updateCartQuantity('${item.id}', 1)" style="width:24px;height:24px;border:1px solid var(--dark);background:white;cursor:pointer;">+</button>
-              `}
-          </div>
-          <button onclick="window.removeFromCart('${item.id}')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;">&times;</button>
-      </div>`;
-  }).join("");
+          <span style="font-weight:700;font-size:11px;">${item.unit || "шт"}</span>
+          `
+        }
+    </div>
+    <button onclick="window.removeFromCart('${item.id}')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;">&times;</button>
+</div>`;
+    })
+    .join("");
 
   totalEl.textContent = Math.round(total * 100) / 100 + " ₽";
 }
 
-async function checkout() {
-  const data = await API.auth.me();
-  if (!data || !data.user) {
-      alert("Войдите для оформления заказа");
-      closeCart();
-      openAuthModal();
-      return;
-  }
-  if (cart.length === 0) return;
-  
-  const products = await API.products.getAll();
-  
-  const grouped = {};
-  cart.forEach(item => {
-      try {
-          const parsed = JSON.parse(item);
-          const key = String(parsed.id);
-          if (!grouped[key]) {
-              const product = products.find(p => String(p.id) === key);
-              if (!product) return;
-              grouped[key] = { id: product.id, quantity: 0 };
-          }
-          grouped[key].quantity += parsed.qty;
-      } catch (e) {
-          const key = String(item);
-          if (!grouped[key]) {
-              const product = products.find(p => String(p.id) === key);
-              if (!product) return;
-              grouped[key] = { id: product.id, quantity: 0 };
-          }
-          grouped[key].quantity += 1;
-      }
-  });
-  
-  try {
-      await API.orders.create({
-          items: Object.values(grouped).map(it => ({
-              id: it.id,
-              quantity: it.quantity,
-          })),
-      });
-      alert("Заказ оформлен!");
-      cart = [];
-      localStorage.setItem("cart", "[]");
-      updateCartBadge();
-      closeCart();
-      navigate("/account");
-  } catch (err) {
-      alert(err.message || "Ошибка при оформлении заказа");
-  }
-}
+// ===== ФУНКЦИЯ ДЛЯ КНОПОК ПЛЮС/МИНУС В КОРЗИНЕ (Для ВЕСОВЫХ) =====
+window.changeCartWeightQty = function(productId, delta) {
+    const input = document.getElementById(`cart-qty-${productId}`);
+    if (!input) return;
 
+    // Парсим текущий вес из инпута
+    let currentQty = parseFloat(input.value) || 0.1;
+    
+    // Рассчитываем новый вес без проблемы лишних нулей (напр., 0.1+0.2 != 0.300000004)
+    let newQty = (Math.round(currentQty * 10) + Math.round(delta * 10)) / 10;
+
+    // Минимум - это 0.1. Ниже быть не может!
+    if (newQty < 0.1) {
+        newQty = 0.1;
+    }
+    
+    // Передаем команду "главному" обработчику, который сам обновит локалсторадж и нарисует корзину
+    window.updateCartWeightQty(productId, newQty);
+};
+
+async function checkout() {
+    const data = await API.auth.me();
+    const pickupId = document.getElementById('pickupPoint')?.value;
+    
+    if (!data || !data.user) {
+        alert("Войдите для оформления заказа");
+        closeCart();
+        openAuthModal();
+        return;
+    }
+    if (cart.length === 0) return;
+    
+    // Проверка выбора пункта выдачи
+    if (!pickupId) {
+        alert("Пожалуйста, выберите магазин для самовывоза");
+        document.getElementById('pickupPoint')?.focus();
+        return;
+    }
+
+    const products = await API.products.getAll();
+
+    const grouped = {};
+    cart.forEach((item) => {
+        let productId = null;
+        let qty = 1;
+
+        if (typeof item === 'string' && item.startsWith('{')) {
+            try {
+                const parsed = JSON.parse(item);
+                if (parsed && parsed.id) {
+                    productId = String(parsed.id);
+                    qty = Number(parsed.qty) || 0.1;
+                }
+            } catch (e) {}
+        } else {
+            productId = String(item);
+            qty = 1;
+        }
+
+        if (!productId) return;
+
+        if (!grouped[productId]) {
+            const product = products.find(p => String(p.id) === productId);
+            if (!product) return;
+            grouped[productId] = { id: product.id, quantity: 0 };
+        }
+        grouped[productId].quantity += qty;
+    });
+
+    const items = Object.values(grouped);
+    console.log('📤 Отправка заказа:', JSON.stringify(items));
+
+    if (items.length === 0) {
+        alert("Корзина пуста или товары не найдены");
+        return;
+    }
+
+    try {
+        await API.orders.create({
+            items: items.map(it => ({ id: it.id, quantity: it.quantity })),
+            pickup_point_id: pickupId
+        });
+        alert("Заказ оформлен!");
+        cart = [];
+        localStorage.setItem("cart", "[]");
+        updateCartBadge();
+        closeCart();
+        navigate("/account");
+    } catch (err) {
+        alert(err.message || "Ошибка при оформлении заказа");
+    }
+}
 // ===== СМЕНА ИМЕНИ В ЛИЧНОМ КАБИНЕТЕ =====
 window.toggleEditName = function () {
   const form = document.getElementById("editNameForm");
@@ -1099,15 +1262,19 @@ window.viewUserOrder = async function (orderId, status, date) {
 
     let totalScore = 0;
     items.forEach((i) => {
-      totalScore += i.quantity * i.price;
+      // Строгое суммирование с отрезанием мусора
+      totalScore += parseFloat(i.quantity) * parseFloat(i.price);
+      
+      const safePrice = Number(i.price).toLocaleString('ru-RU', { maximumFractionDigits: 2 });
+      
       htmlContent += `
          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:8px;">
-           <span style="font-weight:700;">${i.product_name || "Скрытая номенклатура"
-        }</span>
-           <span>${i.quantity} шт. x <span style="color:var(--brand);">${i.price
-        } ₽</span></span>
+           <span style="font-weight:700;">${i.product_name || "Скрытая номенклатура"}</span>
+           <span>${Number(i.quantity).toFixed(1)} ${i.product_unit || 'шт'} × <span style="color:var(--brand);">${safePrice} ₽</span></span>
          </div>`;
     });
+    
+    totalScore = (Math.round(totalScore * 100) / 100); // Страхуем итог
 
     if (status !== "cancelled" && items.length > 0) {
       const orderDateStr = new Date(date).toLocaleDateString("ru-RU");
@@ -1117,13 +1284,13 @@ window.viewUserOrder = async function (orderId, status, date) {
           total: totalScore,
           date: orderDateStr,
           items: items,
-        })
+        }),
       );
 
       htmlContent += `
          <div style="margin-top:20px; display:flex; justify-content:flex-end; border-top: 2px solid var(--dark); padding-top:16px;">
             <button class="hero-btn" style="background:#10B981; padding: 12px 20px; font-size:9px;" onclick="printB2BInvoice('${encodedData}')">
-               <i class="fas fa-file-invoice" style="margin-right:8px; font-size:12px;"></i> Распечатать Счет-Фактуру (Для Юр.лиц)
+               <i class="fas fa-file-invoice" style="margin-right:8px; font-size:12px;"></i> Распечатать счет
             </button>
          </div>`;
     }
@@ -1254,34 +1421,27 @@ function numberToWordsRu(num) {
 
 window.printB2BInvoice = function (encodedData) {
   const data = JSON.parse(decodeURIComponent(encodedData));
-  const buyerName =
-    currentUser?.name ||
-    currentUser?.displayName ||
-    "Частное лицо / Контрагент";
+  const buyerName = currentUser?.is_company 
+    ? `${currentUser.company_name || 'Компания'}, ИНН ${currentUser.company_inn || 'не указан'}, ${currentUser.company_address || ''}`
+    : (currentUser?.name || currentUser?.displayName || 'Частное лицо / Контрагент');
 
   let tbodyHtml = "";
   data.items.forEach((item, index) => {
     const sum = (item.quantity * item.price).toFixed(2);
     tbodyHtml += `
     <tr>
-      <td style="border: 1px solid #000; padding: 6px; text-align:center;">${index + 1
-      }</td>
-      <td style="border: 1px solid #000; padding: 6px;">${item.product_name || "Удаленный товар"
-      }</td>
-      <td style="border: 1px solid #000; padding: 6px; text-align:center;">${item.quantity
-      }</td>
-      <td style="border: 1px solid #000; padding: 6px; text-align:center;">шт</td>
-      <td style="border: 1px solid #000; padding: 6px; text-align:right;">${Number(
-        item.price
-      ).toFixed(2)}</td>
+      <td style="border: 1px solid #000; padding: 6px; text-align:center;">${index + 1}</td>
+      <td style="border: 1px solid #000; padding: 6px;">${item.product_name || "Удаленный товар"}</td>
+      <td style="border: 1px solid #000; padding: 6px; text-align:center;">${Number(item.quantity).toFixed(1)}</td>
+      <td style="border: 1px solid #000; padding: 6px; text-align:center;">${item.product_unit || 'шт'}</td>
+      <td style="border: 1px solid #000; padding: 6px; text-align:right;">${Number(item.price).toFixed(2)}</td>
       <td style="border: 1px solid #000; padding: 6px; text-align:right;">${sum}</td>
-    </tr>
-   `;
+    </tr>`;
   });
 
   const totalNum = parseFloat(data.total).toFixed(2);
-  const ndsSum = ((totalNum * 20) / 120).toFixed(2); 
-  const amountWords = numberToWordsRu(data.total);
+  const ndsSum = ((parseFloat(totalNum) * 20) / 120).toFixed(2);
+  const amountWords = numberToWordsRu(totalNum);
   const itemsCount = data.items.length;
 
   const printHtml = `
@@ -1419,7 +1579,7 @@ window.cancelUserOrder = async function (orderId) {
   try {
     await API.orders.updateStatus(orderId, "cancelled");
     alert("Заказ успешно отменен!");
-    initAccount(); 
+    initAccount();
   } catch (e) {
     alert(e.message || "Ошибка при отмене заказа");
   }
@@ -1522,8 +1682,8 @@ function enforceRKN() {
     }
   });
 
-  const cookieForever = localStorage.getItem("rkn_cookie_consent_v3"); 
-  const cookieSession = sessionStorage.getItem("rkn_cookie_consent_v3"); 
+  const cookieForever = localStorage.getItem("rkn_cookie_consent_v3");
+  const cookieSession = sessionStorage.getItem("rkn_cookie_consent_v3");
 
   if (
     !cookieForever &&
@@ -1556,7 +1716,7 @@ function enforceRKN() {
           Я даю согласие на обработку моих персональных данных согласно <a href="/policy" style="color:var(--brand)">Политике</a> и принимаю <a href="/terms" style="color:var(--brand)">Условия соглашения</a>.
         </label>
       </div>
-    `
+    `,
     );
   }
 }
@@ -1596,11 +1756,17 @@ function ensureModalsExist() {
               <span style="font-size: 10px; font-weight: 900; text-transform: uppercase;">Итого к оплате:</span>
               <span id="cartTotal" style="font-size: 24px; font-weight: 900; color: var(--brand);">0 ₽</span>
             </div>
+            <div id="pickupSelect" style="margin-bottom: 20px;">
+    <label style="font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block;">Пункт самовывоза</label>
+    <select id="pickupPoint" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; font-size: 11px;">
+        <option value="">Выберите магазин</option>
+    </select>
+</div>
             <button onclick="checkout()" style="width:100%;padding:1rem;background:var(--dark);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;">Оформить заказ</button>
           </div>
         </div>
       </div>
-    `
+    `,
     );
   }
 
@@ -1647,9 +1813,9 @@ function ensureModalsExist() {
           </div>
         </div>
       </div>
-    `
+    `,
     );
-    if (typeof initAuthMasking === "function") initAuthMasking(); 
+    if (typeof initAuthMasking === "function") initAuthMasking();
   } else {
     const authCodeStep = document.getElementById("authCodeStep");
     if (authCodeStep && !document.getElementById("resendCodeBtn")) {
@@ -1660,7 +1826,7 @@ function ensureModalsExist() {
           <button id="resendCodeBtn" onclick="resendAuthCode()" style="background:none;border:none;color:var(--brand);font-size:10px;font-weight:900;text-transform:uppercase;cursor:pointer;opacity:1;transition:0.3s;">Отправить повторно</button>
           <span id="resendTimer" style="font-size:10px; font-weight:900; opacity:0.5; display:none; margin-left:8px;">(60 сек)</span>
         </div>
-      `
+      `,
       );
     }
   }
@@ -1670,10 +1836,10 @@ window.resendAuthCode = async function () {
   const btn = document.getElementById("resendCodeBtn");
   if (btn && btn.disabled) return;
 
-  authStep = 1; 
-  document.getElementById("authCode").value = ""; 
+  authStep = 1;
+  document.getElementById("authCode").value = "";
 
-  await handleAuth(); 
+  await handleAuth();
 
   startResendTimer(60);
 };
@@ -1731,16 +1897,15 @@ window.showToast = function (message, type = "success") {
   }, 3000);
 };
 
-
 // ===== ПРОГРЕСС ЧТЕНИЯ И КНОПКА ВВЕРХ =====
 function initScrollFeatures() {
   document.body.insertAdjacentHTML(
     "afterbegin",
-    '<div id="scroll-progress"></div>'
+    '<div id="scroll-progress"></div>',
   );
   document.body.insertAdjacentHTML(
     "beforeend",
-    `<button id="scroll-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>`
+    `<button id="scroll-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>`,
   );
 
   window.addEventListener("scroll", () => {
@@ -1764,19 +1929,19 @@ async function addToCartWithQty(productId) {
 
   let qty = parseFloat(qtyInput.value);
   if (isNaN(qty) || qty <= 0) {
-      alert("Введите корректное количество");
-      return;
+    alert("Введите корректное количество");
+    return;
   }
 
   qty = Math.round(qty * 10) / 10;
 
   if (allProducts.length === 0) allProducts = await API.products.getAll();
-  const p = allProducts.find(item => String(item.id) === String(productId));
+  const p = allProducts.find((item) => String(item.id) === String(productId));
 
   if (!p) return;
   if (qty > p.quantity) {
-      alert("Доступно только " + p.quantity + " " + (p.unit || "шт"));
-      return;
+    alert("Доступно только " + p.quantity + " " + (p.unit || "шт"));
+    return;
   }
 
   const cartItem = { id: productId, qty: qty, unit: p.unit || "шт" };
@@ -1794,74 +1959,139 @@ async function initPromoProducts() {
   if (!container) return;
 
   try {
-      const products = await API.products.getAll();
-      const hits = products.filter(p => p.badge === "hit" && p.quantity > 0);
+    const products = await API.products.getAll();
+    const hits = products.filter((p) => p.badge === "hit" && p.quantity > 0);
 
-      if (hits.length === 0) {
-          container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Хиты продаж скоро появятся</p>';
-          return;
-      }
+    if (hits.length === 0) {
+      container.innerHTML =
+        '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Хиты продаж скоро появятся</p>';
+      return;
+    }
 
-      container.innerHTML = hits.map(p => {
-          const hasImg = p.image && p.image.length > 5;
-          const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
+    container.innerHTML = hits
+      .map((p) => {
+        const hasImg = p.image && p.image.length > 5;
+        const imgHtml = hasImg
+          ? `<img src="${p.image}" alt="${p.name}">`
+          : "📦";
 
-          let inCartQty = 0;
-          cart.forEach(item => {
-            try {
-                const parsed = JSON.parse(item);
-                if (parsed && typeof parsed === 'object' && String(parsed.id) === String(p.id)) {
-                    inCartQty += parsed.qty;
-                } else if (typeof parsed === 'number' && String(parsed) === String(p.id)) {
-                    inCartQty += 1;
-                }
-            } catch (e) {
-                if (String(item) === String(p.id)) {
-                    inCartQty += 1;
-                }
+        let inCartQty = 0;
+        cart.forEach((item) => {
+          try {
+            const parsed = JSON.parse(item);
+            if (
+              parsed &&
+              typeof parsed === "object" &&
+              String(parsed.id) === String(p.id)
+            ) {
+              inCartQty += parsed.qty;
+            } else if (
+              typeof parsed === "number" &&
+              String(parsed) === String(p.id)
+            ) {
+              inCartQty += 1;
             }
+          } catch (e) {
+            if (String(item) === String(p.id)) {
+              inCartQty += 1;
+            }
+          }
         });
 
-          const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
-          const outOfStock = (p.quantity || 0) <= 0;
+        const imgAction = hasImg
+          ? `onclick="window.openImageModal('${p.image}')"`
+          : "";
+        const outOfStock = (p.quantity || 0) <= 0;
 
-          return `<div class="product-card" style="${outOfStock ? "filter:grayscale(1);opacity:0.7;" : ""}">
-              <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
-                  ${imgHtml}
-                  <div class="product-badge">🔥 Хит</div>
-                  ${inCartQty > 0 ? `<div style="position:absolute;top:10px;right:10px;background:var(--brand);color:white;min-width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;padding:0 6px;white-space:nowrap;">${(p.unit === "кг" || p.unit === "м") ? inCartQty.toFixed(1) + " " + p.unit : inCartQty}</div>` : ""}
-              </div>
-              <div class="product-info">
-                  <div style="font-size:9px;font-weight:900;text-transform:uppercase;opacity:0.3;margin-bottom:6px;">${p.category_name || "Без категории"}</div>
-                  <h3 style="font-size:12px;font-weight:900;text-transform:uppercase;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;min-height:28px;">${p.name}</h3>
-                  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;">
-                      <div style="font-size:16px;font-weight:900;color:var(--brand);">
-                          ${Number(p.price).toLocaleString()} ₽
-                          <span style="font-size:10px;font-weight:500;opacity:0.5;">/${p.unit || "шт"}</span>
-                      </div>
-                      ${(p.unit === "кг" || p.unit === "м") ? `
-                          <div style="display:flex;align-items:center;gap:4px;">
-                              <input type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="width:50px;padding:4px;border:1px solid var(--dark);font-size:10px;text-align:center;" ${outOfStock ? "disabled" : ""}>
-                              <span style="font-size:9px;font-weight:700;">${p.unit}</span>
-                              <button onclick="window.addToCartWithQty('${p.id}')" class="icon-btn" style="background:var(--dark);color:white;border:none;width:32px;height:32px;font-size:12px;" ${outOfStock ? "disabled" : ""}>
-                                  <i class="fas fa-shopping-cart"></i>
-                              </button>
-                          </div>
-                      ` : `
-                          <button onclick="window.addToCart('${p.id}')" class="icon-btn" style="background:var(--dark);color:white;border:none;width:32px;height:32px;font-size:12px;" ${outOfStock ? "disabled" : ""}>
-                              <i class="fas fa-shopping-cart"></i>
-                          </button>
-                      `}
-                  </div>
-              </div>
-          </div>`;
-      }).join("");
+        return `<div class="product-card" style="${outOfStock ? 'filter:grayscale(1);opacity:0.7;' : ''}">
+    
+    <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
+        ${imgHtml}
+        
+        <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
+        ${p.badge === 'hit' || p.badge === 'new' ? 
+           `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? '🔥 Хит' : '✨ Новинка'}</div>` 
+        : ''}
+        
+        <!-- Пузырек с корзиной -->
+        ${inCartQty > 0 
+            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; box-shadow: 2px 2px 0 var(--dark);">
+                   ${p.unit === 'кг' || p.unit === 'м' ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}
+               </div>` 
+            : ''}
+    </div>
 
+    <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
+        <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
+            ${p.category_name || 'Без категории'}
+        </div>
+        
+        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
+            ${p.name}
+        </h3>
+        
+        <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
+        <div style="margin-top:auto;">
+            
+            <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
+            <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
+                ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || 'шт'}</span>
+            </div>
+            
+            ${(p.unit === 'кг' || p.unit === 'м') 
+            ? `
+                <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
+                <div class="qty-control" style="width:100%; display:flex; gap:6px;">
+                    <div class="qty-control__stepper" style="flex:1;">
+                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? 'disabled' : ''}>−</button>
+                        <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? 'disabled' : ''}>
+                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? 'disabled' : ''}>+</button>
+                    </div>
+                    <!-- Доп кнопка добавления в корзину -->
+                    <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                </div>
+            ` 
+            : `
+                <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
+                <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? 'disabled' : ''}>
+                    В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
+                </button>
+            `}
+        </div>
+    </div>
+</div>`;
+      })
+      .join("");
   } catch (err) {
-      console.error("Promo products error:", err);
-      container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить рекомендации</p>';
+    console.error("Promo products error:", err);
+    container.innerHTML =
+      '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить рекомендации</p>';
   }
 }
+
+window.changeQtyAndAdd = function(productId, delta) {
+  const input = document.getElementById(`qty-${productId}`);
+  if (!input) return;
+
+  // Берем текущее значение инпута, переводим в число (или ставим 0.1 если там пусто)
+  let currentValue = parseFloat(input.value);
+  if (isNaN(currentValue)) {
+      currentValue = 0.1;
+  }
+  
+  // Математика JavaScript (0.1 + 0.1 иногда дает 0.200000001, решаем это умножением на 10)
+  let newValue = (Math.round(currentValue * 10) + Math.round(delta * 10)) / 10;
+  
+  // Нельзя уходить в минус или ноль, минимум 0.1
+  if (newValue < 0.1) {
+    newValue = 0.1;
+  }
+  
+  // Вписываем новое число обратно в инпут
+  input.value = newValue.toFixed(1);
+};
 
 // ===== ГЛОБАЛЬНЫЕ ПРИВЯЗКИ =====
 window.openAuthModal = openAuthModal;
@@ -1882,4 +2112,6 @@ window.saveNewEmail = saveNewEmail;
 window.printB2BInvoice = printB2BInvoice;
 window.addToCartWithQty = addToCartWithQty;
 window.updateCartWeightQty = updateCartWeightQty;
+window.changeQtyAndAdd = changeQtyAndAdd;
+window.changeCartWeightQty = changeCartWeightQty;
 document.addEventListener("DOMContentLoaded", bootstrap);

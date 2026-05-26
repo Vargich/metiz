@@ -273,6 +273,7 @@
         <button class="admin-tab-btn" onclick="switchTab('categories')" id="btn-categories">Категории</button>
         <button class="admin-tab-btn" onclick="switchTab('orders')" id="btn-orders">Заказы</button>
         <button class="admin-tab-btn" onclick="switchTab('users')" id="btn-users">Пользователи</button>
+        <button class="admin-tab-btn" onclick="switchTab('shops')" id="btn-shops">Магазины</button>
       </div>
 
       <!-- ТОВАРЫ -->
@@ -285,9 +286,13 @@
           </div>
           <div style="display:flex; gap:16px;">
             <button class="hero-btn" onclick="openExcelHelp()"
-              style="background:white; color:var(--dark); border:1px solid var(--dark);">
+              style="background:white; color:var(--dark); border:1px solid var(--dark); cursor: pointer;">
               <i class="fas fa-question-circle"></i> Справка
             </button>
+            <button class="hero-btn" onclick="downloadExcelTemplate()"
+    style="background:white; color:var(--dark); border:1px solid var(--dark); cursor:pointer;">
+    <i class="fas fa-download"></i> Шаблон
+</button>
             <button class="excel-btn" onclick="document.getElementById('excelFile').click()">
               <i class="fas fa-file-excel"></i> Импорт Excel
             </button>
@@ -306,7 +311,7 @@
             <thead>
               <tr>
                 <th style="width: 50px;">Фото</th>
-                <th style="width: 60px;">ID</th>
+                
                 <th>Артикул</th>
                 <th>Название</th>
                 <th>Категория</th>
@@ -317,7 +322,7 @@
             </thead>
             <tbody id="adminProductsList">
               <tr>
-                <td colspan="8" style="text-align:center;">Загрузка...</td>
+                <td colspan="7" style="text-align:center;">Загрузка...</td>
               </tr>
             </tbody>
           </table>
@@ -342,7 +347,6 @@
           <table class="admin-table">
             <thead>
               <tr>
-                <th style="width: 60px;">ID</th>
                 <th>Название</th>
                 <th>URL Slug</th>
                 <th>Привязанных товаров</th>
@@ -351,7 +355,7 @@
             </thead>
             <tbody id="adminCategoriesList">
               <tr>
-                <td colspan="5" style="text-align:center;">Загрузка...</td>
+                <td colspan="4" style="text-align:center;">Загрузка...</td>
               </tr>
             </tbody>
           </table>
@@ -410,8 +414,66 @@
         </div>
       </section>
 
+      <!-- МАГАЗИНЫ -->
+<section id="sec-shops" class="admin-section">
+    <div class="controls-panel">
+        <h2 style="font-size:24px;font-weight:900;text-transform:uppercase;">Магазины</h2>
+        <button class="hero-btn" onclick="openShopModal()">
+            <i class="fas fa-plus"></i> Добавить магазин
+        </button>
+    </div>
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Адрес</th>
+                    <th>Телефон</th>
+                    <th>Режим работы</th>
+                    <th>Активен</th>
+                    <th style="text-align: right;">Действия</th>
+                </tr>
+            </thead>
+            <tbody id="adminShopsList">
+                <tr><td colspan="5" style="text-align:center;">Загрузка...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
     </div>
   </main>
+
+  <!-- МОДАЛЬНОЕ ОКНО: МАГАЗИН -->
+<div id="shopModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px;">
+        <button type="button" onclick="closeShopModal()"
+            style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+        <h2 id="modalShopTitle" style="font-size: 20px; margin-bottom: 24px; text-transform: uppercase;">Добавить магазин</h2>
+        <form id="shopForm">
+            <input type="hidden" id="sId">
+            <div style="margin-bottom: 12px;">
+                <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Адрес</label>
+                <input type="text" id="sAddress" required style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Телефон</label>
+                <input type="text" id="sPhone" required style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Режим работы</label>
+                <input type="text" id="sWorktime" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="sActive" checked> <span style="font-size: 11px; font-weight: 700;">Активен</span>
+                </label>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="hero-btn" style="flex:1; justify-content:center;">Сохранить</button>
+                <button type="button" class="hero-btn" style="background:#6B7280; justify-content:center;" onclick="closeShopModal()">Отмена</button>
+            </div>
+        </form>
+    </div>
+</div>
 
   <!-- МОДАЛЬНОЕ ОКНО: ТОВАР -->
   <div id="productModal" class="modal-overlay">
@@ -444,13 +506,13 @@
 
         <div>
           <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Цена (₽)</label>
-          <input type="number" id="mPrice" required
+          <input type="number" id="mPrice" step="any" min="0" required
             style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
         </div>
 
         <div>
           <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Остаток</label>
-          <input type="number" id="mQuantity" value="0"
+          <input type="number" id="mQuantity" step="any" min="0" value="0"
             style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; margin-top:4px;">
         </div>
         <div>
@@ -617,7 +679,79 @@
       if (tabId === 'categories') loadCategories();
       if (tabId === 'orders') loadOrders();
       if (tabId === 'users') loadUsers();
+      if (tabId === 'shops') loadShops();
     }
+
+    async function loadShops() {
+    try {
+        const res = await fetch(API_BASE + '/shops/all', { cache: 'no-store' });
+        const data = await res.json();
+        const tbody = document.getElementById('adminShopsList');
+        if (data.length === 0) return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Нет магазинов</td></tr>';
+        tbody.innerHTML = data.map(s => `
+            <tr>
+                <td style="font-weight:700;">${s.address}</td>
+                <td style="font-weight:700; color:var(--brand);">${s.phone}</td>
+                <td>${s.worktime || '—'}</td>
+                <td>${s.is_active ? '✅' : '❌'}</td>
+                <td style="text-align: right;">
+                    <button class="action-btn" style="margin-right: 4px;" onclick="editShop(${s.id}, '${s.address.replace(/'/g, "\\'")}', '${s.phone}', '${s.worktime || ''}', ${s.is_active}, event)">✏️</button>
+                    <button class="action-btn delete" onclick="deleteShop(${s.id}, event)">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) { console.error(err); }
+}
+
+function openShopModal() {
+    document.getElementById('sId').value = '';
+    document.getElementById('sAddress').value = '';
+    document.getElementById('sPhone').value = '';
+    document.getElementById('sWorktime').value = '';
+    document.getElementById('sActive').checked = true;
+    document.getElementById('modalShopTitle').textContent = 'Добавить магазин';
+    document.getElementById('shopModal').classList.add('open');
+}
+
+function closeShopModal() { document.getElementById('shopModal').classList.remove('open'); }
+
+function editShop(id, address, phone, worktime, isActive, event) {
+    event.stopPropagation();
+    document.getElementById('sId').value = id;
+    document.getElementById('sAddress').value = address;
+    document.getElementById('sPhone').value = phone;
+    document.getElementById('sWorktime').value = worktime;
+    document.getElementById('sActive').checked = isActive == 1;
+    document.getElementById('modalShopTitle').textContent = 'Редактировать магазин';
+    document.getElementById('shopModal').classList.add('open');
+}
+
+async function deleteShop(id, event) {
+    event.stopPropagation();
+    if (!confirm('Удалить магазин?')) return;
+    try {
+        await fetch(`${API_BASE}/shops/${id}`, { method: 'DELETE' });
+        loadShops();
+    } catch (err) {}
+}
+
+document.getElementById('shopForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('sId').value;
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `${API_BASE}/shops/${id}` : `${API_BASE}/shops`;
+    const body = {
+        address: document.getElementById('sAddress').value,
+        phone: document.getElementById('sPhone').value,
+        worktime: document.getElementById('sWorktime').value,
+        is_active: document.getElementById('sActive').checked ? 1 : 0
+    };
+    try {
+        const res = await fetch(url, { method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+        if (res.ok) { closeShopModal(); loadShops(); }
+    } catch (err) {}
+});
+
 
     function formatDate(dateStr) {
       if (!dateStr) return '—';
@@ -629,6 +763,71 @@
         return '—';
       }
     }
+
+    function downloadExcelTemplate() {
+    // Пустой шаблон с примечаниями
+    const templateData = [
+        {
+            'Название': '',
+            'Артикул': '',
+            'Цена': '',
+            'Остаток': '',
+            'Единица измерения': '',
+            'Категория': '',
+            'Бейдж': ''
+        }
+    ];
+
+    // Создаём книгу
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    
+    // Задаём ширину колонок
+    ws['!cols'] = [
+        { wch: 35 },  // Название
+        { wch: 12 },  // Артикул
+        { wch: 10 },  // Цена
+        { wch: 10 },  // Остаток
+        { wch: 18 },  // Единица измерения
+        { wch: 15 },  // Категория
+        { wch: 8 }    // Бейдж
+    ];
+
+    // Добавляем примечания к заголовкам
+    const comments = {
+        'A1': 'Обязательное поле. Например: Болт М8х40 оцинкованный',
+        'B1': 'Необязательно. Например: Б-001',
+        'C1': 'Обязательное поле. Число, например: 850 или 12.50',
+        'D1': 'Число. Для кг/м можно дробное, например: 15.2. Если пусто — будет 0',
+        'E1': 'Одно из: шт, кг, м, уп, компл. По умолчанию — шт',
+        'F1': 'Должна совпадать с существующей. Например: Крепёж, Сварка, Инструмент',
+        'G1': 'Одно из: hit (Хит), new (Новинка). Можно оставить пустым'
+    };
+    
+    // SheetJS не поддерживает комментарии напрямую, 
+    // поэтому добавляем лист-инструкцию
+    const instructionData = [
+        { 'ПОЛЕ': 'Название *', 'ОПИСАНИЕ': 'Обязательное. Текст. Пример: Болт М8х40 оцинкованный' },
+        { 'ПОЛЕ': 'Артикул', 'ОПИСАНИЕ': 'Необязательное. Текст. Пример: Б-001' },
+        { 'ПОЛЕ': 'Цена *', 'ОПИСАНИЕ': 'Обязательное. Число. Пример: 850 или 12.50' },
+        { 'ПОЛЕ': 'Остаток', 'ОПИСАНИЕ': 'Число. Для кг/м можно дробное (15.2). Пусто = 0' },
+        { 'ПОЛЕ': 'Единица измерения', 'ОПИСАНИЕ': 'шт, кг, м, уп, компл. По умолчанию: шт' },
+        { 'ПОЛЕ': 'Категория', 'ОПИСАНИЕ': 'Категория товара. Пример: Крепёж, Сварка' },
+        { 'ПОЛЕ': 'Бейдж', 'ОПИСАНИЕ': 'hit (Хит) или new (Новинка). Можно пусто' },
+        { 'ПОЛЕ': '', 'ОПИСАНИЕ': '' },
+        { 'ПОЛЕ': 'ВАЖНО', 'ОПИСАНИЕ': 'Не меняйте заголовки колонок на листе "Товары"!' }
+    ];
+    
+    const wi = XLSX.utils.json_to_sheet(instructionData);
+    wi['!cols'] = [{ wch: 20 }, { wch: 60 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Товары');
+    XLSX.utils.book_append_sheet(wb, wi, 'Инструкция');
+
+    // Скачиваем
+    XLSX.writeFile(wb, 'Шаблон_импорта_товаров.xlsx');
+}
+
 
     // Навешиваем обработчик клика на таблицу товаров методом делегирования
     document.getElementById('adminProductsList').addEventListener('click', function(e) {
@@ -667,7 +866,7 @@
       if (categoriesData.length === 0) return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Категорий нет</td></tr>';
       tbody.innerHTML = categoriesData.map(c => `
         <tr>
-          <td style="font-weight:900; opacity:0.5;">#${c.id}</td>
+
           <td style="font-weight:900;">${c.name}</td>
           <td style="font-weight:700; opacity:0.7;">/${c.slug}</td>
           <td style="font-weight:900;">${c.product_count || 0} шт.</td>
@@ -894,7 +1093,7 @@
 
     function renderProductsTable() {
       const tbody = document.getElementById('adminProductsList');
-      if (productsData.length === 0) return tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Товаров пока нет</td></tr>';
+      if (productsData.length === 0) return tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Товаров пока нет</td></tr>';
 
       tbody.innerHTML = productsData.map(p => {
         const cat = categoriesData.find(c => c.id == p.category_id);
@@ -904,7 +1103,7 @@
         return `
             <tr data-id="${p.id}" class="${isLowStock ? 'row-low-stock' : ''}">
                 <td style="text-align:center;">${(p.image && p.image.length > 5) ? `<img src="${p.image}" style="width:32px; height:32px; object-fit:contain;">` : '<div style="font-size:20px;">📦</div>'}</td>
-                <td style="font-weight:900; opacity:0.5;">#${p.id}</td>
+                
                 <td style="font-weight:700; opacity:0.7;">${p.article || '—'}</td>
                 <td style="font-weight:900;">${p.name}${isLowStock ? '<br><span class="low-stock-warning">Осталось мало</span>' : ''}</td>
                 <td><span style="background:var(--gray-bg); padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700;">${cat ? cat.name : 'Без категории'}</span></td>
@@ -979,30 +1178,31 @@
     // ==========================================
     async function loadOrders() {
       try {
-        const res = await fetch(API_BASE + '/orders?all=true', { cache: 'no-store' });
+       const res = await fetch(API_BASE + '/orders?all=true', { cache: 'no-store' });
         const data = await res.json();
         ordersData = Array.isArray(data) ? data : [];
-
+        
         const tbody = document.getElementById('adminOrdersList');
         if (ordersData.length === 0) return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Нет заказов</td></tr>';
-
-        const statuses = { 'new': { text: 'Новый', class: 'status-new' }, 'processing': { text: 'В обработке', class: 'status-processing' }, 'shipped': { text: 'Отправлен', class: 'status-shipped' }, 'completed': { text: 'Выполнен', class: 'status-completed' }, 'cancelled': { text: 'Отменен', class: 'status-cancelled' } };
+        
+        const statuses = { 'new': { text: 'Новый', class: 'status-new' }, 'processing': { text: 'В обработке', class: 'status-processing' }, 'shipped': { text: 'Отправлен', class: 'status-shipped' }, 'completed': { text: 'Выполнен', class: 'status-completed' }, 'cancelled': { text: 'Отменен', class: 'status-cancelled' }};
+        
         tbody.innerHTML = ordersData.map(o => {
           const st = statuses[o.status] || statuses['new'];
-          return `<tr data-id="${o.id}">
-            <td style="font-weight:900;">#${o.id}</td>
-            <td style="opacity:0.6; font-size:11px;">${formatDate(o.created_at)}</td>
-            <td style="font-weight:700;">
-              ${o.user_name || '—'}<br>
-              <span style="font-size:10px; opacity:0.6;">${o.user_phone || ''}</span><br>
-              <span style="font-size:10px; opacity:0.6;">${o.user_email || ''}</span>
-            </td>
-            <td style="font-weight:900;">${Number(o.total).toLocaleString()} ₽</td>
-            <td><span class="status-badge ${st.class}">${st.text}</span></td>
+          // Исправление: Красивое финансовое форматирование для Админки
+          const safeTotalAdmin = Number(o.total).toLocaleString('ru-RU', { maximumFractionDigits: 2, minimumFractionDigits: 0 });
+          
+          return `<tr onclick="viewOrder(${o.id})">
+             <td style="font-weight:900;">#${o.id}</td>
+             <td style="opacity:0.6; font-size:11px;">${new Date(o.created_at).toLocaleDateString('ru-RU')}</td>
+             <td style="font-weight:700;">${o.user_name || o.user_email || 'Гость'}</td>
+             <td style="font-weight:900;">${safeTotalAdmin} ₽</td>
+             <td><span class="status-badge ${st.class}">${st.text}</span></td>
           </tr>`;
         }).join('');
       } catch (err) { console.error("Orders Load Error", err) }
     }
+
 
     function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
 
@@ -1356,6 +1556,69 @@
       document.getElementById('excelHelpModal').classList.remove('open');
     }
   </script>
+  <!-- МОДАЛЬНОЕ ОКНО: СПРАВКА ПО EXCEL -->
+<div id="excelHelpModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 900px;">
+        <button type="button" onclick="closeExcelHelp()"
+            style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+        <h2 class="about-title" style="font-size: 20px; margin-bottom: 16px; text-transform: uppercase;">📋 Как оформить Excel-файл</h2>
+        
+        <div style="font-size:11px; line-height:1.6; margin-bottom: 20px;">
+            <p style="margin-bottom:12px;">Файл должен быть в формате <strong>.xlsx</strong> или <strong>.xls</strong>.</p>
+            <p style="margin-bottom:12px;"><strong>Первая строка</strong> — заголовки колонок.</p>
+            <p style="margin-bottom:12px;"><strong>Остальные строки</strong> — товары (по одному на строку).</p>
+        </div>
+
+        <div style="overflow-x:auto; margin-bottom:20px; border:2px solid var(--dark);">
+            <table class="admin-table" style="min-width:100%;">
+                <thead>
+                    <tr>
+                        <th>Название *</th>
+                        <th>Артикул</th>
+                        <th>Цена *</th>
+                        <th>Остаток</th>
+                        <th>Ед. изм.</th>
+                        <th>Категория</th>
+                        <th>Бейдж</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Болт М8х40 оцинк.</td>
+                        <td>Б-001</td>
+                        <td>850</td>
+                        <td>15.2</td>
+                        <td>кг</td>
+                        <td>Крепёж</td>
+                        <td>hit</td>
+                    </tr>
+                    <tr>
+                        <td>Гайка М10</td>
+                        <td>Г-010</td>
+                        <td>8.00</td>
+                        <td>500</td>
+                        <td>шт</td>
+                        <td>Крепёж</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="font-size:10px; line-height:1.8; opacity:0.8;">
+            <p><span style="color:#EF4444;">*</span> — <strong>обязательные колонки</strong></p>
+            <p><strong>Название</strong> — текст, обязательно</p>
+            <p><strong>Артикул</strong> — текст, можно пусто</p>
+            <p><strong>Цена</strong> — число (рубли, можно с копейками)</p>
+            <p><strong>Остаток</strong> — число (можно дробное для кг/м)</p>
+            <p><strong>Ед. изм.</strong> — шт, кг, м, уп, компл</p>
+            <p><strong>Категория</strong> — должна совпадать с существующей</p>
+            <p><strong>Бейдж</strong> — hit или new</p>
+        </div>
+<p style="margin-bottom:12px;">Нажмите <strong>«Шаблон»</strong>, чтобы скачать готовый файл. Заполните его и загрузите через <strong>«Импорт Excel»</strong>.</p>
+        <button onclick="closeExcelHelp()" class="hero-btn" style="width:100%; justify-content:center; margin-top:16px;">Понятно</button>
+    </div>
+</div>
 </body>
 
 </html>
