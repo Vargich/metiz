@@ -37,7 +37,14 @@ const API = {
                 method: 'PUT',
                 body: JSON.stringify(data) // Теперь можно передавать {name} или {email}
             });
+        },
+         async updatePhone(phone, code) {
+            return API.fetch('/api/users/me/phone', {
+                method: 'PUT',
+                body: JSON.stringify({ phone, code })
+            });
         }
+        
     },
 
     categories: {

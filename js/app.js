@@ -614,6 +614,7 @@ if (companyAddressEl) companyAddressEl.value = user.company_address || '';
 
   try {
     const orders = await API.orders.getMine();
+    window.ordersData = orders;
     document.getElementById("orderCount").innerText = orders.length;
     const ordersList = document.getElementById("ordersList");
 
@@ -662,7 +663,103 @@ window.saveCompanyField = async function(field, value) {
         console.error('Ошибка сохранения:', err);
     }
 };
+// Добавить эти функции в свободное место app.js (например, перед разделом Авторизация):
 
+// ===== ФУНКЦИИ ПРИВЯЗКИ ТЕЛЕФОНА В ЛК =====
+function toggleEditPhone() {
+  const form = document.getElementById("editPhoneForm");
+  if (!form) return;
+  
+  const phoneInput = document.getElementById("newPhoneInput");
+  if (phoneInput && !phoneInput.dataset.masked) {
+      phoneInput.dataset.masked = "true";
+      phoneInput.addEventListener("input", (e) => {
+            let val = e.target.value;
+            let cleaned = val.replace(/\D/g, "");
+            if (!cleaned) {
+                phoneInput.value = "";
+                return;
+            }
+            if (cleaned.startsWith("8")) cleaned = "7" + cleaned.substring(1);
+            if (!cleaned.startsWith("7")) cleaned = "7" + cleaned;
+            let masked = "+7";
+            if (cleaned.length > 1) masked += " (" + cleaned.substring(1, 4);
+            if (cleaned.length >= 5) masked += ") " + cleaned.substring(4, 7);
+            if (cleaned.length >= 8) masked += "-" + cleaned.substring(7, 9);
+            if (cleaned.length >= 10) masked += "-" + cleaned.substring(9, 11);
+            phoneInput.value = masked.substring(0, 18);
+      });
+  }
+
+  if (form.style.display === "none") {
+    form.style.display = "flex";
+    document.getElementById("phoneInputStep").style.display = "flex";
+    document.getElementById("phoneCodeStep").style.display = "none";
+    phoneInput.value = "";
+    phoneInput.focus();
+  } else {
+    form.style.display = "none";
+  }
+}
+
+async function sendPhoneVerifyCode() {
+  const phoneInput = document.getElementById("newPhoneInput");
+  let phone = phoneInput.value.trim().replace(/\D/g, "");
+  if (phone.startsWith("8")) phone = "7" + phone.substring(1);
+  if (!phone.startsWith("7")) phone = "7" + phone;
+
+  if (phone.length !== 11) {
+    alert("Пожалуйста, укажите корректный 11-значный номер телефона");
+    return;
+  }
+
+  try {
+    const res = await API.auth.requestCode(phone);
+    document.getElementById("phoneInputStep").style.display = "none";
+    document.getElementById("phoneCodeStep").style.display = "flex";
+    document.getElementById("phoneVerifyCode").value = "";
+    document.getElementById("phoneVerifyCode").focus();
+    if (res.code) {
+      alert("ТЕСТОВЫЙ РЕЖИМ!\nКод подтверждения: " + res.code);
+    }
+  } catch (err) {
+    alert(err.message || "Ошибка отправки кода подтверждения");
+  }
+}
+
+async function verifyPhoneCode() {
+  const phoneInput = document.getElementById("newPhoneInput");
+  let phone = phoneInput.value.trim().replace(/\D/g, "");
+  if (phone.startsWith("8")) phone = "7" + phone.substring(1);
+  if (!phone.startsWith("7")) phone = "7" + phone;
+
+  const code = document.getElementById("phoneVerifyCode").value.trim();
+  if (code.length !== 4) {
+    alert("Пожалуйста, введите 4-значный код подтверждения");
+    return;
+  }
+
+  try {
+    await API.auth.updatePhone(phone, code);
+    showToast("Номер телефона успешно подтвержден и привязан!");
+    document.getElementById("editPhoneForm").style.display = "none";
+    
+    // Обновляем данные пользователя в сессии и перезагружаем ЛК
+    const profileData = await API.auth.me();
+    if (profileData && profileData.user) {
+        currentUser = profileData.user;
+        localStorage.setItem("user", JSON.stringify(currentUser));
+    }
+    initAccount();
+  } catch (err) {
+    alert(err.message || "Неверный код или ошибка сохранения");
+  }
+}
+
+function resetPhoneVerify() {
+  document.getElementById("phoneInputStep").style.display = "flex";
+  document.getElementById("phoneCodeStep").style.display = "none";
+}
 // ===== АВТОРИЗАЦИЯ =====
 function openAuthModal() {
   document.getElementById("authModal")?.classList.add("open");
@@ -1178,7 +1275,7 @@ async function checkout() {
     });
 
     const items = Object.values(grouped);
-    console.log('📤 Отправка заказа:', JSON.stringify(items));
+    
 
     if (items.length === 0) {
         alert("Корзина пуста или товары не найдены");
@@ -1222,14 +1319,16 @@ window.toggleEditName = function () {
   }
 };
 
+
 // ===== ПРОСМОТР И ОТМЕНА ЗАКАЗА ПОЛЬЗОВАТЕЛЕМ =====
-window.viewUserOrder = async function (orderId, status, date) {
+window.viewUserOrder = async function (orderId, status, date, orderPickupId) {
   document.getElementById("userOrderModal").classList.add("open");
-  document.getElementById("modalUserOrderTitle").innerText =
-    "Заказ #" + orderId;
+  document.getElementById("modalUserOrderTitle").innerText = "Заказ #" + orderId;
   const list = document.getElementById("userOrderItemsList");
 
   let trackerHtml = "";
+  let htmlContent = "";
+  
   if (status === "cancelled") {
     trackerHtml = `<div style="text-align:center; padding:10px; color:#EF4444; font-size:12px; font-weight:900; background:#fef2f2; border:1px solid #fecaca; margin-bottom:16px;">ЗАКАЗ БЫЛ ОТМЕНЕН</div>`;
   } else {
@@ -1238,9 +1337,7 @@ window.viewUserOrder = async function (orderId, status, date) {
     if (status === "processing") fill = 33;
     if (status === "shipped") fill = 66;
     if (status === "completed") fill = 100;
-
     const isActive = (lvl) => (fill >= lvl ? "completed" : "");
-
     trackerHtml = `
       <div class="tracker-wrap">
         <div class="tracker-line"></div>
@@ -1253,28 +1350,44 @@ window.viewUserOrder = async function (orderId, status, date) {
     `;
   }
 
+  // Получаем pickup_point_id из глобальных данных
+  if (orderPickupId == null && window.ordersData) {
+      const order = window.ordersData.find(o => o.id == orderId);
+      if (order) orderPickupId = order.pickup_point_id;
+  }
+
+  // Пункт выдачи: виден всегда, но редактируется только при статусах 'new' и 'processing'
+  const isEditable = (status === 'new' || status === 'processing');
+  htmlContent += `
+      <div style="margin-bottom:16px; display:flex; align-items:center; gap:10px;">
+          <span style="font-size:10px; font-weight:900; text-transform:uppercase; opacity:0.5;">Пункт выдачи:</span>
+          <select id="userOrderPickup" onchange="changeUserOrderPickup(${orderId})" 
+              ${isEditable ? '' : 'disabled'}
+              style="flex:1; padding:8px; border:1px solid var(--dark); font-size:11px; font-weight:700; ${isEditable ? '' : 'background:#f3f4f6; cursor:not-allowed; opacity:0.8;'}">
+              <option value="">Загрузка...</option>
+          </select>
+      </div>
+  `;
+  
+  htmlContent += trackerHtml;  // Добавляем трекер
+
   list.innerHTML = `<p style="font-size:11px; opacity:0.5; text-align:center;">Анализ чека...</p>`;
 
   try {
     const items = await API.orders.getItems(orderId);
 
-    let htmlContent = trackerHtml;
-
     let totalScore = 0;
     items.forEach((i) => {
-      // Строгое суммирование с отрезанием мусора
       totalScore += parseFloat(i.quantity) * parseFloat(i.price);
-      
       const safePrice = Number(i.price).toLocaleString('ru-RU', { maximumFractionDigits: 2 });
-      
       htmlContent += `
          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:8px; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:8px;">
            <span style="font-weight:700;">${i.product_name || "Скрытая номенклатура"}</span>
            <span>${Number(i.quantity).toFixed(1)} ${i.product_unit || 'шт'} × <span style="color:var(--brand);">${safePrice} ₽</span></span>
          </div>`;
     });
-    
-    totalScore = (Math.round(totalScore * 100) / 100); // Страхуем итог
+
+    totalScore = (Math.round(totalScore * 100) / 100);
 
     if (status !== "cancelled" && items.length > 0) {
       const orderDateStr = new Date(date).toLocaleDateString("ru-RU");
@@ -1286,7 +1399,6 @@ window.viewUserOrder = async function (orderId, status, date) {
           items: items,
         }),
       );
-
       htmlContent += `
          <div style="margin-top:20px; display:flex; justify-content:flex-end; border-top: 2px solid var(--dark); padding-top:16px;">
             <button class="hero-btn" style="background:#10B981; padding: 12px 20px; font-size:9px;" onclick="printB2BInvoice('${encodedData}')">
@@ -1295,13 +1407,39 @@ window.viewUserOrder = async function (orderId, status, date) {
          </div>`;
     }
 
+    // 1. СНАЧАЛА вставляем сгенерированный HTML в DOM, чтобы селект появился на странице
     list.innerHTML = htmlContent;
+
+    // 2. ТЕПЕРЬ ищем селект в DOM и заполняем его списком магазинов (работает всегда)
+    try {
+      const shopsRes = await fetch('/api/shops');
+      const shops = await shopsRes.json();
+      const pickupSelect = document.getElementById('userOrderPickup');
+      if (pickupSelect) {
+          pickupSelect.innerHTML = '<option value="">Не выбран</option>' +
+              shops.map(s => `<option value="${s.id}" ${s.id == orderPickupId ? 'selected' : ''}>${s.address}</option>`).join('');
+      }
+    } catch (e) {
+        console.error("Ошибка загрузки магазинов:", e);
+    }
   } catch (e) {
-    list.innerHTML =
-      '<p style="font-size:11px; color:#EF4444;">Ошибка базы</p>';
+    list.innerHTML = '<p style="font-size:11px; color:#EF4444;">Ошибка базы</p>';
   }
 };
-
+window.changeUserOrderPickup = async function(orderId) {
+    const pickupId = document.getElementById('userOrderPickup')?.value;
+    if (!pickupId) return;
+    try {
+        await fetch(`/api/orders/${orderId}/pickup`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pickup_point_id: pickupId })
+        });
+        showToast('Пункт выдачи изменён');
+    } catch (err) {
+        alert('Ошибка при изменении пункта выдачи');
+    }
+};
 function numberToWordsRu(num) {
   let number = parseFloat(num).toFixed(2).split(".");
   let rubles = parseInt(number[0]);
@@ -2114,4 +2252,8 @@ window.addToCartWithQty = addToCartWithQty;
 window.updateCartWeightQty = updateCartWeightQty;
 window.changeQtyAndAdd = changeQtyAndAdd;
 window.changeCartWeightQty = changeCartWeightQty;
+window.toggleEditPhone = toggleEditPhone;
+window.sendPhoneVerifyCode = sendPhoneVerifyCode;
+window.verifyPhoneCode = verifyPhoneCode;
+window.resetPhoneVerify = resetPhoneVerify;
 document.addEventListener("DOMContentLoaded", bootstrap);

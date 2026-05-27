@@ -374,13 +374,15 @@
                 <th style="width: 60px;">ID</th>
                 <th>Дата</th>
                 <th>Покупатель</th>
+                <th>Пункт выдачи</th>
                 <th>Сумма</th>
+                
                 <th>Статус</th>
               </tr>
             </thead>
             <tbody id="adminOrdersList">
               <tr>
-                <td colspan="5" style="text-align:center;">Загрузка...</td>
+                <td colspan="6" style="text-align:center;">Загрузка...</td>
               </tr>
             </tbody>
           </table>
@@ -602,6 +604,13 @@
         <input type="hidden" id="oId">
         <div>
           <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Статус заказа</label>
+          <div>
+    <label style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.5;">Пункт выдачи</label>
+    <select id="oPickupPoint" onchange="changeOrderPickup()"
+        style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; font-size: 11px; margin-top:4px;">
+        <option value="">Не выбран</option>
+    </select>
+</div>
           <select id="oStatus"
             style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:900; text-transform:uppercase; margin-top:4px;">
             <option value="new">Новый</option>
@@ -1091,6 +1100,22 @@ document.getElementById('shopForm').addEventListener('submit', async function(e)
       } catch (err) { console.error("Ошибка загрузки товаров:", err); }
     }
 
+    async function changeOrderPickup() {
+    if (!currentOrderId) return;
+    const pickupId = document.getElementById('oPickupPoint')?.value;
+    try {
+        const res = await fetch(`${API_BASE}/orders/${currentOrderId}/pickup`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pickup_point_id: pickupId || null })
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            alert(err.error || 'Ошибка');
+        }
+    } catch (err) { console.error(err); }
+}
+
     function renderProductsTable() {
       const tbody = document.getElementById('adminProductsList');
       if (productsData.length === 0) return tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Товаров пока нет</td></tr>';
@@ -1177,58 +1202,74 @@ document.getElementById('shopForm').addEventListener('submit', async function(e)
     // ЛОГИКА: ЗАКАЗЫ И РЕДАКТИРОВАНИЕ СОСТАВА
     // ==========================================
     async function loadOrders() {
-      try {
-       const res = await fetch(API_BASE + '/orders?all=true', { cache: 'no-store' });
+    try {
+        const res = await fetch(API_BASE + '/orders?all=true', { cache: 'no-store' });
         const data = await res.json();
         ordersData = Array.isArray(data) ? data : [];
         
         const tbody = document.getElementById('adminOrdersList');
-        if (ordersData.length === 0) return tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Нет заказов</td></tr>';
+        if (ordersData.length === 0) return tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Нет заказов</td></tr>';
         
         const statuses = { 'new': { text: 'Новый', class: 'status-new' }, 'processing': { text: 'В обработке', class: 'status-processing' }, 'shipped': { text: 'Отправлен', class: 'status-shipped' }, 'completed': { text: 'Выполнен', class: 'status-completed' }, 'cancelled': { text: 'Отменен', class: 'status-cancelled' }};
         
         tbody.innerHTML = ordersData.map(o => {
-          const st = statuses[o.status] || statuses['new'];
-          // Исправление: Красивое финансовое форматирование для Админки
-          const safeTotalAdmin = Number(o.total).toLocaleString('ru-RU', { maximumFractionDigits: 2, minimumFractionDigits: 0 });
-          
-          return `<tr onclick="viewOrder(${o.id})">
-             <td style="font-weight:900;">#${o.id}</td>
-             <td style="opacity:0.6; font-size:11px;">${new Date(o.created_at).toLocaleDateString('ru-RU')}</td>
-             <td style="font-weight:700;">${o.user_name || o.user_email || 'Гость'}</td>
-             <td style="font-weight:900;">${safeTotalAdmin} ₽</td>
-             <td><span class="status-badge ${st.class}">${st.text}</span></td>
-          </tr>`;
+            const st = statuses[o.status] || statuses['new'];
+            const safeTotalAdmin = Number(o.total).toLocaleString('ru-RU', { maximumFractionDigits: 2, minimumFractionDigits: 0 });
+            
+            return `<tr onclick="viewOrder(${o.id})">
+                <td style="font-weight:900;">#${o.id}</td>
+                <td style="opacity:0.6; font-size:11px;">${new Date(o.created_at).toLocaleDateString('ru-RU')}</td>
+                <td style="font-weight:700;">
+                    ${o.user_name || o.user_email || 'Гость'}<br>
+                    <span style="font-size:10px; opacity:0.6;">${o.user_phone || ''}</span><br>
+                    <span style="font-size:10px; opacity:0.6;">${o.user_email || ''}</span>
+                </td>
+                <td style="font-weight:700; font-size:11px;">${o.pickup_address || '—'}</td>
+                <td style="font-weight:900;">${safeTotalAdmin} ₽</td>
+                <td><span class="status-badge ${st.class}">${st.text}</span></td>
+            </tr>`;
         }).join('');
-      } catch (err) { console.error("Orders Load Error", err) }
-    }
+    } catch (err) { console.error("Orders Load Error", err) }
+}
 
 
     function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
 
     async function viewOrder(id) {
-      const o = ordersData.find(x => x.id == id);
-      if (!o) return;
-      currentOrderId = id;
-      document.getElementById('oId').value = o.id;
-      document.getElementById('oStatus').value = o.status || 'new';
-      document.getElementById('modalOrderTitle').textContent = `Заказ #${o.id}`;
-      document.getElementById('modalOrderCustomer').innerHTML = `
+    const o = ordersData.find(x => x.id == id);
+    if (!o) return;
+    currentOrderId = id;
+    document.getElementById('oId').value = o.id;
+    document.getElementById('oStatus').value = o.status || 'new';
+    document.getElementById('modalOrderTitle').textContent = `Заказ #${o.id}`;
+    document.getElementById('modalOrderCustomer').innerHTML = `
         Клиент: ${o.user_name || '—'}<br>
         <span style="font-size:11px; opacity:0.7;">Тел: ${o.user_phone || 'не указан'}</span><br>
         <span style="font-size:11px; opacity:0.7;">Email: ${o.user_email || 'не указан'}</span>
-      `;
-      document.getElementById('orderModal').classList.add('open');
+    `;
+    document.getElementById('orderModal').classList.add('open');
 
-      try {
+    // Загружаем пункты выдачи для выбора
+    try {
+        const shopsRes = await fetch(API_BASE + '/shops/all');
+        const shops = await shopsRes.json();
+        const pickupSelect = document.getElementById('oPickupPoint');
+        if (pickupSelect) {
+            pickupSelect.innerHTML = '<option value="">Не выбран</option>' +
+                shops.map(s => `<option value="${s.id}" ${s.id == o.pickup_point_id ? 'selected' : ''}>${s.address}</option>`).join('');
+        }
+    } catch (e) {}
+
+    // Загружаем состав заказа
+    try {
         const res = await fetch(`${API_BASE}/orders/${id}/items`, { cache: 'no-store' });
         currentOrderItems = await res.json();
         renderOrderItemsEdit();
-      } catch (e) {
+    } catch (e) {
         document.getElementById('modalOrderItems').innerHTML = 'Ошибка загрузки товаров';
-      }
     }
-
+}
+   
     function renderOrderItemsEdit() {
       const container = document.getElementById('modalOrderItems');
       if (!container) return;

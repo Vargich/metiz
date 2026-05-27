@@ -10,10 +10,51 @@ const multer = require('multer');
 const cors = require('cors');
 const { Pool } = require('pg');
 const nodemailer = require('nodemailer');
+const rateLimit = require('express-rate-limit');
+const winston = require('winston');
 
 const app = express();
 const PORT = 3000;
 const SECRET_KEY = process.env.JWT_SECRET || 'dev-secret-only-for-development';
+
+// ==========================================
+// НАСТРОЙКА ЛОГЕРА (Winston)
+// ==========================================
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.json()
+    ),
+    transports: [
+        // Запись ошибок в файл error.log
+        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+        // Запись всех логов в файл combined.log
+        new winston.transports.File({ filename: 'logs/combined.log' }),
+    ],
+});
+
+// В режиме разработки пишем логи дополнительно в консоль с красивой подсветкой
+if (process.env.NODE_ENV !== 'production') {
+    logger.add(new winston.transports.Console({
+        format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.simple()
+        )
+    }));
+}
+
+// ==========================================
+// НАСТРОЙКА ЛИМИТЕРА ЗАПРОСОВ (Rate Limiter)
+// ==========================================
+// Ограничение: не более 3 запросов OTP-кода в минуту с одного IP
+const otpLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 минута
+    max: 3, 
+    message: { error: 'Слишком много запросов кода. Пожалуйста, подождите 1 минуту перед повторной попыткой.' },
+    standardHeaders: true, 
+    legacyHeaders: false, 
+});
 
 // ==========================================
 // 1. НАСТРОЙКИ POSTGRESQL, ПОЧТЫ И TELEGRAM
@@ -270,6 +311,12 @@ app.post('/api/admin/login', async (req, res) => {
     const user = await queryOne("SELECT * FROM users WHERE (email = ? OR phone = ?) AND is_admin = 1", [contact, contact]);
     if (!user || !(await bcrypt.compare(password, user.password))) return res.status(401).json({ error: 'Неверные данные' });
     const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1d' });
+res.cookie('token', token, { 
+    httpOnly: true, // Предотвращает чтение токена через XSS-скрипты на клиенте
+    secure: process.env.NODE_ENV === 'production', // Передача только по HTTPS в продакшене
+    sameSite: 'lax', // Защита от CSRF-атак
+    maxAge: 1 * 24 * 60 * 60 * 1000 // Время жизни куки — 1 день
+});
     res.cookie('token', token, { httpOnly: true });
     res.json({ user: { id: user.id, email: user.email, displayName: user.name, isAdmin: true } });
 });
@@ -367,7 +414,8 @@ app.delete('/api/shops/:id', authenticateToken, isAdminMiddleware, async (req, r
 });
 
 // OTP-авторизация
-app.post('/api/auth/request-code', async (req, res) => {
+// Найти роут отправки кода и заменить его объявление:
+app.post('/api/auth/request-code', otpLimiter, async (req, res) => {
     let { contact } = req.body;
     if (!contact) return res.status(400).json({ error: 'Контакт обязателен' });
     if (!contact.includes('@')) contact = contact.replace(/\D/g, '');
@@ -375,11 +423,44 @@ app.post('/api/auth/request-code', async (req, res) => {
     const code = String(Math.floor(1000 + Math.random() * 9000));
     try {
         await run(`INSERT INTO otp_codes (contact, code, expires_at) VALUES (?, ?, ?) ON CONFLICT (contact) DO UPDATE SET code = EXCLUDED.code, expires_at = EXCLUDED.expires_at`, [contact, code, Date.now() + 300000]);
+        
+        // В продакшене отправляем код, в деве — логируем
+        logger.info(`Сгенерирован OTP-код для контакта ${contact}`);
+        
         res.json({ success: true, exists: !!user, user: user || null, code: code });
     } catch (e) {
+        logger.error(`Ошибка при генерации OTP для ${contact}: ${e.message}`);
         res.status(500).json({ error: e.message || 'Ошибка отправки' });
     }
 });
+
+app.put('/api/users/me/phone', authenticateToken, async (req, res) => {
+    let { phone, code } = req.body;
+    if (!phone || !code) return res.status(400).json({ error: 'Телефон и код обязательны' });
+    
+    phone = phone.replace(/\D/g, ''); // Оставляем только цифры
+    
+    // 1. Проверяем OTP код из таблицы otp_codes
+    const savedOtp = await queryOne(`SELECT * FROM otp_codes WHERE contact = ?`, [phone]);
+    if (!savedOtp) return res.status(400).json({ error: 'Сначала запросите код подтверждения!' });
+    if (Date.now() > Number(savedOtp.expires_at)) return res.status(400).json({ error: 'Код подтверждения устарел.' });
+    if (savedOtp.code !== code.trim()) return res.status(400).json({ error: 'Неверный код подтверждения!' });
+    
+    // 2. Проверяем, не привязан ли этот номер к другой учетной записи
+    const existing = await queryOne("SELECT id FROM users WHERE phone = ? AND id != ?", [phone, req.user.id]);
+    if (existing) return res.status(400).json({ error: 'Этот номер телефона уже привязан к другому аккаунту' });
+    
+    // 3. Сохраняем телефон и очищаем код
+    try {
+        await run("UPDATE users SET phone = ? WHERE id = ?", [phone, req.user.id]);
+        await run(`DELETE FROM otp_codes WHERE contact = ?`, [phone]);
+        res.json({ success: true });
+    } catch (err) {
+        logger.error(`Ошибка привязки телефона: ${err.message}`);
+        res.status(500).json({ error: 'Ошибка базы данных' });
+    }
+});
+
 
 app.post('/api/auth/verify-code', async (req, res) => {
     let { contact, code, name } = req.body;
@@ -395,13 +476,23 @@ app.post('/api/auth/verify-code', async (req, res) => {
         await run("INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)", [name || 'Клиент', isEmail ? contact : null, isEmail ? null : contact, 'no-password']);
         user = await queryOne("SELECT id, name, email, phone, is_admin FROM users WHERE email = ? OR phone = ?", [contact, contact]);
     }
-    const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '7d' });
+   const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '7d' });
+res.cookie('token', token, { 
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === 'production', 
+    sameSite: 'lax', 
+    maxAge: 7 * 24 * 60 * 60 * 1000 // Время жизни куки — 7 дней
+});
     res.cookie('token', token, { httpOnly: true });
     res.json({ success: true, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, isAdmin: !!user.is_admin } });
 });
 
 app.post('/api/auth/logout', (req, res) => {
-    res.clearCookie('token');
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+    });
     res.json({ success: true });
 });
 
@@ -506,9 +597,39 @@ app.delete('/api/products/:id', authenticateToken, isAdminMiddleware, async (req
 // Заказы
 app.get('/api/orders', authenticateToken, async (req, res) => {
     if (req.user.is_admin && req.query.all === 'true') {
-        res.json(await queryAll("SELECT o.*, u.name as user_name, u.email as user_email, u.phone as user_phone FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC"));
+        res.json(await queryAll(
+            "SELECT o.*, u.name as user_name, u.email as user_email, u.phone as user_phone, s.address as pickup_address FROM orders o JOIN users u ON o.user_id = u.id LEFT JOIN shops s ON o.pickup_point_id = s.id ORDER BY o.created_at DESC"
+        ));
     } else {
-        res.json(await queryAll("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC", [req.user.id]));
+        // ДЛЯ ОБЫЧНОГО ПОЛЬЗОВАТЕЛЯ — ДОБАВЛЕН pickup_point_id и pickup_address
+        res.json(await queryAll(
+            "SELECT o.*, s.address as pickup_address FROM orders o LEFT JOIN shops s ON o.pickup_point_id = s.id WHERE user_id = ? ORDER BY created_at DESC", [req.user.id]
+        ));
+    }
+});
+
+app.put('/api/orders/:id/pickup', authenticateToken, async (req, res) => {
+    const orderId = req.params.id;
+    const { pickup_point_id } = req.body;
+    
+    const order = await queryOne("SELECT user_id, status FROM orders WHERE id = ?", [orderId]);
+    if (!order) return res.status(404).json({ error: 'Заказ не найден' });
+    
+    // Проверка прав: админ или владелец заказа
+    if (!req.user.is_admin && order.user_id !== req.user.id) {
+        return res.status(403).json({ error: 'Доступ запрещён' });
+    }
+    
+    // Клиент может менять только до отправки
+    if (!req.user.is_admin && (order.status === 'shipped' || order.status === 'completed')) {
+        return res.status(400).json({ error: 'Нельзя изменить пункт выдачи после отправки заказа' });
+    }
+    
+    try {
+        await run("UPDATE orders SET pickup_point_id = ? WHERE id = ?", [pickup_point_id || null, orderId]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Ошибка БД' });
     }
 });
 
@@ -592,7 +713,7 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
             const originalPrice = Number(item.price);
             const discountedPrice = discountPercent > 0 ? (originalPrice * (1 - discountPercent / 100)) : originalPrice;
             const qty = Number(item.quantity);
-            console.log(`📦 Товар ${item.id}: ${qty} × ${discountedPrice} = ${discountedPrice * qty}`); // Отладка
+            
             await run("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)", [orderId, item.id, qty, discountedPrice]);
             await run("UPDATE products SET quantity = quantity - ? WHERE id = ?", [qty, item.id]);
         }
@@ -668,7 +789,13 @@ if (TG_BOT_TOKEN && TG_BOT_TOKEN !== 'ВАШ_ТОКЕН_БОТА') {
     }
     pollTelegram();
 }
-
+// ==========================================
+// ГЛОБАЛЬНЫЙ ОБРАБОТЧИК ОШИБОК
+// ==========================================
+app.use((err, req, res, next) => {
+    logger.error(`[Unhandled Error] ${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+    res.status(err.status || 500).json({ error: 'Внутренняя ошибка сервера. Подробности записаны в системный журнал.' });
+});
 // ==========================================
 // 7. ЗАПУСК СЕРВЕРА
 // ==========================================
@@ -699,5 +826,5 @@ initDatabase().then(async () => {
         });
     }
 }).catch(err => {
-    console.error("Database connection failed:", err);
+    logger.error("Database connection failed: " + err.message);
 });
