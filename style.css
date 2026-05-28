@@ -973,6 +973,9 @@ body {
 #shop-fullscreen-modal.show .modal-overlay-industrial {
   opacity: 1;
 }
+#shop-fullscreen-modal.show {
+  display: block; /* Показываем контейнер при добавлении класса .show */
+}
 
 .modal-card-industrial {
   background: white;

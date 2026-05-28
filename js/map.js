@@ -1,3 +1,63 @@
+// Локальные объявления функций (исключают ReferenceError при инициализации)
+function openFullscreenCard(shopData) {
+    let modal = document.getElementById("shop-fullscreen-modal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "shop-fullscreen-modal";
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div class="modal-overlay-industrial" onclick="closeFullscreenCard()" style="z-index: 9000; position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center;">
+            <div class="modal-card-industrial" onclick="event.stopPropagation()" style="background:white; border:2px solid var(--dark); max-width:400px; position:relative; box-shadow: 15px 15px 0 var(--dark);">
+                <button class="modal-close-industrial" onclick="closeFullscreenCard()" style="position:absolute; right:-20px; top:-20px; background:var(--brand); border:2px solid var(--dark); color:white; width:40px; height:40px; cursor:pointer;"><i class="fas fa-times"></i></button>
+                <div class="modal-content-industrial" style="padding:40px;">
+                    <div class="modal-label-industrial" style="color:var(--brand); font-weight:900; font-size:10px; letter-spacing:2px; text-transform:uppercase;">Локация пункта</div>
+                    <h2 class="modal-title-industrial" style="font-size:24px; font-weight:900; line-height:1.2; text-transform:uppercase; margin:16px 0;">${shopData.address}</h2>
+                    <div class="modal-info-block-industrial" style="background:#f3f4f6; padding:16px; margin: 24px 0;">
+                        <div class="info-label" style="opacity:0.5; font-size:10px; font-weight:900; text-transform:uppercase; margin-bottom:8px;">Режим работы</div>
+                        <div class="info-value" style="font-weight:700;">${shopData.time}</div>
+                    </div>
+                    <a href="${shopData.route}" target="_blank" class="modal-btn-industrial hero-btn" style="text-decoration:none; display:block; text-align:center; padding:16px;">
+                       ПРОЛОЖИТЬ МАРШРУТ <i class="fas fa-external-link-alt ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Принудительно перебиваем стиль "display: none" из CSS файла
+    modal.style.display = "block";
+    
+    // Запускаем плавную CSS-анимацию через класс .show
+    setTimeout(() => {
+        modal.classList.add("show");
+    }, 10);
+
+    // Блокируем прокрутку основного сайта
+    document.body.style.overflow = "hidden";
+}
+
+function closeFullscreenCard() {
+    const modal = document.getElementById("shop-fullscreen-modal");
+    if (modal) {
+        // Убираем класс анимации (запускает плавное исчезновение opacity)
+        modal.classList.remove("show");
+        
+        // Даем 400 миллисекунд на завершение CSS-анимации, после чего удаляем элемент из DOM
+        setTimeout(() => {
+            modal.remove();
+        }, 400);
+        
+        // Возвращаем прокрутку основному сайту
+        document.body.style.overflow = "";
+    }
+}
+
+// Привязываем к глобальному объекту window для inline-обработчиков
+window.openFullscreenCard = openFullscreenCard;
+window.closeFullscreenCard = closeFullscreenCard;
+
 export function initYandexMap() {
     const mapEl = document.getElementById("map");
     if (!mapEl) return;
@@ -9,11 +69,18 @@ export function initYandexMap() {
     };
 
     if (typeof ymaps === 'undefined') {
-        const script = document.createElement('script');
-        script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=33642748-9cc0-49a1-8516-cef1e3433a34";
-        script.type = "text/javascript";
-        script.onload = loadMap;
-        document.head.appendChild(script);
+        fetch('/api/config/yandex-maps')
+            .then(res => res.json())
+            .then(config => {
+                const script = document.createElement('script');
+                script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${config.apiKey}`;
+                script.type = "text/javascript";
+                script.onload = loadMap;
+                document.head.appendChild(script);
+            })
+            .catch(err => {
+                console.error("Не удалось получить API ключ Яндекс.Карт:", err);
+            });
     } else {
         loadMap();
     }
@@ -60,7 +127,6 @@ export function initYandexMap() {
             zoom: 11,
             controls: ["zoomControl"],
         });
-        myMap.behaviors.disable('scrollZoom');
 
         const shopsContainer = document.getElementById("shops");
         if (shopsContainer) {
@@ -88,6 +154,7 @@ export function initYandexMap() {
                     { preset: "islands#redDotIcon" }
                 );
 
+                // Корректный вызов локально доступного метода
                 shopPlacemark.events.add("click", function (e) {
                     const target = e.get("target");
                     const data = target.properties.get("shopData");
@@ -116,43 +183,6 @@ export function initYandexMap() {
             myMap.geoObjects.add(cityCollection);
         });
     }
-
-    window.openFullscreenCard = function(shopData) {
-        let modal = document.getElementById("shop-fullscreen-modal");
-        if (!modal) {
-            modal = document.createElement("div");
-            modal.id = "shop-fullscreen-modal";
-            document.body.appendChild(modal);
-        }
-
-        modal.innerHTML = `
-            <div class="modal-overlay-industrial" onclick="closeFullscreenCard()" style="z-index: 9000; position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center;">
-                <div class="modal-card-industrial" onclick="event.stopPropagation()" style="background:white; border:2px solid var(--dark); max-width:400px; position:relative; box-shadow: 15px 15px 0 var(--dark);">
-                    <button class="modal-close-industrial" onclick="closeFullscreenCard()" style="position:absolute; right:-20px; top:-20px; background:var(--brand); border:2px solid var(--dark); color:white; width:40px; height:40px; cursor:pointer;"><i class="fas fa-times"></i></button>
-                    <div class="modal-content-industrial" style="padding:40px;">
-                        <div class="modal-label-industrial" style="color:var(--brand); font-weight:900; font-size:10px; letter-spacing:2px; text-transform:uppercase;">Локация пункта</div>
-                        <h2 class="modal-title-industrial" style="font-size:24px; font-weight:900; line-height:1.2; text-transform:uppercase; margin:16px 0;">${shopData.address}</h2>
-                        <div class="modal-info-block-industrial" style="background:#f3f4f6; padding:16px; margin: 24px 0;">
-                            <div class="info-label" style="opacity:0.5; font-size:10px; font-weight:900; text-transform:uppercase; margin-bottom:8px;">Режим работы</div>
-                            <div class="info-value" style="font-weight:700;">${shopData.time}</div>
-                        </div>
-                        <a href="${shopData.route}" target="_blank" class="modal-btn-industrial hero-btn" style="text-decoration:none; display:block; text-align:center; padding:16px;">
-                           ПРОЛОЖИТЬ МАРШРУТ <i class="fas fa-external-link-alt ml-2"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.style.overflow = "hidden";
-    }
-
-    window.closeFullscreenCard = function () {
-        const modal = document.getElementById("shop-fullscreen-modal");
-        if (modal) {
-            modal.remove();
-            document.body.style.overflow = "";
-        }
-    };
 }
 
 // Мини-карта для корзины — загружает точки из API
@@ -174,11 +204,18 @@ export function initPickupMap(containerId, onSelectCallback) {
     };
 
     if (typeof ymaps === 'undefined') {
-        const script = document.createElement('script');
-        script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=33642748-9cc0-49a1-8516-cef1e3433a34";
-        script.type = "text/javascript";
-        script.onload = loadMap;
-        document.head.appendChild(script);
+        fetch('/api/config/yandex-maps')
+            .then(res => res.json())
+            .then(config => {
+                const script = document.createElement('script');
+                script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${config.apiKey}`;
+                script.type = "text/javascript";
+                script.onload = loadMap;
+                document.head.appendChild(script);
+            })
+            .catch(err => {
+                console.error('Ошибка загрузки скрипта Яндекс.Карт:', err);
+            });
     } else {
         loadMap();
     }
@@ -192,7 +229,6 @@ function initPickup(container, points, onSelectCallback) {
         zoom: 11,
         controls: ["zoomControl"]
     });
-    map.behaviors.disable('scrollZoom');
 
     points.forEach(point => {
         const coords = point.coords ? JSON.parse(point.coords) : [50.1, 45.4];

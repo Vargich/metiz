@@ -17,6 +17,10 @@ const app = express();
 const PORT = 3000;
 const SECRET_KEY = process.env.JWT_SECRET || 'dev-secret-only-for-development';
 
+// Автоматическое создание папки логов при её отсутствии
+const logDir = './logs/';
+if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+
 // ==========================================
 // НАСТРОЙКА ЛОГЕРА (Winston)
 // ==========================================
@@ -155,8 +159,8 @@ async function initDatabase() {
         price NUMERIC
     )`);    
     await run(`CREATE TABLE IF NOT EXISTS otp_codes (contact VARCHAR(255) PRIMARY KEY, code VARCHAR(50), expires_at BIGINT)`);
-
     
+
     // Таблица магазинов
     await run(`CREATE TABLE IF NOT EXISTS shops (
         id SERIAL PRIMARY KEY,
@@ -165,7 +169,17 @@ async function initDatabase() {
         worktime VARCHAR(255) DEFAULT '',
         is_active INTEGER DEFAULT 1
     )`);
-
+await run(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+await run(`CREATE INDEX IF NOT EXISTS prod_name_trgm_idx ON products USING gin (name gin_trgm_ops)`);
+app.get('/api/products/search', async (req, res) => {
+    const query = req.query.q || '';
+    // Находит товары со сходством названий выше 30%
+    const products = await queryAll(
+        "SELECT *, similarity(name, ?) as sml FROM products WHERE similarity(name, ?) > 0.3 ORDER BY sml DESC", 
+        [query, query]
+    );
+    res.json(products);
+});
     // Демо-данные
     const catCount = await queryOne('SELECT COUNT(*)::int as count FROM categories');
     if (catCount && catCount.count === 0) {
@@ -199,6 +213,10 @@ async function initDatabase() {
     }
 }
 
+
+
+
+
 // ==========================================
 // 3. ОТПРАВКА КОДА
 // ==========================================
@@ -219,7 +237,7 @@ async function sendAuthCode(contact, code) {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    chat_id: tgUser.chat_id,
+                    chat_id: msg.chat.id,
                     text: `🔐 Ваш код для входа на сайт: *${code}*`,
                     parse_mode: 'Markdown'
                 })
@@ -293,10 +311,20 @@ app.get('/admin', async (req, res, next) => {
     }
 });
 
-app.use((req, res, next) => {
+// Асинхронное middleware раздачи HTML с автоподстановкой API-ключа карт (исправлено)
+app.use(async (req, res, next) => {
     if (!req.path.startsWith('/api') && !req.path.includes('.')) {
         const filePath = path.join(__dirname, req.path === '/' ? 'index.html' : req.path + '.html');
-        if (fs.existsSync(filePath)) return res.sendFile(filePath);
+        if (fs.existsSync(filePath)) {
+            try {
+                let content = await fs.readFile(filePath, 'utf-8');
+                const mapsApiKey = process.env.YANDEX_MAPS_API_KEY || '';
+                content = content.replace(/\{\{YANDEX_MAPS_API_KEY\}\}/g, mapsApiKey);
+                return res.send(content);
+            } catch (err) {
+                return next(err);
+            }
+        }
     }
     next();
 });
@@ -311,13 +339,13 @@ app.post('/api/admin/login', async (req, res) => {
     const user = await queryOne("SELECT * FROM users WHERE (email = ? OR phone = ?) AND is_admin = 1", [contact, contact]);
     if (!user || !(await bcrypt.compare(password, user.password))) return res.status(401).json({ error: 'Неверные данные' });
     const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1d' });
-res.cookie('token', token, { 
-    httpOnly: true, // Предотвращает чтение токена через XSS-скрипты на клиенте
-    secure: process.env.NODE_ENV === 'production', // Передача только по HTTPS в продакшене
-    sameSite: 'lax', // Защита от CSRF-атак
-    maxAge: 1 * 24 * 60 * 60 * 1000 // Время жизни куки — 1 день
-});
-    res.cookie('token', token, { httpOnly: true });
+    res.cookie('token', token, { 
+        httpOnly: true, // Предотвращает чтение токена через XSS-скрипты на клиенте
+        secure: process.env.NODE_ENV === 'production', // Передача только по HTTPS в продакшене
+        sameSite: 'lax', // Защита от CSRF-атак
+        maxAge: 1 * 24 * 60 * 60 * 1000 // Время жизни куки — 1 день
+    });
+    // Удалено дублирование куки
     res.json({ user: { id: user.id, email: user.email, displayName: user.name, isAdmin: true } });
 });
 
@@ -348,6 +376,77 @@ app.get('/api/users', authenticateToken, isAdminMiddleware, async (req, res) => 
         res.json(users);
     } catch (err) {
         res.status(500).json({ error: 'Ошибка загрузки пользователей' });
+    }
+});
+
+// Получение аналитической статистики продаж для админ-панели (ПЕРЕНЕСЕНО НИЖЕ ИНИЦИАЛИЗАЦИИ MIDDLEWARE)
+app.get('/api/admin/stats', authenticateToken, isAdminMiddleware, async (req, res) => {
+    try {
+        // 1. Расчет общей выручки, среднего чека и общего числа выполненных/активных заказов
+        const revenueData = await queryOne(`
+            SELECT 
+                COALESCE(SUM(total), 0)::numeric as total_revenue,
+                COALESCE(AVG(total), 0)::numeric as avg_check,
+                COUNT(*)::int as total_orders
+            FROM orders 
+            WHERE status != 'cancelled'
+        `);
+
+        // 2. Определение самого популярного товара по суммарному проданному объему
+        const popularProduct = await queryOne(`
+            SELECT p.name, SUM(oi.quantity)::numeric as total_qty
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.status != 'cancelled'
+            GROUP BY p.name
+            ORDER BY total_qty DESC
+            LIMIT 1
+        `);
+
+        // 3. Определение наименее популярного товара среди проданных хотя бы один раз
+        const unpopularProduct = await queryOne(`
+            SELECT p.name, SUM(oi.quantity)::numeric as total_qty
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.status != 'cancelled'
+            GROUP BY p.name
+            ORDER BY total_qty ASC
+            LIMIT 1
+        `);
+
+        // 4. Группировка продаж и выручки по категориям
+        const categorySales = await queryAll(`
+            SELECT c.name as category, COALESCE(SUM(oi.quantity * oi.price), 0)::numeric as revenue
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            JOIN categories c ON p.category_id = c.id
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.status != 'cancelled'
+            GROUP BY c.name
+            ORDER BY revenue DESC
+        `);
+
+        // 5. Распределение заказов по текущим статусам
+        const orderStatuses = await queryAll(`
+            SELECT status, COUNT(*)::int as count
+            FROM orders
+            GROUP BY status
+        `);
+
+        res.json({
+            revenue: Number(revenueData.total_revenue),
+            avgCheck: Number(revenueData.avg_check),
+            totalOrders: revenueData.total_orders,
+            popularProduct: popularProduct ? { name: popularProduct.name, qty: Number(popularProduct.total_qty) } : null,
+            unpopularProduct: unpopularProduct ? { name: unpopularProduct.name, qty: Number(unpopularProduct.total_qty) } : null,
+            categorySales: categorySales.map(c => ({ category: c.category, revenue: Number(c.revenue) })),
+            orderStatuses: orderStatuses.map(s => ({ status: s.status, count: s.count }))
+        });
+    } catch (err) {
+        logger.error(`Ошибка при сборе статистики: ${err.message}`);
+        res.status(500).json({ error: 'Внутренняя ошибка сервера при расчете аналитики' });
     }
 });
 
@@ -414,7 +513,7 @@ app.delete('/api/shops/:id', authenticateToken, isAdminMiddleware, async (req, r
 });
 
 // OTP-авторизация
-// Найти роут отправки кода и заменить его объявление:
+// Найти роут отправки кода и заментиь его объявление:
 app.post('/api/auth/request-code', otpLimiter, async (req, res) => {
     let { contact } = req.body;
     if (!contact) return res.status(400).json({ error: 'Контакт обязателен' });
@@ -483,7 +582,7 @@ res.cookie('token', token, {
     sameSite: 'lax', 
     maxAge: 7 * 24 * 60 * 60 * 1000 // Время жизни куки — 7 дней
 });
-    res.cookie('token', token, { httpOnly: true });
+    // Удалено дублирование куки
     res.json({ success: true, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, isAdmin: !!user.is_admin } });
 });
 
@@ -742,6 +841,11 @@ app.put('/api/orders/:id/status', authenticateToken, async (req, res) => {
         for (let item of items) await run("UPDATE products SET quantity = quantity - CAST(? AS NUMERIC) WHERE id = ?", [item.quantity, item.product_id]);
     }
     res.json({ success: true });
+});
+
+// эндпоинт для динамического получения ключа Яндекс.Карт на фронтенде (добавлено)
+app.get('/api/config/yandex-maps', (req, res) => {
+    res.json({ apiKey: process.env.YANDEX_MAPS_API_KEY || '' });
 });
 
 // ==========================================

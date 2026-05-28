@@ -585,28 +585,56 @@ async function initAccount() {
   const emailEl = document.getElementById("userEmail");
   
   const companyCheck = document.getElementById('isCompany');
-const companyFields = document.getElementById('companyFields');
-const companyNameEl = document.getElementById('userCompanyName');
-const companyInnEl = document.getElementById('userCompanyInn');
-const companyAddressEl = document.getElementById('userCompanyAddress');
+  const companyFields = document.getElementById('companyFields');
+  const companyNameEl = document.getElementById('userCompanyName');
+  const companyInnEl = document.getElementById('userCompanyInn');
+  const companyAddressEl = document.getElementById('userCompanyAddress');
 
-if (companyCheck) {
+  if (companyCheck) {
     companyCheck.checked = user.is_company == 1;
     companyCheck.onchange = async function() {
-        await API.auth.updateProfile({ is_company: this.checked ? 1 : 0 });
+        const checkedVal = this.checked ? 1 : 0;
+        await API.auth.updateProfile({ is_company: checkedVal });
         if (companyFields) companyFields.style.display = this.checked ? 'block' : 'none';
+        
+        // Синхронизируем локальное состояние в памяти (исправлено)
+        if (currentUser) {
+            currentUser.is_company = checkedVal;
+            localStorage.setItem("user", JSON.stringify(currentUser));
+        }
     };
 }
 
-if (companyFields) {
-    companyFields.style.display = user.is_company == 1 ? 'block' : 'none';
-}
+  if (companyFields) {
+      companyFields.style.display = user.is_company == 1 ? 'block' : 'none';
+  }
 
-if (companyNameEl) companyNameEl.value = user.company_name || '';
-if (companyInnEl) companyInnEl.value = user.company_inn || '';
-if (companyAddressEl) companyAddressEl.value = user.company_address || '';
+  if (companyNameEl) companyNameEl.value = user.company_name || '';
+  if (companyInnEl) companyInnEl.value = user.company_inn || '';
+  if (companyAddressEl) companyAddressEl.value = user.company_address || '';
 
-  if (phoneEl) phoneEl.innerText = user.phone || "Не указан";
+  // Умная логика отображения номера телефона
+  if (phoneEl) {
+    const editPhoneBtn = document.getElementById("editPhoneBtn");
+    const editPhoneForm = document.getElementById("editPhoneForm");
+    
+    if (user.phone && user.phone !== "null" && user.phone.trim() !== "") {
+      let p = user.phone.replace(/\D/g, '');
+      phoneEl.innerText = `+7 (${p.substring(1, 4)}) ${p.substring(4, 7)}-${p.substring(7, 9)}-${p.substring(9, 11)}`;
+      
+      // Скрываем кнопку изменения и форму, если номер уже привязан
+      if (editPhoneBtn) editPhoneBtn.style.display = "none";
+      if (editPhoneForm) editPhoneForm.style.display = "none";
+    } else {
+      phoneEl.innerText = "Не указан";
+      
+      if (editPhoneBtn) {
+        editPhoneBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Привязать телефон';
+        editPhoneBtn.style.display = "inline-flex";
+      }
+    }
+  }
+
   if (emailEl) emailEl.innerText = user.email || "Не указана";
 
   const adminLink = document.getElementById("adminLink");
@@ -632,7 +660,6 @@ if (companyAddressEl) companyAddressEl.value = user.company_address || '';
           const stName = statusDict[order.status] || order.status;
           const color = order.status === "cancelled" ? "#EF4444" : order.status === "completed" ? "#10B981" : "var(--dark)";
           
-          // Бухгалтерское форматирование суммы! Избавляемся от микроскопических копеек
           const formattedTotal = Number(order.total).toLocaleString('ru-RU', { maximumFractionDigits: 2 });
 
           return `<div class="about-list-item" style="border:1px solid var(--dark); padding:16px; margin-bottom:16px; background:white;">
@@ -659,6 +686,12 @@ if (companyAddressEl) companyAddressEl.value = user.company_address || '';
 window.saveCompanyField = async function(field, value) {
     try {
         await API.auth.updateProfile({ [field]: value });
+        
+        // Синхронизируем локальное состояние в памяти (исправлено)
+        if (currentUser) {
+            currentUser[field] = value;
+            localStorage.setItem("user", JSON.stringify(currentUser));
+        }
     } catch (err) {
         console.error('Ошибка сохранения:', err);
     }
@@ -1582,6 +1615,10 @@ window.printB2BInvoice = function (encodedData) {
   const amountWords = numberToWordsRu(totalNum);
   const itemsCount = data.items.length;
 
+  // === ГЕНЕРАЦИЯ СТРОКИ СТАНДАРТА ГОСТ Р 56042-2014 ===
+  const gostString = `ST00012|Name=ИП Варгич Вадим Леонидович|PersonalAcc=40802810211000000000|BankName=ФИЛИАЛ "ЦЕНТРАЛЬНЫЙ" ПАО БАНК|BIC=040000000|CorrespAcc=30101810100000000000|PayeeINN=343608258210|Purpose=Оплата заказа N ${data.id}|Sum=${Math.round(totalNum * 100)}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(gostString)}`;
+
   const printHtml = `
   <!DOCTYPE html>
   <html lang="ru">
@@ -1617,32 +1654,40 @@ window.printB2BInvoice = function (encodedData) {
     </head>
     <body onload="window.print();">
 
-      <table class="bank-table">
-        <tr>
-          <td colspan="2" rowspan="2" style="width: 55%;">
-            ФИЛИАЛ "ЦЕНТРАЛЬНЫЙ" ПАО БАНК<br/>
-            <div class="bank-label">Банк получателя</div>
-          </td>
-          <td style="width: 10%;">БИК</td>
-          <td class="no-border-bot" style="width: 35%;">040000000</td>
-        </tr>
-        <tr>
-          <td>Сч. №</td>
-          <td class="no-border-top">30101810100000000000</td>
-        </tr>
-        <tr>
-          <td style="width: 25%;">ИНН 343608258210</td>
-          <td style="width: 30%;">КПП 343434</td>
-          <td rowspan="2" style="vertical-align: middle;">Сч. №</td>
-          <td rowspan="2" style="vertical-align: middle;">40802810211000000000</td>
-        </tr>
-        <tr>
-          <td colspan="2">
-            ИП Варгич Вадим Леонидович<br/>
-            <div class="bank-label">Получатель</div>
-          </td>
-        </tr>
-      </table>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+          <table class="bank-table" style="flex: 1; margin-right: 20px; margin-bottom: 0;">
+            <tr>
+              <td colspan="2" rowspan="2" style="width: 55%;">
+                ФИЛИАЛ "ЦЕНТРАЛЬНЫЙ" ПАО БАНК<br/>
+                <div class="bank-label">Банк получателя</div>
+              </td>
+              <td style="width: 10%;">БИК</td>
+              <td class="no-border-bot" style="width: 35%;">040000000</td>
+            </tr>
+            <tr>
+              <td>Сч. №</td>
+              <td class="no-border-top">30101810100000000000</td>
+            </tr>
+            <tr>
+              <td style="width: 25%;">ИНН 343608258210</td>
+              <td style="width: 30%;">КПП 343434</td>
+              <td rowspan="2" style="vertical-align: middle;">Сч. №</td>
+              <td rowspan="2" style="vertical-align: middle;">40802810211000000000</td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                ИП Варгич Вадим Леонидович<br/>
+                <div class="bank-label">Получатель</div>
+              </td>
+            </tr>
+          </table>
+          
+          <!-- Блок рендеринга QR-кода -->
+          <div style="text-align: center; border: 0px solid #000; padding: 10px; width: 150px; flex-shrink: 0;">
+              <img src="${qrCodeUrl}" style="width: 110px; height: 110px; display: block; margin: 0 auto 6px;" alt="QR-код для оплаты">
+              
+          </div>
+      </div>
 
       <div class="title-text">
           Счет на оплату № ${data.id} от ${data.date}
