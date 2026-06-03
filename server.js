@@ -69,7 +69,8 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD || 'postgres',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 5432,
-    database: process.env.DB_NAME || 'metiz_elektrod'
+    database: process.env.DB_NAME || 'metiz_elektrod',
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
     
 });
 
@@ -908,9 +909,11 @@ app.use((err, req, res, next) => {
 // ==========================================
 
 initDatabase().then(async () => {
+    const PORT = process.env.PORT || 3000;
     const isProduction = process.env.NODE_ENV === 'production';
     const distPath = path.join(__dirname, 'dist');
     const distExists = fs.existsSync(distPath);
+    
     if (isProduction && distExists) {
         app.use(express.static(distPath));
         app.get('*', (req, res) => {
@@ -919,9 +922,9 @@ initDatabase().then(async () => {
             }
         });
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`Production Server started on http://localhost:${PORT}`);
+            console.log(`✅ Production Server started on port ${PORT}`);
         });
-    } else {
+    } else if (!isProduction) {
         const { createServer: createViteServer } = require('vite');
         const vite = await createViteServer({ 
             server: { middlewareMode: true }, 
@@ -929,9 +932,16 @@ initDatabase().then(async () => {
         });
         app.use(vite.middlewares);
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`Dev Server & Vite started on http://localhost:${PORT}`);
+            console.log(`✅ Dev Server started on port ${PORT}`);
+        });
+    } else {
+        // Продакшен без dist/ — отдаём статику из корня
+        app.use(express.static(__dirname));
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`✅ Server started on port ${PORT}`);
         });
     }
 }).catch(err => {
-    logger.error("Database connection failed: " + err.message);
+    console.error("❌ Database connection failed:", err.message);
+    process.exit(1);
 });
