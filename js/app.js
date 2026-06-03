@@ -849,7 +849,7 @@ async function handleAuth() {
 
       if (res.code) {
         alert("ТЕСТОВЫЙ РЕЖИМ!\nВаш код авторизации: " + res.code);
-        if (codePreview) codePreview.innerText = "Тестовый код: " + res.code;
+        //if (codePreview) codePreview.innerText = "Тестовый код: " + res.code;
       }
     } catch (err) {
       alert("Ошибка: " + (err.message || "Не удалось отправить код"));
