@@ -69,10 +69,8 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD || 'postgres',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 5432,
-    database: process.env.DB_NAME || 'metiz_elektrod',
-    ssl: {
-        rejectUnauthorized: false  
-    }
+    database: process.env.DB_NAME || 'metiz_elektrod'
+    
 });
 
 
