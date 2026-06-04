@@ -336,6 +336,9 @@ async function initHomeCategories() {
         '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 16 4 16 8 12 10 8 8 8 4 12 2"/><path d="M10 10v12"/><path d="M14 10v12"/><path d="M10 13h4" stroke="var(--brand)"/><path d="M10 17h4" stroke="var(--brand)"/></svg>',
       abrasives:
         '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" stroke="var(--brand)"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>',
+        abrazivy:
+        '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" stroke="var(--brand)"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>',
+        
       specodezhda:
         '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a8 8 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" stroke="var(--brand)"/></svg>',
       default:
