@@ -141,6 +141,11 @@ body {
   cursor: pointer;
   transition: all 0.3s;
   position: relative;
+  color: var(--dark);
+}
+
+.icon-btn i {
+  color: currentColor;
 }
 
 .icon-btn:hover {
