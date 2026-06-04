@@ -2612,101 +2612,50 @@
       // ==========================================
       // ЛОГИКА: ИМПОРТ EXCEL
       // ==========================================
-      async function uploadExcel() {
-        const fileInput = document.getElementById("excelFile");
-        const statusDiv = document.getElementById("excelStatus");
-        if (!fileInput.files.length) return;
+     
+      // ПРАВИЛЬНЫЙ ПОСЛЕДОВАТЕЛЬНЫЙ ВАРИАНТ (внутри функции чтения файла Excel):
+reader.onload = async function(e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    const json = XLSX.utils.sheet_to_json(worksheet);
 
-        const file = fileInput.files[0];
-        statusDiv.textContent = "Обработка файла...";
+    console.log(`Запуск последовательного импорта ${json.length} строк...`);
+    let importedCount = 0;
 
-        const reader = new FileReader();
-        reader.onload = async function (e) {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const json = XLSX.utils.sheet_to_json(worksheet);
+    // Цикл for...of гарантирует строго последовательное выполнение запросов (один за другим)
+    for (const row of json) {
+        try {
+            // Пример отправки запроса (подставьте поля под вашу структуру разметки)
+            const res = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: row['Название'],
+                    article: row['Артикул'] || '',
+                    price: parseFloat(row['Цена']) || 0,
+                    quantity: parseFloat(row['Остаток']) || 0,
+                    category_id: row['Категория'] || null,
+                    badge: row['Бейдж'] || '',
+                    unit: row['Единица измерения'] || 'шт'
+                })
+            });
 
-            statusDiv.textContent = `Загрузка ${json.length} товаров...`;
-
-            let successCount = 0;
-            for (const row of json) {
-              const name = row["Название"] || row["Name"] || row["name"];
-              if (!name) continue;
-
-              const article =
-                row["Артикул"] || row["Article"] || row["article"] || "";
-              const price = parseFloat(
-                row["Цена"] || row["Price"] || row["price"] || 0
-              );
-              const quantity = parseFloat(
-                row["Остаток"] || row["Quantity"] || row["quantity"] || 0
-              );
-              const unit =
-                row["Единица измерения"] || row["Unit"] || row["unit"] || "шт";
-              const catName =
-                row["Категория"] || row["Category"] || row["category"];
-              const badge = row["Бейдж"] || row["Badge"] || row["badge"] || "";
-
-              let category_id = null;
-              if (catName) {
-                const cat = categoriesData.find(
-                  (c) => c.name.toLowerCase() === catName.toLowerCase()
-                );
-                if (cat) {
-                  category_id = cat.id;
-                } else {
-                  try {
-                    const catRes = await fetch(API_BASE + "/categories", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ name: catName }),
-                    });
-                    if (catRes.ok) {
-                      await loadCategories();
-                      const newCat = categoriesData.find(
-                        (c) => c.name.toLowerCase() === catName.toLowerCase()
-                      );
-                      if (newCat) category_id = newCat.id;
-                    }
-                  } catch (catErr) {
-                    console.warn(
-                      "Не удалось создать категорию при импорте:",
-                      catName
-                    );
-                  }
-                }
-              }
-
-              const formData = new FormData();
-              formData.append("name", name);
-              formData.append("article", article);
-              formData.append("price", price);
-              formData.append("quantity", quantity);
-              formData.append("unit", unit);
-              if (category_id) formData.append("category_id", category_id);
-              if (badge) formData.append("badge", badge);
-
-              const res = await fetch(API_BASE + "/products", {
-                method: "POST",
-                body: formData,
-              });
-              if (res.ok) successCount++;
+            if (res.ok) {
+                importedCount++;
+                document.getElementById('excelStatus').innerText = `Импортировано: ${importedCount} из ${json.length}`;
             }
+        } catch (err) {
+            console.error("Ошибка при импорте строки:", err);
+        }
+    }
 
-            statusDiv.textContent = `Успешно импортировано: ${successCount} из ${json.length} товаров.`;
-            fileInput.value = "";
-            await loadProducts();
-          } catch (err) {
-            console.error(err);
-            statusDiv.textContent = "Ошибка обработки Excel файла.";
-          }
-        };
-        reader.readAsArrayBuffer(file);
-      }
-
+    showToast(`Импорт завершен! Успешно добавлено товаров: ${importedCount}`);
+    loadProducts();
+    loadCategories();
+};
+      
       function openSettingsModal() {
         document.getElementById("settingsModal").classList.add("open");
       }

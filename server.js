@@ -650,11 +650,16 @@ app.get('/api/categories', async (req, res) => {
     res.json(await queryAll("SELECT c.*, (SELECT COUNT(*)::int FROM products p WHERE p.category_id = c.id) as product_count FROM categories c"));
 });
 
-app.post('/api/categories', authenticateToken, isAdminMiddleware, async (req, res) => {
-    const { name } = req.body;
-    const slug = translit(name);
-    await run("INSERT INTO categories (name, slug) VALUES (?, ?)", [name, slug]);
-    res.json({ success: true, slug });
+app.post('/api/categories', authenticateToken, isAdminMiddleware, async (req, res, next) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).json({ error: 'Название категории обязательно' });
+        const slug = name.toLowerCase().replace(/[^a-z0-9а-яё]/gi, '-');
+        await run("INSERT INTO categories (name, slug) VALUES (?, ?)", [name, slug]);
+        res.json({ success: true, slug });
+    } catch (err) {
+        next(err); // Безопасно передает ошибку в глобальный логер Winston и возвращает 500
+    }
 });
 
 app.put('/api/categories/:id', authenticateToken, isAdminMiddleware, async (req, res) => {
@@ -675,12 +680,16 @@ app.get('/api/products', async (req, res) => {
     res.json(await queryAll("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.id DESC"));
 });
 
-app.post('/api/products', authenticateToken, isAdminMiddleware, handleImageUpload, async (req, res) => {
-    const { name, price, quantity, unit, category_id, badge, description, article } = req.body;
-    const image = req.file ? `/image/${req.file.filename}` : (req.body.image_url || '');
-    await run("INSERT INTO products (name, price, quantity, unit, category_id, image, badge, description, article) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-        [name, price, quantity, unit || 'шт', category_id || null, image, badge, description, article]);
-    res.json({ success: true });
+app.post('/api/products', authenticateToken, isAdminMiddleware, handleImageUpload, async (req, res, next) => {
+    try {
+        const { name, price, quantity, unit, category_id, badge, description, article } = req.body;
+        const image = req.file ? `/image/${req.file.filename}` : (req.body.image_url || '');
+        await run("INSERT INTO products (name, price, quantity, unit, category_id, image, badge, description, article) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+            [name, price, quantity, unit || 'шт', category_id || null, image, badge, description, article]);
+        res.json({ success: true });
+    } catch (err) {
+        next(err); // Предотвращает падение всего Node.js процесса при ошибках БД
+    }
 });
 
 app.put('/api/products/:id', authenticateToken, isAdminMiddleware, handleImageUpload, async (req, res) => {
