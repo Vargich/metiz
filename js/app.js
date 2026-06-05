@@ -261,7 +261,7 @@ async function initNewProducts() {
         <!-- Пузырек с корзиной -->
         ${
           inCartQty > 0
-            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; box-shadow: 2px 2px 0 var(--dark);">
+            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
                    ${p.unit === "кг" || p.unit === "м" ? inCartQty.toFixed(1) + " " + p.unit : inCartQty}
                </div>`
             : ""
@@ -457,8 +457,10 @@ function renderProducts() {
   if (!grid) return;
 
   let filtered = allProducts.filter((p) => {
+    const normalName = normalizeForSearch(p.name);
+    const normalQuery = normalizeForSearch(currentSearch);
     // Сначала проверяем соответствие поисковому запросу
-    const matchesSearch = p.name.toLowerCase().includes(currentSearch);
+    const matchesSearch = normalName.includes(normalQuery);
     if (!matchesSearch) return false;
 
     // Если фильтр не выбран, выводим все товары
@@ -527,7 +529,7 @@ function renderProducts() {
         
         <!-- Пузырек с корзиной -->
         ${inCartQty > 0 
-            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; box-shadow: 2px 2px 0 var(--dark);">
+            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
                    ${p.unit === 'кг' || p.unit === 'м' ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}
                </div>` 
             : ''}
@@ -688,6 +690,24 @@ async function initAccount() {
     }
   } catch (e) { console.error(e); }
 }
+
+// Функция нормализации текста для защиты от опечаток и перепутанной раскладки (кириллица/латиница)
+function normalizeForSearch(str) {
+  if (!str) return "";
+  return str.toLowerCase()
+    .replace(/m/g, 'м')  // латинская 'm' -> русская 'м' (резьба М8, М10)
+    .replace(/c/g, 'с')  // латинская 'c' -> русская 'с'
+    .replace(/x/g, 'х')  // латинская 'x' -> русская 'х'
+    .replace(/a/g, 'а')  // латинская 'a' -> русская 'а'
+    .replace(/e/g, 'е')  // латинская 'e' -> русская 'е'
+    .replace(/o/g, 'о')  // латинская 'o' -> русская 'о'
+    .replace(/p/g, 'р')  // латинская 'p' -> русская 'р'
+    .replace(/h/g, 'н')  // латинская 'h' -> русская 'н'
+    .replace(/b/g, 'в')  // латинская 'b' -> русская 'в'
+    .replace(/t/g, 'т')  // латинская 't' -> русская 'т'
+    .replace(/k/g, 'к'); // латинская 'k' -> русская 'к'
+}
+
 
 window.saveCompanyField = async function(field, value) {
     try {
@@ -2204,7 +2224,7 @@ async function initPromoProducts() {
         
         <!-- Пузырек с корзиной -->
         ${inCartQty > 0 
-            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; box-shadow: 2px 2px 0 var(--dark);">
+            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
                    ${p.unit === 'кг' || p.unit === 'м' ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}
                </div>` 
             : ''}
