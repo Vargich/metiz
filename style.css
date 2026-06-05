@@ -318,7 +318,8 @@ body {
 .product-img {
   aspect-ratio: 1 / 1;
   /* Сделали квадратным для компактности */
-  /* background: var(--gray-bg); */
+  /* background: var(--gray-bg); */ 
+  
   display: flex;
   align-items: center;
   justify-content: center;
