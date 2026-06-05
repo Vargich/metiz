@@ -257,9 +257,15 @@ async function sendAuthCode(contact, code) {
 // 4. КОНФИГУРАЦИЯ SERVER
 // ==========================================
 
-const translit = (str) => {
-    const ru = {'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sch','ь':'','ы':'y','ъ':'','э':'e','ю':'yu','я':'ya'};
-    return str.toLowerCase().replace(/[а-яё]/g, m => ru[m]).replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/(^-|-$)/g, '');
+const sanitizeFilename = (str) => {
+    return str
+        .toLowerCase()
+        // Оставляем только русские (а-яё), английские (a-z) буквы, цифры, дефисы и пробелы
+        .replace(/[^a-z0-9а-яё\s-]/gi, '')
+        // Заменяем пробелы и группы дефисов на один дефис
+        .replace(/[\s-]+/g, '-')
+        // Удаляем дефисы на концах строки
+        .replace(/(^-|-$)/g, '');
 };
 
 const storage = multer.diskStorage({
@@ -270,7 +276,8 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
-        const safeName = req.body.name ? translit(req.body.name) : 'product';
+        // Используем новую функцию для сохранения кириллицы (исправлено)
+        const safeName = req.body.name ? sanitizeFilename(req.body.name) : 'product';
         const randomStr = Math.random().toString(36).slice(2, 6); 
         cb(null, `${safeName}_${randomStr}${ext}`);
     }
@@ -650,15 +657,20 @@ app.get('/api/categories', async (req, res) => {
     res.json(await queryAll("SELECT c.*, (SELECT COUNT(*)::int FROM products p WHERE p.category_id = c.id) as product_count FROM categories c"));
 });
 
+
+
 app.post('/api/categories', authenticateToken, isAdminMiddleware, async (req, res, next) => {
     try {
         const { name } = req.body;
         if (!name) return res.status(400).json({ error: 'Название категории обязательно' });
         const slug = name.toLowerCase().replace(/[^a-z0-9а-яё]/gi, '-');
-        await run("INSERT INTO categories (name, slug) VALUES (?, ?)", [name, slug]);
-        res.json({ success: true, slug });
+        
+        // Получаем сгенерированный ID созданной категории (исправлено)
+        const catId = await run("INSERT INTO categories (name, slug) VALUES (?, ?)", [name, slug]);
+        
+        res.json({ success: true, id: catId, slug }); 
     } catch (err) {
-        next(err); // Безопасно передает ошибку в глобальный логер Winston и возвращает 500
+        next(err); 
     }
 });
 

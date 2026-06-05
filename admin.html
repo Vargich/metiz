@@ -9,8 +9,10 @@
       rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.14.0/css/all.css"
     />
+    
+    <!-- Подключение UMD-версии Chart.js для корректного рендеринга аналитики -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
     <style>
       /* Навигация админки */
       .admin-nav-tabs {
@@ -605,54 +607,56 @@
             </table>
           </div>
         </section>
-         <!-- ВКЛАДКА: СТАТИСТИКА И АНАЛИТИКА -->
-<!-- НАЧАЛО БЛОКА СТАТИСТИКИ (Замените обертку на эту) -->
-<div id="sec-stats" class="admin-section">
-  <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase; margin-bottom: 24px;">Аналитика и статистика продаж</h2>
-  
-  <!-- Сетка ключевых показателей (KPI) -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
-    <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
-      <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 8px;">Общая выручка</div>
-      <div style="font-size: 24px; font-weight: 900; color: var(--brand);" id="statRevenue">0 ₽</div>
-    </div>
-    <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
-      <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 8px;">Всего заказов</div>
-      <div style="font-size: 24px; font-weight: 900;" id="statOrders">0</div>
-    </div>
-    <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
-      <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 8px;">Средний чек</div>
-      <div style="font-size: 24px; font-weight: 900;" id="statAvgCheck">0 ₽</div>
-    </div>
-  </div>
 
-  <!-- Блок анализа популярности товаров -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px;">
-    <div class="admin-panel-box" style="background: #F0FDF4; border-color: #BBF7D0; margin-bottom: 0; padding: 20px;">
-      <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #15803D; margin-bottom: 8px;">Самый популярный товар</div>
-      <div style="font-size: 15px; font-weight: 900; text-transform: uppercase;" id="statPopularName">Загрузка...</div>
-      <div style="font-size: 11px; font-weight: 700; opacity: 0.7; margin-top: 4px;">Суммарные продажи: <span id="statPopularQty">0</span> ед.</div>
-    </div>
-    <div class="admin-panel-box" style="background: #FEF2F2; border-color: #FEE2E2; margin-bottom: 0; padding: 20px;">
-      <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #B91C1C; margin-bottom: 8px;">Самый непопулярный товар</div>
-      <div style="font-size: 15px; font-weight: 900; text-transform: uppercase;" id="statUnpopularName">Загрузка...</div>
-      <div style="font-size: 11px; font-weight: 700; opacity: 0.7; margin-top: 4px;">Суммарные продажи: <span id="statUnpopularQty">0</span> ед.</div>
-    </div>
-  </div>
+        <!-- СТАТИСТИКА И АНАЛИТИКА -->
+        <section id="sec-stats" class="admin-section">
+          <div class="controls-panel">
+            <h2 style="font-size: 24px; font-weight: 900; text-transform: uppercase; margin-bottom: 24px;">Аналитика и статистика продаж</h2>
+          </div>
+          
+          <!-- Сетка ключевых показателей (KPI) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 8px;">Общая выручка</div>
+              <div style="font-size: 24px; font-weight: 900; color: var(--brand);" id="statRevenue">0 ₽</div>
+            </div>
+            <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 8px;">Всего заказов</div>
+              <div style="font-size: 24px; font-weight: 900;" id="statOrders">0</div>
+            </div>
+            <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; opacity: 0.5; margin-bottom: 8px;">Средний чек</div>
+              <div style="font-size: 24px; font-weight: 900;" id="statAvgCheck">0 ₽</div>
+            </div>
+          </div>
 
-  <!-- Область графиков -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 40px;">
-    <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
-      <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Выручка по категориям товаров (₽)</h4>
-      <div style="position: relative; height: 250px;"><canvas id="categoryChart"></canvas></div>
-    </div>
-    <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
-      <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Распределение статусов заказов</h4>
-      <div style="position: relative; height: 250px;"><canvas id="statusChart"></canvas></div>
-    </div>
-  </div>
-</div>
-<!-- КОНЕЦ БЛОКА СТАТИСТИКИ -->
+          <!-- Блок анализа популярности товаров -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px;">
+            <div class="admin-panel-box" style="background: #F0FDF4; border-color: #BBF7D0; margin-bottom: 0; padding: 20px;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #15803D; margin-bottom: 8px;">Самый популярный товар</div>
+              <div style="font-size: 15px; font-weight: 900; text-transform: uppercase;" id="statPopularName">Загрузка...</div>
+              <div style="font-size: 11px; font-weight: 700; opacity: 0.7; margin-top: 4px;">Суммарные продажи: <span id="statPopularQty">0</span> ед.</div>
+            </div>
+            <div class="admin-panel-box" style="background: #FEF2F2; border-color: #FEE2E2; margin-bottom: 0; padding: 20px;">
+              <div style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #B91C1C; margin-bottom: 8px;">Самый непопулярный товар</div>
+              <div style="font-size: 15px; font-weight: 900; text-transform: uppercase;" id="statUnpopularName">Загрузка...</div>
+              <div style="font-size: 11px; font-weight: 700; opacity: 0.7; margin-top: 4px;">Суммарные продажи: <span id="statUnpopularQty">0</span> ед.</div>
+            </div>
+          </div>
+
+          <!-- Область графиков -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 40px;">
+            <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
+              <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Выручка по категориям товаров (₽)</h4>
+              <div style="position: relative; height: 250px;"><canvas id="categoryChart"></canvas></div>
+            </div>
+            <div class="admin-panel-box" style="background: white; margin-bottom: 0; padding: 20px;">
+              <h4 style="font-size: 11px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px;">Распределение статусов заказов</h4>
+              <div style="position: relative; height: 250px;"><canvas id="statusChart"></canvas></div>
+            </div>
+          </div>
+        </section>
+
       </div>
     </main>
 
@@ -1751,6 +1755,97 @@
         XLSX.writeFile(wb, "Шаблон_импорта_товаров.xlsx");
       }
 
+      // Найти в файле admin.html и заменить функцию uploadExcel() целиком:
+async function uploadExcel() {
+  const fileInput = document.getElementById("excelFile");
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type: "array" });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    const json = XLSX.utils.sheet_to_json(worksheet);
+
+    console.log(`Запуск последовательного импорта ${json.length} строк...`);
+    let importedCount = 0;
+
+    for (const row of json) {
+      try {
+        let categoryId = null;
+        const excelCatName = row["Категория"] ? String(row["Категория"]).trim() : "";
+
+        if (excelCatName) {
+          // Ищем, есть ли уже такая категория в нашем локальном списке (регистронезависимо)
+          let matchedCat = categoriesData.find(c => c.name.trim().toLowerCase() === excelCatName.toLowerCase());
+
+          if (matchedCat) {
+            categoryId = matchedCat.id;
+          } else {
+            console.log(`Категория "${excelCatName}" не найдена. Создаем на лету...`);
+            
+            // Отправляем запрос на создание категории
+            const catRes = await fetch('/api/categories', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: excelCatName })
+            });
+
+            if (catRes.ok) {
+              const catData = await catRes.json();
+              categoryId = catData.id;
+              
+              // Важно: СРАЗУ добавляем новую категорию в локальный массив categoriesData,
+              // чтобы для следующих строк с этой же категорией не делать повторные сетевые запросы
+              categoriesData.push({
+                id: categoryId,
+                name: excelCatName,
+                slug: catData.slug,
+                product_count: 0
+              });
+              console.log(`Категория "${excelCatName}" успешно создана с ID: ${categoryId}`);
+            } else {
+              console.warn(`Не удалось создать категорию "${excelCatName}". Товар будет импортирован без категории.`);
+            }
+          }
+        }
+
+        // Отправляем запрос на создание товара с валидным ID категории
+        const res = await fetch("/api/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: row["Название"],
+            article: row["Артикул"] || "",
+            price: parseFloat(row["Цена"]) || 0,
+            quantity: parseFloat(row["Остаток"]) || 0,
+            category_id: categoryId, // Передаем полученный числовой ID
+            badge: row["Бейдж"] || "",
+            unit: row["Единица измерения"] || "шт",
+          }),
+        });
+
+        if (res.ok) {
+          importedCount++;
+          document.getElementById(
+            "excelStatus"
+          ).innerText = `Импортировано: ${importedCount} из ${json.length}`;
+        }
+      } catch (err) {
+        console.error("Ошибка при импорте строки:", err);
+      }
+    }
+
+    alert(`Импорт завершен! Успешно добавлено товаров: ${importedCount}`);
+    fileInput.value = ""; // Очищаем инпут
+    loadProducts();
+    loadCategories();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
       // Навешиваем обработчик клика на таблицу товаров методом делегирования
       document
         .getElementById("adminProductsList")
@@ -2105,55 +2200,60 @@
       }
 
       function renderProductsTable() {
-        const tbody = document.getElementById("adminProductsList");
-        if (productsData.length === 0)
-          return (tbody.innerHTML =
-            '<tr><td colspan="7" style="text-align:center;">Товаров пока нет</td></tr>');
+  const tbody = document.getElementById("adminProductsList");
+  if (productsData.length === 0)
+    return (tbody.innerHTML =
+      '<tr><td colspan="7" style="text-align:center;">Товаров пока нет</td></tr>');
 
-        tbody.innerHTML = productsData
-          .map((p) => {
-            const cat = categoriesData.find((c) => c.id == p.category_id);
-            const isLowStock = p.quantity < 2;
+  tbody.innerHTML = productsData
+    .map((p) => {
+      const cat = categoriesData.find((c) => c.id == p.category_id);
+      const isLowStock = p.quantity < 2;
 
-            return `
-            <tr data-id="${p.id}" class="${isLowStock ? "row-low-stock" : ""}">
-                <td style="text-align:center;">${
-                  p.image && p.image.length > 5
-                    ? `<img src="${p.image}" style="width:32px; height:32px; object-fit:contain;">`
-                    : '<div style="font-size:20px;">📦</div>'
-                }</td>
-                
-                <td style="font-weight:700; opacity:0.7;">${
-                  p.article || "—"
-                }</td>
-                <td style="font-weight:900;">${p.name}${
-              isLowStock
-                ? '<br><span class="low-stock-warning">Осталось мало</span>'
-                : ""
-            }</td>
-                <td><span style="background:var(--gray-bg); padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700;">${
-                  cat ? cat.name : "Без категории"
-                }</span></td>
-                <td style="font-weight:900; color:${
-                  isLowStock ? "#EF4444" : "#10B981"
-                };">${p.quantity} ${p.unit || "шт"}</td>
-                <td style="font-weight:900; color:var(--brand);">${Number(
-                  p.price
-                ).toLocaleString()} ₽</td>
-                <td style="text-align: right; white-space: nowrap;">
-                    <button class="action-btn" title="Копировать" style="margin-right: 4px;" onclick="copyProduct(${
-                      p.id
-                    }, event)"><i class="fas fa-copy"></i> Копия</button>
-                    <button class="action-btn delete" title="Удалить" onclick="deleteProduct(${
-                      p.id
-                    }, event)"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `;
-          })
-          .join("");
-      }
+      // Форматирование остатков: кг и м — до 1 знака после запятой, штучные — целые числа (исправлено)
+      const qtyVal = parseFloat(p.quantity) || 0;
+      const isWeightOrMeter = (p.unit === "кг" || p.unit === "м");
+      const displayQty = isWeightOrMeter ? qtyVal.toFixed(1) : Math.round(qtyVal);
 
+      return `
+      <tr data-id="${p.id}" class="${isLowStock ? "row-low-stock" : ""}">
+          <td style="text-align:center;">${
+            p.image && p.image.length > 5
+              ? `<img src="${p.image}" style="width:32px; height:32px; object-fit:contain;">`
+              : '<div style="font-size:20px;">📦</div>'
+          }</td>
+          
+          <td style="font-weight:700; opacity:0.7;">${
+            p.article || "—"
+          }</td>
+          <td style="font-weight:900;">${p.name}${
+        isLowStock
+          ? '<br><span class="low-stock-warning">Осталось мало</span>'
+          : ""
+      }</td>
+          <td><span style="background:var(--gray-bg); padding:4px 8px; border-radius:4px; font-size:11px; font-weight:700;">${
+            cat ? cat.name : "Без категории"
+          }</span></td>
+          <td style="font-weight:900; color:${
+            isLowStock ? "#EF4444" : "#10B981"
+          };">${displayQty} ${p.unit || "шт"}</td>
+          <td style="font-weight:900; color:var(--brand);">${Number(
+            p.price
+          ).toLocaleString()} ₽</td>
+          <td style="text-align: right; white-space: nowrap;">
+              <button class="action-btn" title="Копировать" style="margin-right: 4px;" onclick="copyProduct(${
+                p.id
+              }, event)"><i class="fas fa-copy"></i> Копия</button>
+              <button class="action-btn delete" title="Удалить" onclick="deleteProduct(${
+                p.id
+              }, event)"><i class="fas fa-trash"></i></button>
+          </td>
+      </tr>
+  `;
+    })
+    .join("");
+}
+      
       function openProductModal() {
         document.getElementById("productModal").classList.add("open");
       }
@@ -2242,12 +2342,9 @@
           tbody.innerHTML = ordersData
             .map((o) => {
               const st = statuses[o.status] || statuses["new"];
-              const safeTotalAdmin = Number(o.total).toLocaleString("ru-RU", {
-                maximumFractionDigits: 2,
-                minimumFractionDigits: 0,
-              });
+              const formattedTotal = Number(o.total).toLocaleString('ru-RU', { maximumFractionDigits: 2, minimumFractionDigits: 0 });
 
-              return `<tr onclick="viewOrder(${o.id})">
+              return `<tr data-id="${o.id}">
                 <td style="font-weight:900;">#${o.id}</td>
                 <td style="opacity:0.6; font-size:11px;">${new Date(
                   o.created_at
@@ -2264,11 +2361,11 @@
                 <td style="font-weight:700; font-size:11px;">${
                   o.pickup_address || "—"
                 }</td>
-                <td style="font-weight:900;">${safeTotalAdmin} ₽</td>
+                <td style="font-weight:900;">${formattedTotal} ₽</td>
                 <td><span class="status-badge ${st.class}">${
-                st.text
-              }</span></td>
-            </tr>`;
+          st.text
+        }</span></td>
+      </tr>`;
             })
             .join("");
         } catch (err) {

@@ -96,6 +96,7 @@ function initAuthMasking() {
 }
 
 // ===== SPA НАВИГАЦИЯ =====
+// НАЙТИ И ЗАМЕНИТЬ В app.js:
 function setupNavigation() {
   document.addEventListener("click", (e) => {
     const link = e.target.closest("a");
@@ -106,7 +107,8 @@ function setupNavigation() {
         !path.includes(".") &&
         !path.startsWith("mailto:") &&
         !path.startsWith("tel:") &&
-        !path.startsWith("#")
+        !path.startsWith("#") &&
+        !path.startsWith("/admin") // <-- ИСКЛЮЧАЕМ АДМИНКУ ИЗ SPA-ПЕРЕХОДОВ!
       ) {
         e.preventDefault();
 
@@ -121,6 +123,7 @@ function setupNavigation() {
   window.onpopstate = () =>
     loadPage(window.location.pathname + window.location.search, false);
 }
+
 async function navigate(path) {
   if (window.location.pathname + window.location.search === path) return;
   window.history.pushState({}, "", path);
