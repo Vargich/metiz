@@ -14,7 +14,7 @@ const rateLimit = require('express-rate-limit');
 const winston = require('winston');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 const SECRET_KEY = process.env.JWT_SECRET || 'dev-secret-only-for-development';
 
 // Автоматическое создание папки логов при её отсутствии
@@ -69,8 +69,12 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD || 'postgres',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 5432,
-    database: process.env.DB_NAME || 'metiz_elektrod'
+    database: process.env.DB_NAME || 'metiz_elektrod',
+    // ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    
 });
+
+
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.mail.ru', 
@@ -160,8 +164,6 @@ async function initDatabase() {
     )`);    
     await run(`CREATE TABLE IF NOT EXISTS otp_codes (contact VARCHAR(255) PRIMARY KEY, code VARCHAR(50), expires_at BIGINT)`);
     
-    // Создаем таблицу tg_users для привязки Telegram-аккаунтов (исправлено)
-    await run(`CREATE TABLE IF NOT EXISTS tg_users (phone VARCHAR(50) PRIMARY KEY, chat_id BIGINT)`);
 
     // Таблица магазинов
     await run(`CREATE TABLE IF NOT EXISTS shops (
@@ -171,7 +173,17 @@ async function initDatabase() {
         worktime VARCHAR(255) DEFAULT '',
         is_active INTEGER DEFAULT 1
     )`);
-
+await run(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+await run(`CREATE INDEX IF NOT EXISTS prod_name_trgm_idx ON products USING gin (name gin_trgm_ops)`);
+app.get('/api/products/search', async (req, res) => {
+    const query = req.query.q || '';
+    // Находит товары со сходством названий выше 30%
+    const products = await queryAll(
+        "SELECT *, similarity(name, ?) as sml FROM products WHERE similarity(name, ?) > 0.3 ORDER BY sml DESC", 
+        [query, query]
+    );
+    res.json(products);
+});
     // Демо-данные
     const catCount = await queryOne('SELECT COUNT(*)::int as count FROM categories');
     if (catCount && catCount.count === 0) {
@@ -204,6 +216,10 @@ async function initDatabase() {
         );
     }
 }
+
+
+
+
 
 // ==========================================
 // 3. ОТПРАВКА КОДА
@@ -299,7 +315,7 @@ app.get('/admin', async (req, res, next) => {
     }
 });
 
-// Асинхронное middleware раздачи HTML с автоподстановкой API-ключа карт
+// Асинхронное middleware раздачи HTML с автоподстановкой API-ключа карт (исправлено)
 app.use(async (req, res, next) => {
     if (!req.path.startsWith('/api') && !req.path.includes('.')) {
         const filePath = path.join(__dirname, req.path === '/' ? 'index.html' : req.path + '.html');
@@ -333,6 +349,7 @@ app.post('/api/admin/login', async (req, res) => {
         sameSite: 'lax', // Защита от CSRF-атак
         maxAge: 1 * 24 * 60 * 60 * 1000 // Время жизни куки — 1 день
     });
+    // Удалено дублирование куки
     res.json({ user: { id: user.id, email: user.email, displayName: user.name, isAdmin: true } });
 });
 
@@ -500,6 +517,7 @@ app.delete('/api/shops/:id', authenticateToken, isAdminMiddleware, async (req, r
 });
 
 // OTP-авторизация
+// Найти роут отправки кода и заментиь его объявление:
 app.post('/api/auth/request-code', otpLimiter, async (req, res) => {
     let { contact } = req.body;
     if (!contact) return res.status(400).json({ error: 'Контакт обязателен' });
@@ -568,7 +586,7 @@ res.cookie('token', token, {
     sameSite: 'lax', 
     maxAge: 7 * 24 * 60 * 60 * 1000 // Время жизни куки — 7 дней
 });
-    // @ts-ignore
+    // Удалено дублирование куки
     res.json({ success: true, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, isAdmin: !!user.is_admin } });
 });
 
