@@ -13,34 +13,50 @@ let authCurrentContact = "";
 let authStep = 1;
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
+// async function bootstrap() {
+//   const savedCart = localStorage.getItem("cart");
+//   if (savedCart) {
+//     try {
+//       cart = JSON.parse(savedCart);
+//     } catch (e) {
+//       cart = [];
+//     }
+//   }
+//   ensureModalsExist();
+
+//   const yearEl = document.getElementById("current-year");
+//   if (yearEl) yearEl.innerText = new Date().getFullYear();
+
+//   try {
+//     const data = await API.auth.me();
+//     if (data && data.user) {
+//       currentUser = data.user;
+//       updateUIForLoggedInUser(currentUser);
+//     }
+//   } catch (e) {
+//     console.log("No user session found");
+//   }
+
+//   updateCartBadge();
+//   setupNavigation();
+//   initPageFunctions();
+//   initAuthMasking();
+
+//   enforceRKN();
+//   initScrollFeatures();
+// }
+
+// Найти в app.js и заменить функцию bootstrap() на упрощенную:
 async function bootstrap() {
-  const savedCart = localStorage.getItem("cart");
-  if (savedCart) {
-    try {
-      cart = JSON.parse(savedCart);
-    } catch (e) {
-      cart = [];
-    }
-  }
   ensureModalsExist();
 
   const yearEl = document.getElementById("current-year");
   if (yearEl) yearEl.innerText = new Date().getFullYear();
 
-  try {
-    const data = await API.auth.me();
-    if (data && data.user) {
-      currentUser = data.user;
-      updateUIForLoggedInUser(currentUser);
-    }
-  } catch (e) {
-    console.log("No user session found");
-  }
+  // Удалена проверка сессии пользователя, обновление корзины и маскировка ввода
 
-  updateCartBadge();
   setupNavigation();
   initPageFunctions();
-  initAuthMasking();
 
   enforceRKN();
   initScrollFeatures();
@@ -176,6 +192,26 @@ function updateHeaderActive(path) {
   });
 }
 
+// function initPageFunctions(
+//   path = window.location.pathname,
+//   params = new URLSearchParams(window.location.search),
+// ) {
+//   if (path === "/" || path === "/index") {
+//     initHomeCategories();
+//     initPromoProducts();
+//     initNewProducts();
+//   } else if (path.includes("catalog")) initCatalog(params);
+//   else if (path.includes("account")) initAccount();
+//   else if (path.includes("contacts")) {
+//     setTimeout(() => {
+//       if (typeof window.initYandexMap === "function") {
+//         window.initYandexMap();
+//       }
+//     }, 50);
+//   }
+// }
+
+// Найти в app.js и заменить функцию initPageFunctions() (удалена обработка личного кабинета):
 function initPageFunctions(
   path = window.location.pathname,
   params = new URLSearchParams(window.location.search),
@@ -185,7 +221,6 @@ function initPageFunctions(
     initPromoProducts();
     initNewProducts();
   } else if (path.includes("catalog")) initCatalog(params);
-  else if (path.includes("account")) initAccount();
   else if (path.includes("contacts")) {
     setTimeout(() => {
       if (typeof window.initYandexMap === "function") {
@@ -195,132 +230,176 @@ function initPageFunctions(
   }
 }
 
+// async function initNewProducts() {
+//   const container = document.getElementById("newProductsContainer");
+//   if (!container) return;
+
+//   try {
+//     const products = await API.products.getAll();
+//     const news = products.filter((p) => p.badge === "new" && p.quantity > 0);
+
+//     if (news.length === 0) {
+//       container.innerHTML =
+//         '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Новинки скоро появятся</p>';
+//       return;
+//     }
+
+//     container.innerHTML = news
+//       .map((p) => {
+//         const hasImg = p.image && p.image.length > 5;
+//         const imgHtml = hasImg
+//           ? `<img src="${p.image}" alt="${p.name}">`
+//           : "📦";
+
+//         let inCartQty = 0;
+//         cart.forEach((item) => {
+//           try {
+//             const itemStr =
+//               typeof item === "string" ? item : JSON.stringify(item);
+//             const parsed = JSON.parse(itemStr);
+//             if (
+//               parsed &&
+//               typeof parsed === "object" &&
+//               String(parsed.id) === String(p.id)
+//             ) {
+//               inCartQty += parsed.qty;
+//             } else if (
+//               typeof parsed === "number" &&
+//               String(parsed) === String(p.id)
+//             ) {
+//               inCartQty += 1;
+//             }
+//           } catch (e) {
+//             if (String(item) === String(p.id)) {
+//               inCartQty += 1;
+//             }
+//           }
+//         });
+
+//         const imgAction = hasImg
+//           ? `onclick="window.openImageModal('${p.image}')"`
+//           : "";
+//         const outOfStock = (p.quantity || 0) <= 0;
+
+//         return `<div class="product-card" style="${outOfStock ? "filter:grayscale(1);opacity:0.7;" : ""}">
+    
+//     <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
+//         ${imgHtml}
+        
+//         <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
+//         ${
+//           p.badge === "hit" || p.badge === "new"
+//             ? `<div class="product-badge ${p.badge === "new" ? "new" : ""}">${p.badge === "hit" ? "🔥 Хит" : "✨ Новинка"}</div>`
+//             : ""
+//         }
+        
+//         <!-- Пузырек с корзиной -->
+//         ${
+//           inCartQty > 0
+//             ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
+//                    ${p.unit === "кг" || p.unit === "м" ? inCartQty.toFixed(1) + " " + p.unit : inCartQty}
+//                </div>`
+//             : ""
+//         }
+//     </div>
+
+//     <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
+//         <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
+//             ${p.category_name || "Без категории"}
+//         </div>
+        
+//         <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
+//             ${p.name}
+//         </h3>
+        
+//         <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
+//         <div style="margin-top:auto;">
+            
+//             <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
+//             <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
+//                 ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || "шт"}</span>
+//             </div>
+            
+//             ${
+//               p.unit === "кг" || p.unit === "м"
+//                 ? `
+//                 <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
+//                 <div class="qty-control" style="width:100%; display:flex; gap:6px;">
+//                     <div class="qty-control__stepper" style="flex:1;">
+//                         <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? "disabled" : ""}>−</button>
+//                         <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? "disabled" : ""}>
+//                         <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? "disabled" : ""}>+</button>
+//                     </div>
+//                     <!-- Доп кнопка добавления в корзину -->
+//                     <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? "disabled" : ""}>
+//                         <i class="fas fa-shopping-cart"></i>
+//                     </button>
+//                 </div>
+//             `
+//                 : `
+//                 <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
+//                 <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? "disabled" : ""}>
+//                     В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
+//                 </button>
+//             `
+//             }
+//         </div>
+//     </div>
+// </div>`;
+//       })
+//       .join("");
+//   } catch (err) {
+//     console.error("New products error:", err);
+//     container.innerHTML =
+//       '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить новинки</p>';
+//   }
+// }
+
+// ===== КАТЕГОРИИ НА ГЛАВНОЙ =====
+
 async function initNewProducts() {
   const container = document.getElementById("newProductsContainer");
   if (!container) return;
 
   try {
     const products = await API.products.getAll();
-    const news = products.filter((p) => p.badge === "new" && p.quantity > 0);
+    const news = products.filter((p) => p.badge === "new");
 
     if (news.length === 0) {
-      container.innerHTML =
-        '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Новинки скоро появятся</p>';
+      container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Новинки скоро появятся</p>';
       return;
     }
 
-    container.innerHTML = news
-      .map((p) => {
+    container.innerHTML = news.map((p) => {
         const hasImg = p.image && p.image.length > 5;
-        const imgHtml = hasImg
-          ? `<img src="${p.image}" alt="${p.name}">`
-          : "📦";
-
-        let inCartQty = 0;
-        cart.forEach((item) => {
-          try {
-            const itemStr =
-              typeof item === "string" ? item : JSON.stringify(item);
-            const parsed = JSON.parse(itemStr);
-            if (
-              parsed &&
-              typeof parsed === "object" &&
-              String(parsed.id) === String(p.id)
-            ) {
-              inCartQty += parsed.qty;
-            } else if (
-              typeof parsed === "number" &&
-              String(parsed) === String(p.id)
-            ) {
-              inCartQty += 1;
-            }
-          } catch (e) {
-            if (String(item) === String(p.id)) {
-              inCartQty += 1;
-            }
-          }
-        });
-
-        const imgAction = hasImg
-          ? `onclick="window.openImageModal('${p.image}')"`
-          : "";
+        const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
         const outOfStock = (p.quantity || 0) <= 0;
+        const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
 
-        return `<div class="product-card" style="${outOfStock ? "filter:grayscale(1);opacity:0.7;" : ""}">
-    
-    <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
-        ${imgHtml}
-        
-        <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
-        ${
-          p.badge === "hit" || p.badge === "new"
-            ? `<div class="product-badge ${p.badge === "new" ? "new" : ""}">${p.badge === "hit" ? "🔥 Хит" : "✨ Новинка"}</div>`
-            : ""
-        }
-        
-        <!-- Пузырек с корзиной -->
-        ${
-          inCartQty > 0
-            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
-                   ${p.unit === "кг" || p.unit === "м" ? inCartQty.toFixed(1) + " " + p.unit : inCartQty}
-               </div>`
-            : ""
-        }
-    </div>
-
-    <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
-        <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
-            ${p.category_name || "Без категории"}
-        </div>
-        
-        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
-            ${p.name}
-        </h3>
-        
-        <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
-        <div style="margin-top:auto;">
-            
-            <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
-            <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
-                ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || "шт"}</span>
-            </div>
-            
-            ${
-              p.unit === "кг" || p.unit === "м"
-                ? `
-                <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
-                <div class="qty-control" style="width:100%; display:flex; gap:6px;">
-                    <div class="qty-control__stepper" style="flex:1;">
-                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? "disabled" : ""}>−</button>
-                        <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? "disabled" : ""}>
-                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? "disabled" : ""}>+</button>
-                    </div>
-                    <!-- Доп кнопка добавления в корзину -->
-                    <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? "disabled" : ""}>
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
-                </div>
-            `
-                : `
-                <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
-                <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? "disabled" : ""}>
-                    В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
-                </button>
-            `
-            }
-        </div>
-    </div>
-</div>`;
-      })
-      .join("");
+        return `<div class="product-card">
+          <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
+              ${imgHtml}
+              <div class="product-badge new">✨ Новинка</div>
+          </div>
+          <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
+              <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
+                  ${p.category_name || "Без категории"}
+              </div>
+              <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
+                  ${p.name}
+              </h3>
+              <div style="margin-top:auto; font-size:11px; font-weight:900; color:${outOfStock ? '#EF4444' : '#10B981'}; text-transform:uppercase; letter-spacing:1px;">
+                  ${outOfStock ? '❌ Нет в наличии' : '✅ В наличии'}
+              </div>
+          </div>
+        </div>`;
+      }).join("");
   } catch (err) {
     console.error("New products error:", err);
-    container.innerHTML =
-      '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить новинки</p>';
+    container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить новинки</p>';
   }
 }
 
-// ===== КАТЕГОРИИ НА ГЛАВНОЙ =====
 async function initHomeCategories() {
   const container = document.getElementById("homeCategories");
   if (!container) return;
@@ -452,6 +531,138 @@ async function initCatalog(params) {
   }
 }
 
+// function renderProducts() {
+//   const grid = document.getElementById("productsGrid");
+//   if (!grid) return;
+
+//   let filtered = allProducts.filter((p) => {
+//     const normalName = normalizeForSearch(p.name);
+//     const normalQuery = normalizeForSearch(currentSearch);
+//     // Сначала проверяем соответствие поисковому запросу
+//     const matchesSearch = normalName.includes(normalQuery);
+//     if (!matchesSearch) return false;
+
+//     // Если фильтр не выбран, выводим все товары
+//     if (currentFilter === "all") return true;
+
+//     // Ищем категорию по slug в сохраненном массиве категорий
+//     const targetCategory = allCategories.find((c) => c.slug === currentFilter);
+
+//     // Если категория найдена, сравниваем ID товара с ID этой категории
+//     return targetCategory ? p.category_id == targetCategory.id : false;
+//   });
+
+//   if (currentSort === "price-asc") filtered.sort((a, b) => a.price - b.price);
+//   if (currentSort === "price-desc") filtered.sort((a, b) => b.price - a.price);
+//   if (currentSort === "name")
+//     filtered.sort((a, b) => a.name.localeCompare(b.name));
+
+//   if (filtered.length === 0) {
+//     grid.innerHTML =
+//       '<div style="grid-column:1/-1;padding:100px 40px;text-align:center;"><h3>Товаров не найдено</h3></div>';
+//     return;
+//   }
+
+//   grid.innerHTML = filtered
+//     .map((p) => {
+//       const hasImg = p.image && p.image.length > 5;
+//       const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
+//       let inCartQty = 0;
+//       cart.forEach((item) => {
+//         try {
+//           const itemStr =
+//             typeof item === "string" ? item : JSON.stringify(item);
+//           const parsed = JSON.parse(itemStr);
+//           if (
+//             parsed &&
+//             typeof parsed === "object" &&
+//             String(parsed.id) === String(p.id)
+//           ) {
+//             inCartQty += parsed.qty;
+//           } else if (
+//             typeof parsed === "number" &&
+//             String(parsed) === String(p.id)
+//           ) {
+//             inCartQty += 1;
+//           }
+//         } catch (e) {
+//           if (String(item) === String(p.id)) {
+//             inCartQty += 1;
+//           }
+//         }
+//       });
+//       const outOfStock = (p.quantity || 0) <= 0;
+//       const imgAction = hasImg
+//         ? `onclick="window.openImageModal('${p.image}')"`
+//         : "";
+
+//       return `<div class="product-card" style="${outOfStock ? 'filter:grayscale(1);opacity:0.7;' : ''}">
+    
+//     <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
+//         ${imgHtml}
+        
+//         <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
+//         ${p.badge === 'hit' || p.badge === 'new' ? 
+//            `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? '🔥 Хит' : '✨ Новинка'}</div>` 
+//         : ''}
+        
+//         <!-- Пузырек с корзиной -->
+//         ${inCartQty > 0 
+//             ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
+//                    ${p.unit === 'кг' || p.unit === 'м' ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}
+//                </div>` 
+//             : ''}
+//     </div>
+
+//     <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
+//         <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
+//             ${p.category_name || 'Без категории'}
+//         </div>
+        
+//         <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
+//             ${p.name}
+//         </h3>
+        
+//         <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
+//         <div style="margin-top:auto;">
+            
+//             <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
+//             <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
+//                 ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || 'шт'}</span>
+//             </div>
+            
+//             ${(p.unit === 'кг' || p.unit === 'м') 
+//             ? `
+//                 <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
+//                 <div class="qty-control" style="width:100%; display:flex; gap:6px;">
+//                     <div class="qty-control__stepper" style="flex:1;">
+//                         <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? 'disabled' : ''}>−</button>
+//                         <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? 'disabled' : ''}>
+//                         <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? 'disabled' : ''}>+</button>
+//                     </div>
+//                     <!-- Доп кнопка добавления в корзину -->
+//                     <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? 'disabled' : ''}>
+//                         <i class="fas fa-shopping-cart"></i>
+//                     </button>
+//                 </div>
+//             ` 
+//             : `
+//                 <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
+//                 <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? 'disabled' : ''}>
+//                     В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
+//                 </button>
+//             `}
+//         </div>
+//     </div>
+// </div>`;
+//     })
+//     .join("");
+// }
+
+// ===== ЛИЧНЫЙ КАБИНЕТ =====
+
+// Замените функцию renderProducts() целиком:
+
 function renderProducts() {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
@@ -459,128 +670,52 @@ function renderProducts() {
   let filtered = allProducts.filter((p) => {
     const normalName = normalizeForSearch(p.name);
     const normalQuery = normalizeForSearch(currentSearch);
-    // Сначала проверяем соответствие поисковому запросу
     const matchesSearch = normalName.includes(normalQuery);
     if (!matchesSearch) return false;
 
-    // Если фильтр не выбран, выводим все товары
     if (currentFilter === "all") return true;
 
-    // Ищем категорию по slug в сохраненном массиве категорий
     const targetCategory = allCategories.find((c) => c.slug === currentFilter);
-
-    // Если категория найдена, сравниваем ID товара с ID этой категории
     return targetCategory ? p.category_id == targetCategory.id : false;
   });
 
-  if (currentSort === "price-asc") filtered.sort((a, b) => a.price - b.price);
-  if (currentSort === "price-desc") filtered.sort((a, b) => b.price - a.price);
-  if (currentSort === "name")
+  if (currentSort === "name") {
     filtered.sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   if (filtered.length === 0) {
-    grid.innerHTML =
-      '<div style="grid-column:1/-1;padding:100px 40px;text-align:center;"><h3>Товаров не найдено</h3></div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:100px 40px;text-align:center;"><h3>Товаров не найдено</h3></div>';
     return;
   }
 
-  grid.innerHTML = filtered
-    .map((p) => {
+  grid.innerHTML = filtered.map((p) => {
       const hasImg = p.image && p.image.length > 5;
       const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
-      let inCartQty = 0;
-      cart.forEach((item) => {
-        try {
-          const itemStr =
-            typeof item === "string" ? item : JSON.stringify(item);
-          const parsed = JSON.parse(itemStr);
-          if (
-            parsed &&
-            typeof parsed === "object" &&
-            String(parsed.id) === String(p.id)
-          ) {
-            inCartQty += parsed.qty;
-          } else if (
-            typeof parsed === "number" &&
-            String(parsed) === String(p.id)
-          ) {
-            inCartQty += 1;
-          }
-        } catch (e) {
-          if (String(item) === String(p.id)) {
-            inCartQty += 1;
-          }
-        }
-      });
       const outOfStock = (p.quantity || 0) <= 0;
-      const imgAction = hasImg
-        ? `onclick="window.openImageModal('${p.image}')"`
-        : "";
+      const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
 
-      return `<div class="product-card" style="${outOfStock ? 'filter:grayscale(1);opacity:0.7;' : ''}">
-    
+      return `<div class="product-card">
     <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
         ${imgHtml}
-        
-        <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
         ${p.badge === 'hit' || p.badge === 'new' ? 
            `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? '🔥 Хит' : '✨ Новинка'}</div>` 
         : ''}
-        
-        <!-- Пузырек с корзиной -->
-        ${inCartQty > 0 
-            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
-                   ${p.unit === 'кг' || p.unit === 'м' ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}
-               </div>` 
-            : ''}
     </div>
-
     <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
         <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
             ${p.category_name || 'Без категории'}
         </div>
-        
         <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
             ${p.name}
         </h3>
-        
-        <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
-        <div style="margin-top:auto;">
-            
-            <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
-            <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
-                ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || 'шт'}</span>
-            </div>
-            
-            ${(p.unit === 'кг' || p.unit === 'м') 
-            ? `
-                <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
-                <div class="qty-control" style="width:100%; display:flex; gap:6px;">
-                    <div class="qty-control__stepper" style="flex:1;">
-                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? 'disabled' : ''}>−</button>
-                        <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? 'disabled' : ''}>
-                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? 'disabled' : ''}>+</button>
-                    </div>
-                    <!-- Доп кнопка добавления в корзину -->
-                    <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
-                </div>
-            ` 
-            : `
-                <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
-                <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? 'disabled' : ''}>
-                    В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
-                </button>
-            `}
+        <div style="margin-top:auto; font-size:11px; font-weight:900; color:${outOfStock ? '#EF4444' : '#10B981'}; text-transform:uppercase; letter-spacing:1px;">
+            ${outOfStock ? 'Нет в наличии' : 'В наличии'}
         </div>
     </div>
 </div>`;
-    })
-    .join("");
+    }).join("");
 }
 
-// ===== ЛИЧНЫЙ КАБИНЕТ =====
 async function initAccount() {
   const userNameEl = document.getElementById("userName");
   if (!userNameEl) return;
@@ -2163,120 +2298,165 @@ async function addToCartWithQty(productId) {
   if (document.getElementById("promoProductsContainer")) initPromoProducts();
 }
 
+// async function initPromoProducts() {
+//   const container = document.getElementById("promoProductsContainer");
+//   if (!container) return;
+
+//   try {
+//     const products = await API.products.getAll();
+//     const hits = products.filter((p) => p.badge === "hit" && p.quantity > 0);
+
+//     if (hits.length === 0) {
+//       container.innerHTML =
+//         '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Хиты продаж скоро появятся</p>';
+//       return;
+//     }
+
+//     container.innerHTML = hits
+//       .map((p) => {
+//         const hasImg = p.image && p.image.length > 5;
+//         const imgHtml = hasImg
+//           ? `<img src="${p.image}" alt="${p.name}">`
+//           : "📦";
+
+//         let inCartQty = 0;
+//         cart.forEach((item) => {
+//           try {
+//             const parsed = JSON.parse(item);
+//             if (
+//               parsed &&
+//               typeof parsed === "object" &&
+//               String(parsed.id) === String(p.id)
+//             ) {
+//               inCartQty += parsed.qty;
+//             } else if (
+//               typeof parsed === "number" &&
+//               String(parsed) === String(p.id)
+//             ) {
+//               inCartQty += 1;
+//             }
+//           } catch (e) {
+//             if (String(item) === String(p.id)) {
+//               inCartQty += 1;
+//             }
+//           }
+//         });
+
+//         const imgAction = hasImg
+//           ? `onclick="window.openImageModal('${p.image}')"`
+//           : "";
+//         const outOfStock = (p.quantity || 0) <= 0;
+
+//         return `<div class="product-card" style="${outOfStock ? 'filter:grayscale(1);opacity:0.7;' : ''}">
+    
+//     <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
+//         ${imgHtml}
+        
+//         <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
+//         ${p.badge === 'hit' || p.badge === 'new' ? 
+//            `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? '🔥 Хит' : '✨ Новинка'}</div>` 
+//         : ''}
+        
+//         <!-- Пузырек с корзиной -->
+//         ${inCartQty > 0 
+//             ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
+//                    ${p.unit === 'кг' || p.unit === 'м' ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}
+//                </div>` 
+//             : ''}
+//     </div>
+
+//     <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
+//         <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
+//             ${p.category_name || 'Без категории'}
+//         </div>
+        
+//         <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
+//             ${p.name}
+//         </h3>
+        
+//         <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
+//         <div style="margin-top:auto;">
+            
+//             <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
+//             <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
+//                 ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || 'шт'}</span>
+//             </div>
+            
+//             ${(p.unit === 'кг' || p.unit === 'м') 
+//             ? `
+//                 <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
+//                 <div class="qty-control" style="width:100%; display:flex; gap:6px;">
+//                     <div class="qty-control__stepper" style="flex:1;">
+//                         <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? 'disabled' : ''}>−</button>
+//                         <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? 'disabled' : ''}>
+//                         <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? 'disabled' : ''}>+</button>
+//                     </div>
+//                     <!-- Доп кнопка добавления в корзину -->
+//                     <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? 'disabled' : ''}>
+//                         <i class="fas fa-shopping-cart"></i>
+//                     </button>
+//                 </div>
+//             ` 
+//             : `
+//                 <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
+//                 <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? 'disabled' : ''}>
+//                     В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
+//                 </button>
+//             `}
+//         </div>
+//     </div>
+// </div>`;
+//       })
+//       .join("");
+//   } catch (err) {
+//     console.error("Promo products error:", err);
+//     container.innerHTML =
+//       '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить рекомендации</p>';
+//   }
+// }
+
+// Замените функцию initPromoProducts() целиком:
+
 async function initPromoProducts() {
   const container = document.getElementById("promoProductsContainer");
   if (!container) return;
 
   try {
     const products = await API.products.getAll();
-    const hits = products.filter((p) => p.badge === "hit" && p.quantity > 0);
+    const hits = products.filter((p) => p.badge === "hit");
 
     if (hits.length === 0) {
-      container.innerHTML =
-        '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Хиты продаж скоро появятся</p>';
+      container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Рекомендации скоро появятся</p>';
       return;
     }
 
-    container.innerHTML = hits
-      .map((p) => {
+    container.innerHTML = hits.map((p) => {
         const hasImg = p.image && p.image.length > 5;
-        const imgHtml = hasImg
-          ? `<img src="${p.image}" alt="${p.name}">`
-          : "📦";
-
-        let inCartQty = 0;
-        cart.forEach((item) => {
-          try {
-            const parsed = JSON.parse(item);
-            if (
-              parsed &&
-              typeof parsed === "object" &&
-              String(parsed.id) === String(p.id)
-            ) {
-              inCartQty += parsed.qty;
-            } else if (
-              typeof parsed === "number" &&
-              String(parsed) === String(p.id)
-            ) {
-              inCartQty += 1;
-            }
-          } catch (e) {
-            if (String(item) === String(p.id)) {
-              inCartQty += 1;
-            }
-          }
-        });
-
-        const imgAction = hasImg
-          ? `onclick="window.openImageModal('${p.image}')"`
-          : "";
+        const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
         const outOfStock = (p.quantity || 0) <= 0;
+        const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
 
-        return `<div class="product-card" style="${outOfStock ? 'filter:grayscale(1);opacity:0.7;' : ''}">
-    
-    <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
-        ${imgHtml}
-        
-        <!-- Красивый ярлык: Одинаково работает и для Новинок, и для Хитов -->
-        ${p.badge === 'hit' || p.badge === 'new' ? 
-           `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? '🔥 Хит' : '✨ Новинка'}</div>` 
-        : ''}
-        
-        <!-- Пузырек с корзиной -->
-        ${inCartQty > 0 
-            ? `<div style="position:absolute; top:10px; right:10px; background:#10B981; color:white; min-width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; padding:0 6px; ">
-                   ${p.unit === 'кг' || p.unit === 'м' ? inCartQty.toFixed(1) + ' ' + p.unit : inCartQty}
-               </div>` 
-            : ''}
-    </div>
-
-    <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
-        <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
-            ${p.category_name || 'Без категории'}
-        </div>
-        
-        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
-            ${p.name}
-        </h3>
-        
-        <!-- === ЦЕНА СВЕРХУ, КНОПКИ ВНИЗУ === -->
-        <div style="margin-top:auto;">
-            
-            <!-- Запрещаем цене разрываться на новую строку через white-space:nowrap -->
-            <div style="font-size:18px; font-weight:900; color:var(--brand); white-space:nowrap; margin-bottom:10px;">
-                ${Number(p.price).toLocaleString()} ₽ <span style="font-size:11px; font-weight:700; color:var(--dark); opacity:0.5;">/ ${p.unit || 'шт'}</span>
-            </div>
-            
-            ${(p.unit === 'кг' || p.unit === 'м') 
-            ? `
-                <!-- Контроллер ВЕСОВЫХ товаров растянут на ширину карточки -->
-                <div class="qty-control" style="width:100%; display:flex; gap:6px;">
-                    <div class="qty-control__stepper" style="flex:1;">
-                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', -0.1)" ${outOfStock ? 'disabled' : ''}>−</button>
-                        <input class="qty-control__input" type="number" id="qty-${p.id}" value="0.1" min="0.1" step="0.1" style="flex:1; width:100%; padding:0;" oninput="this.value = Math.max(0.1, parseFloat(this.value) || 0.1).toFixed(1)" ${outOfStock ? 'disabled' : ''}>
-                        <button type="button" class="qty-control__btn" style="flex:1;" onclick="window.changeQtyAndAdd('${p.id}', 0.1)" ${outOfStock ? 'disabled' : ''}>+</button>
-                    </div>
-                    <!-- Доп кнопка добавления в корзину -->
-                    <button class="qty-control__cart-btn" style="width:40px; height:28px; flex-shrink:0; font-size:13px;" onclick="window.addToCartWithQty('${p.id}')" ${outOfStock ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
-                </div>
-            ` 
-            : `
-                <!-- Большая удобная кнопка "В корзину" для ШТУЧНЫХ товаров -->
-                <button onclick="window.addToCart('${p.id}')" class="qty-control__cart-btn" style="width:100%; height:32px; border-radius:4px; font-size:11px; text-transform:uppercase; font-weight:900;" ${outOfStock ? 'disabled' : ''}>
-                    В корзину <i class="fas fa-shopping-cart" style="margin-left:6px;"></i>
-                </button>
-            `}
-        </div>
-    </div>
-</div>`;
-      })
-      .join("");
+        return `<div class="product-card">
+          <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
+              ${imgHtml}
+              <div class="product-badge">🔥 Хит</div>
+          </div>
+          <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
+              <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
+                  ${p.category_name || 'Без категории'}
+              </div>
+              <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
+                  ${p.name}
+              </h3>
+              <div style="margin-top:auto; font-size:11px; font-weight:900; color:${outOfStock ? '#EF4444' : '#10B981'}; text-transform:uppercase; letter-spacing:1px;">
+                  ${outOfStock ? '❌ Нет в наличии' : '✅ В наличии'}
+              </div>
+          </div>
+        </div>`;
+      }).join("");
   } catch (err) {
     console.error("Promo products error:", err);
-    container.innerHTML =
-      '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить рекомендации</p>';
+    container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить рекомендации</p>';
   }
 }
 
