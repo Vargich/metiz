@@ -370,30 +370,30 @@ async function initNewProducts() {
       return;
     }
 
-    container.innerHTML = news.map((p) => {
+    container.innerHTML = news
+      .map((p) => {
         const hasImg = p.image && p.image.length > 5;
-        const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
-        const outOfStock = (p.quantity || 0) <= 0;
-        const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
+        const imgHtml = hasImg
+          ? `<img src="${p.image}" alt="${p.name}">`
+          : "📦";
+        const imgAction = hasImg
+          ? `onclick="window.openImageModal('${p.image}')"`
+          : "";
 
         return `<div class="product-card">
-          <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
-              ${imgHtml}
-              <div class="product-badge new">✨ Новинка</div>
-          </div>
-          <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
-              <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
-                  ${p.category_name || "Без категории"}
-              </div>
-              <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
-                  ${p.name}
-              </h3>
-              <div style="margin-top:auto; font-size:11px; font-weight:900; color:${outOfStock ? '#EF4444' : '#10B981'}; text-transform:uppercase; letter-spacing:1px;">
-                  ${outOfStock ? '❌ Нет в наличии' : '✅ В наличии'}
-              </div>
-          </div>
-        </div>`;
-      }).join("");
+    <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
+        ${imgHtml}
+        <div class="product-badge new">Новинка</div>
+    </div>
+    <div class="product-info" style="display:flex; flex-direction:column; justify-content:center; padding:16px; height:100%;">
+        <!-- Название расширено до 3 строк (line-clamp: 3) для размещения длинных наименований -->
+        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:48px; line-height:1.2; margin:0;">
+            ${p.name}
+        </h3>
+    </div>
+</div>`;
+      })
+      .join("");
   } catch (err) {
     console.error("New products error:", err);
     container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить новинки</p>';
@@ -688,11 +688,13 @@ function renderProducts() {
     return;
   }
 
-  grid.innerHTML = filtered.map((p) => {
+  grid.innerHTML = filtered
+    .map((p) => {
       const hasImg = p.image && p.image.length > 5;
       const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
-      const outOfStock = (p.quantity || 0) <= 0;
-      const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
+      const imgAction = hasImg
+        ? `onclick="window.openImageModal('${p.image}')"`
+        : "";
 
       return `<div class="product-card">
     <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
@@ -701,19 +703,15 @@ function renderProducts() {
            `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? '🔥 Хит' : '✨ Новинка'}</div>` 
         : ''}
     </div>
-    <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
-        <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
-            ${p.category_name || 'Без категории'}
-        </div>
-        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
+    <div class="product-info" style="display:flex; flex-direction:column; justify-content:center; padding:16px; height:100%;">
+        <!-- Название расширено до 3 строк (line-clamp: 3) -->
+        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:48px; line-height:1.2; margin:0;">
             ${p.name}
         </h3>
-        <div style="margin-top:auto; font-size:11px; font-weight:900; color:${outOfStock ? '#EF4444' : '#10B981'}; text-transform:uppercase; letter-spacing:1px;">
-            ${outOfStock ? 'Нет в наличии' : 'В наличии'}
-        </div>
     </div>
 </div>`;
-    }).join("");
+    })
+    .join("");
 }
 
 async function initAccount() {
@@ -2430,30 +2428,30 @@ async function initPromoProducts() {
       return;
     }
 
-    container.innerHTML = hits.map((p) => {
+    container.innerHTML = hits
+      .map((p) => {
         const hasImg = p.image && p.image.length > 5;
-        const imgHtml = hasImg ? `<img src="${p.image}" alt="${p.name}">` : "📦";
-        const outOfStock = (p.quantity || 0) <= 0;
-        const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
+        const imgHtml = hasImg
+          ? `<img src="${p.image}" alt="${p.name}">`
+          : "📦";
+        const imgAction = hasImg
+          ? `onclick="window.openImageModal('${p.image}')"`
+          : "";
 
-        return `<div class="product-card">
-          <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
-              ${imgHtml}
-              <div class="product-badge">🔥 Хит</div>
-          </div>
-          <div class="product-info" style="display:flex; flex-direction:column; height:100%;">
-              <div style="font-size:9px; font-weight:900; text-transform:uppercase; color:var(--dark); opacity:0.4; margin-bottom:6px; letter-spacing:1px;">
-                  ${p.category_name || 'Без категории'}
-              </div>
-              <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:30px; line-height:1.2;">
-                  ${p.name}
-              </h3>
-              <div style="margin-top:auto; font-size:11px; font-weight:900; color:${outOfStock ? '#EF4444' : '#10B981'}; text-transform:uppercase; letter-spacing:1px;">
-                  ${outOfStock ? '❌ Нет в наличии' : '✅ В наличии'}
-              </div>
-          </div>
-        </div>`;
-      }).join("");
+        return `<div class="product-card" style="height:100%;">
+    <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
+        ${imgHtml}
+        <div class="product-badge">Хит</div>
+    </div>
+    <div class="product-info" style="display:flex; flex-direction:column; justify-content:center; padding:16px; height:100%;">
+        <!-- Название расширено до 3 строк (line-clamp: 3) -->
+        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:48px; line-height:1.2; margin:0;">
+            ${p.name}
+        </h3>
+    </div>
+</div>`;
+      })
+      .join("");
   } catch (err) {
     console.error("Promo products error:", err);
     container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-align:center; padding:40px;">Не удалось загрузить рекомендации</p>';
