@@ -185,37 +185,37 @@ app.get('/api/products/search', async (req, res) => {
     res.json(products);
 });
     // Демо-данные
-    const catCount = await queryOne('SELECT COUNT(*)::int as count FROM categories');
-    if (catCount && catCount.count === 0) {
-        const cats = [['Сварка', 'welding'], ['Такелаж', 'rigging'], ['Прокат', 'metal'], ['Инструмент', 'tools'], ['Крепёж', 'fasteners'], ['Абразивы', 'abrasives'], ['Спецодежда', 'workwear']];
-        for (const c of cats) await run("INSERT INTO categories (name, slug) VALUES (?, ?)", c);
-    }
+//     const catCount = await queryOne('SELECT COUNT(*)::int as count FROM categories');
+//     if (catCount && catCount.count === 0) {
+//         const cats = [['Сварка', 'welding'], ['Такелаж', 'rigging'], ['Прокат', 'metal'], ['Инструмент', 'tools'], ['Крепёж', 'fasteners'], ['Абразивы', 'abrasives'], ['Спецодежда', 'workwear']];
+//         for (const c of cats) await run("INSERT INTO categories (name, slug) VALUES (?, ?)", c);
+//     }
 
-    const prodCount = await queryOne('SELECT COUNT(*)::int as count FROM products');
-    if (prodCount && prodCount.count === 0) {
-        const products = [
-            ['Сварочный инвертор Ресанта САИ-220', 'СВ-001', 12500, 10, 'шт', 1, '', 'hit', 1],
-            ['Электроды УОНИ 13/55 3мм (1кг)', 'СВ-002', 350, 25.5, 'кг', 1, '', 'new', 1],
-            ['Цепь длиннозвенная 8мм DIN 763', 'ТК-001', 210, 50, 'м', 2, '', 'hit', 1],
-            ['Болт М8х40 оцинкованный', 'Б-008', 850, 15.2, 'кг', 3, '', '', 1],
-            ['Проволока сварочная Св-08Г2С 1.2мм', 'СВ-003', 180, 100, 'кг', 1, '', 'hit', 1]
-        ];
-        for (const p of products) await run(
-            'INSERT INTO products (name, article, price, quantity, unit, category_id, image, badge, in_stock) VALUES (?,?,?,?,?,?,?,?,?)', p
-        );
-    }
+//     const prodCount = await queryOne('SELECT COUNT(*)::int as count FROM products');
+//     if (prodCount && prodCount.count === 0) {
+//         const products = [
+//             ['Сварочный инвертор Ресанта САИ-220', 'СВ-001', 12500, 10, 'шт', 1, '', 'hit', 1],
+//             ['Электроды УОНИ 13/55 3мм (1кг)', 'СВ-002', 350, 25.5, 'кг', 1, '', 'new', 1],
+//             ['Цепь длиннозвенная 8мм DIN 763', 'ТК-001', 210, 50, 'м', 2, '', 'hit', 1],
+//             ['Болт М8х40 оцинкованный', 'Б-008', 850, 15.2, 'кг', 3, '', '', 1],
+//             ['Проволока сварочная Св-08Г2С 1.2мм', 'СВ-003', 180, 100, 'кг', 1, '', 'hit', 1]
+//         ];
+//         for (const p of products) await run(
+//             'INSERT INTO products (name, article, price, quantity, unit, category_id, image, badge, in_stock) VALUES (?,?,?,?,?,?,?,?,?)', p
+//         );
+//     }
 
-    const shopsCount = await queryOne('SELECT COUNT(*)::int as count FROM shops');
-    if (shopsCount && shopsCount.count === 0) {
-        const shops = [
-            ['г. Камышин, 2-й железнодорожный переезд, корп. 1', '+7(84457) 9-00-99', 'Пн-Пт 8:00-17:00, Сб 9:00-14:00'],
-            ['г. Камышин, ул. Пролетарская, д. 45', '+7(961)089-38-12', 'Пн-Сб 9:00-18:00']
-        ];
-        for (const s of shops) await run(
-            "INSERT INTO shops (address, phone, worktime) VALUES (?, ?, ?)", s
-        );
-    }
-}
+//     const shopsCount = await queryOne('SELECT COUNT(*)::int as count FROM shops');
+//     if (shopsCount && shopsCount.count === 0) {
+//         const shops = [
+//             ['г. Камышин, 2-й железнодорожный переезд, корп. 1', '+7(84457) 9-00-99', 'Пн-Пт 8:00-17:00, Сб 9:00-14:00'],
+//             ['г. Камышин, ул. Пролетарская, д. 45', '+7(961)089-38-12', 'Пн-Сб 9:00-18:00']
+//         ];
+//         for (const s of shops) await run(
+//             "INSERT INTO shops (address, phone, worktime) VALUES (?, ?, ?)", s
+//         );
+//     }
+// }
 
 
 
