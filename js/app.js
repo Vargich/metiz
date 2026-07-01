@@ -363,7 +363,7 @@ async function initNewProducts() {
 
   try {
     const products = await API.products.getAll();
-    const news = products.filter((p) => p.badge === "new");
+    const news = products.filter((p) => p.badge === "new" && (p.quantity || 0) > 0);
 
     if (news.length === 0) {
       container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Новинки скоро появятся</p>';
@@ -668,6 +668,7 @@ function renderProducts() {
   if (!grid) return;
 
   let filtered = allProducts.filter((p) => {
+    if ((p.quantity || 0) <= 0) return false;
     const normalName = normalizeForSearch(p.name);
     const normalQuery = normalizeForSearch(currentSearch);
     const matchesSearch = normalName.includes(normalQuery);
@@ -2421,7 +2422,7 @@ async function initPromoProducts() {
 
   try {
     const products = await API.products.getAll();
-    const hits = products.filter((p) => p.badge === "hit");
+    const hits = products.filter((p) => p.badge === "hit" && (p.quantity || 0) > 0);
 
     if (hits.length === 0) {
       container.innerHTML = '<p style="font-size:11px; opacity:0.5; text-transform:uppercase; font-weight:900; text-align:center; padding:40px;">Рекомендации скоро появятся</p>';

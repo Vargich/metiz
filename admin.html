@@ -408,6 +408,9 @@
                 accept=".xlsx,.xls"
                 onchange="uploadExcel()"
               />
+              <!-- <button class="hero-btn" onclick="deleteAllProducts()" style="background: #EF4444; border-color: #EF4444; color: white; cursor: pointer;">
+                <i class="fas fa-trash-alt"></i> Удалить все товары
+              </button> -->
               <button class="hero-btn" onclick="openProductModal()">
                 <i class="fas fa-plus"></i> Добавить товар
               </button>
@@ -2618,15 +2621,35 @@ async function uploadExcel() {
           }
         });
 
-      async function deleteProduct(id, event) {
-        event.stopPropagation();
-        if (!confirm("Удалить товар безвозвратно?")) return;
-        try {
-          await fetch(`${API_BASE}/products/${id}`, { method: "DELETE" });
-          loadProducts();
-          loadCategories();
-        } catch (err) {}
-      }
+        async function deleteProduct(id, event) {
+  event.stopPropagation();
+  try {
+    await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
+    loadProducts();
+    loadCategories();
+  } catch (err) {
+    console.error("Ошибка при удалении товара:", err);
+  }
+}
+
+async function deleteAllProducts() {
+  // Оставляем только одно глобальное предупреждение на полную очистку всей базы
+  if (!confirm("ВНИМАНИЕ! Вы уверены, что хотите БЕЗВОЗВРАТНО удалить абсолютно все товары из каталога?")) return;
+  
+  try {
+    const res = await fetch(`${API_BASE}/products`, { method: 'DELETE' });
+    if (res.ok) {
+      alert("Все товары были успешно удалены из каталога!");
+      loadProducts();
+      loadCategories();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Не удалось очистить каталог");
+    }
+  } catch (err) {
+    console.error("Критическая ошибка очистки:", err);
+  }
+}
 
       // ==========================================
       // ЛОГИКА: ПОЛЬЗОВАТЕЛИ

@@ -1763,12 +1763,12 @@ body {
   font-size: 16px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: -1px;
+  letter-spacing: 0px;
   margin-bottom: 24px;
-  line-height: 1.1;
-  white-space: nowrap;
+  line-height: 1.2;
+  /* white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: ellipsis; */
 }
 
 .category-footer {

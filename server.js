@@ -721,7 +721,14 @@ app.delete('/api/products/:id', authenticateToken, isAdminMiddleware, async (req
     await run("DELETE FROM products WHERE id = ?", [req.params.id]);
     res.json({ success: true });
 });
-
+app.delete('/api/products', authenticateToken, isAdminMiddleware, async (req, res, next) => {
+    try {
+        await run("DELETE FROM products");
+        res.json({ success: true });
+    } catch (err) {
+        next(err);
+    }
+});
 // Заказы
 app.get('/api/orders', authenticateToken, async (req, res) => {
     if (req.user.is_admin && req.query.all === 'true') {
