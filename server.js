@@ -256,6 +256,10 @@ async function sendAuthCode(contact, code) {
 // ==========================================
 // 4. КОНФИГУРАЦИЯ SERVER
 // ==========================================
+const translit = (str) => {
+    const ru = {'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sch','ь':'','ы':'y','ъ':'','э':'e','ю':'yu','я':'ya'};
+    return str.toLowerCase().replace(/[а-яё]/g, m => ru[m]).replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/(^-|-$)/g, '');
+};
 
 const sanitizeFilename = (str) => {
     return str
