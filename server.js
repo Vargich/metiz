@@ -667,11 +667,11 @@ app.post('/api/categories', authenticateToken, isAdminMiddleware, async (req, re
     try {
         const { name } = req.body;
         if (!name) return res.status(400).json({ error: 'Название категории обязательно' });
-        const slug = name.toLowerCase().replace(/[^a-z0-9а-яё]/gi, '-');
         
-        // Получаем сгенерированный ID созданной категории (исправлено)
+        // Используем стандартную функцию транслитерации для получения чистого латинского slug (исправлено)
+        const slug = translit(name);
+        
         const catId = await run("INSERT INTO categories (name, slug) VALUES (?, ?)", [name, slug]);
-        
         res.json({ success: true, id: catId, slug }); 
     } catch (err) {
         next(err); 
