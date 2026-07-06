@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://api-maps.yandex.ru/2.1/?apikey={{YANDEX_MAPS_API_KEY}}"></script>
-  <meta name="description" content="Метизы, сварочное оборудование, инструмент и промышленный прокат" />
+  <meta name="description" content="Метизы, сварочное оборудование, instrument и промышленный прокат" />
   <meta name="format-detection" content="telephone=no">
 </head>
 <body>
@@ -35,11 +35,11 @@
           <span id="cartTotal" style="font-size: 24px; font-weight: 900; color: var(--brand);">0 ₽</span>
         </div>
         <div id="pickupSelect" style="margin-bottom: 20px;">
-    <label style="font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block;">Пункт самовывоза</label>
-    <select id="pickupPoint" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; font-size: 11px;">
-        <option value="">Выберите магазин</option>
-    </select>
-</div>
+          <label style="font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block;">Пункт самовывоза</label>
+          <select id="pickupPoint" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; font-size: 11px;">
+              <option value="">Выберите магазин</option>
+          </select>
+        </div>
         <button onclick="checkout()" style="width:100%;padding:1rem;background:var(--dark);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;">Оформить заказ</button>
       </div>
     </div>
@@ -93,9 +93,9 @@
     </div>
   </div>
 
-  <!-- ШАПКА -->
+  <!-- ШАПКА (изменена ширина и возвращены интерактивные элементы) -->
   <header class="shop-header">
-    <div class="container shop-header__container">
+    <div class="shop-header__container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
       
       <nav class="shop-nav">
@@ -105,13 +105,13 @@
         <a href="/contacts">Контакты</a>
       </nav>
       
-      <!-- <div class="shop-header__actions">
+      <div class="shop-header__actions">
         <div id="auth-actions" style="display: flex; gap: 8px;">
           <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
           <button class="icon-btn" onclick="handleLogout()" id="logout-btn" style="display:none; color: #EF4444;"><i class="fas fa-sign-out-alt"></i></button>
         </div>
         <button class="icon-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-count">0</span></button>
-      </div> -->
+      </div>
     </div>
   </header>
 
@@ -145,7 +145,8 @@
             </li>
           </ul>
         </div>
-        <!-- <div class="hero-info-box bg-dark text-white">
+        <!-- Раскомментирован важный блок информации о дилерстве и опыте -->
+        <div class="hero-info-box bg-dark text-white">
           <div style="padding-bottom:20px;">
              <h3 style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--brand);margin-bottom:20px;">Официальный дилер</h3>
              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -159,27 +160,28 @@
             <div style="font-size:4rem;font-weight:900;line-height:1;font-style:italic;">15+</div>
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;text-align:right;opacity:0.6;">ЛЕТ ОПЫТА<br/>НА РЫНКЕ РФ</div>
           </div>
-        </div> -->
+        </div>
       </div>
     </section>
 
-    <!-- Categories Grid -->
-    <!-- <section class="categories-grid" id="homeCategories">
-     
-    </section> -->
+    <!-- Сетка категорий (раскомментирована для наполнения структуры) -->
+    <section class="categories-grid" id="homeCategories">
+       <!-- Сюда подгружаются категории товаров -->
+    </section>
+
     <section class="hits-section">
       <div style=" margin: 0 auto;">
         <h2 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; color: var(--brand); margin-bottom: 8px;">Рекомендуем</h2>
         <div style="font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 40px; line-height: 1.1;">Лучшие<br/><span class="text-outline">Позиции</span></div>
         
         <div class="products-grid" id="promoProductsContainer">
-          <!-- Товары подгрузятся сюда скриптом -->
           <p style="font-size: 11px; opacity:0.5; text-transform:uppercase; font-weight:900;">Загрузка рекомендаций...</p>
         </div>
       </div>
     </section>
+
     <section class="new-section">
-      <div  style=" margin: 0 auto;">
+      <div style=" margin: 0 auto;">
           <h2 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; color: #10B981; margin-bottom: 8px;">Новинки</h2>
           <div style="font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 40px; line-height: 1.1;">Свежие<br/><span class="text-outline">Поступления</span></div>
           
@@ -187,11 +189,11 @@
               <p style="font-size: 11px; opacity:0.5; text-transform:uppercase; font-weight:900;">Загрузка новинок...</p>
           </div>
       </div>
-  </section>
+    </section>
+
     <!-- About Section -->
     <section id="about" class="about-section border-b border-dark">
       <div class="about-content">
-        
         <div class="about-title">Наш опыт —<br/>Ваша <span class="text-brand">надёжность</span></div>
         <p class="about-p">
           Метиз Электрод — ведущий поставщик промышленных материалов и оборудования. 
@@ -226,22 +228,65 @@
       </div>
     </section>
 
+    <!-- БЛОК ВОПРОС-ОТВЕТ (FAQ) в стиле нео-брутализма -->
+    <section class="faq-section">
+      <div class="faq-header">
+        <div class="faq-tag">База знаний</div>
+        <h2 class="faq-title">Вопросы <br/><span class="text-outline">и Ответы</span></h2>
+      </div>
+      <div class="faq-accordion">
+        <div class="faq-item">
+          <button class="faq-trigger">
+            <span>Как оформить заказ через сайт?</span>
+            <i class="fas fa-plus"></i>
+          </button>
+          <div class="faq-content">
+            <p>Перейдите в «Каталог», выберите необходимые позиции, укажите нужное количество/вес и добавьте их в корзину. Затем откройте корзину, выберите удобный магазин для самовывоза и нажмите «Оформить заказ». Наш менеджер свяжется с вами для подтверждения.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger">
+            <span>Работаете ли вы с юридическими лицами?</span>
+            <i class="fas fa-plus"></i>
+          </button>
+          <div class="faq-content">
+            <p>Да, мы работаем с юридическими лицами и индивидуальными предпринимателями по безналичному расчету с предоставлением всех необходимых закрывающих документов (в том числе работаем с НДС). Для выставления счета отправьте реквизиты на почту metiz-elektrod@mail.ru.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger">
+            <span>Возможна ли поставка позиций под заказ?</span>
+            <i class="fas fa-plus"></i>
+          </button>
+          <div class="faq-content">
+            <p>Да. Если вы не нашли нужный типоразмер крепежа или определенную модель оборудования в наличии, мы можем привезти их напрямую от заводов-производителей под заказ в кратчайшие сроки.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-trigger">
+            <span>Где можно забрать оплаченный товар?</span>
+            <i class="fas fa-plus"></i>
+          </button>
+          <div class="faq-content">
+            <p>Вы можете забрать заказ самостоятельно в одном из наших розничных магазинов. Точные адреса филиалов и график их работы вы можете посмотреть на вкладке «Контакты».</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Contacts Grid -->
     <section id="contacts" class="contacts-grid">
       <div class="contact-box">
         <div class="contact-tag">Менеджеры</div>
         <div class="contact-value">+7(84457) 9-00-99</div>
-        <!-- <div class="contact-sub">Общие вопросы</div> -->
       </div>
       <div class="contact-box">
         <div class="contact-tag">Коммерческий отдел</div>
         <div class="contact-value">+7(961)089-38-12</div>
-        <!-- <div class="contact-sub">Закупки и партнерство</div> -->
       </div>
       <div class="contact-box">
         <div class="contact-tag">Email</div>
         <div class="contact-value">metiz-elektrod@mail.ru</div>
-        <!-- <div class="contact-sub">Принимаем заявки</div> -->
       </div>
     </section>
 
@@ -262,42 +307,58 @@
     </div>
 
     <section class="footer-benefits">
-    <div class="benefit-item">
-        <div class="benefit-title">Налоги</div>
-        <div class="benefit-desc">Работаем с НДС</div>
-    </div>
-    <div class="benefit-item">
-        <div class="benefit-title">Склад</div>
-        <div class="benefit-desc">3000+ позиций в наличии</div>
-    </div>
-    <div class="benefit-item">
-        <div class="benefit-title">Оплата</div>
-        <div class="benefit-desc">Безнал и наличные</div>
-    </div>
-</section>
+      <div class="benefit-item">
+          <div class="benefit-title">Налоги</div>
+          <div class="benefit-desc">Работаем с НДС</div>
+      </div>
+      <div class="benefit-item">
+          <div class="benefit-title">Склад</div>
+          <div class="benefit-desc">3000+ позиций в наличии</div>
+      </div>
+      <div class="benefit-item">
+          <div class="benefit-title">Оплата</div>
+          <div class="benefit-desc">Безнал и наличные</div>
+      </div>
+    </section>
   </main>
 
   <footer style="border-top:1px solid var(--dark);">
-    
-    
     <div class="footer-bottom">
       <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
       
       <div class="footer-links">
-        
         <a href="#">Политика</a>
         <a href="#">Условия</a>
       </div>
       
       <div class="footer-socials">
         <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">VK</a>
-        
         <a href="https://t.me/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">TG</a>
-        
       </div>
     </div>
   </footer>
 
   <script type="module" src="/js/app.js"></script>
+
+  <!-- Скрипт для интерактивной работы аккордеона FAQ -->
+  <script>
+    $(document).ready(function() {
+      $('.faq-trigger').on('click', function() {
+        const item = $(this).closest('.faq-item');
+        const content = item.find('.faq-content');
+        
+        if (item.hasClass('active')) {
+          item.removeClass('active');
+          content.css('max-height', '0');
+        } else {
+          $('.faq-item').removeClass('active');
+          $('.faq-content').css('max-height', '0');
+          
+          item.addClass('active');
+          content.css('max-height', content[0].scrollHeight + 'px');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
