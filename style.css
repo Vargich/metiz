@@ -2364,3 +2364,132 @@ input[type="number"] {
       grid-template-columns: 1fr;
   }
 }
+
+/* НАЙТИ И ЗАМЕНИТЬ В КОНЦЕ ФАЙЛА style.css: */
+
+/* ===== СТИЛИ ДВУХКОЛОНОЧНОГО КАТАЛОГА (Сайдбар + Шторка) ===== */
+
+.catalog-layout {
+ display: flex;
+  gap: 24px;
+  /* max-width: 1300px; */
+  margin: 0 auto;
+  padding: 80px;
+}
+
+.catalog-sidebar {
+  flex: 0 0 240px; /* Уменьшили ширину сайдбара с 280px до 240px */
+  width: 240px;
+  background: white;
+}
+
+.catalog-content {
+  flex: 1;
+}
+
+.sidebar-title {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--brand);
+  margin-bottom: 12px;
+}
+
+.sidebar-block {
+  padding-bottom: 20px; /* Сделали блоки фильтров внутри сайдбара плотнее */
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--gray-bg);
+}
+
+.sidebar-block:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.sidebar-close-btn {
+  display: none;
+}
+
+.mobile-filter-bar {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* === АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И МОБИЛЬНЫХ (До 992px) === */
+@media (max-width: 992px) {
+  .catalog-layout {
+    flex-direction: column;
+    padding: 40px 20px; /* На планшетах отступы сужаются до 20px */
+  }
+
+  /* Превращаем сайдбар во внеэкранную выплывающую шторку */
+  .catalog-sidebar {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    z-index: 2500;
+    padding: 40px 24px;
+    border-right: 2px solid var(--dark);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    overflow-y: auto;
+  }
+
+  /* Класс активации выезда шторки */
+  .catalog-sidebar.open {
+    transform: translateX(320px);
+  }
+
+  .sidebar-close-btn {
+    display: block;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--dark);
+  }
+
+  /* Затемненная размытая подложка */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2400;
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  /* Кнопка «Показать фильтры» на мобильных */
+  .mobile-filter-bar {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .mobile-filter-btn {
+    width: 100%;
+    justify-content: center;
+    background: var(--dark);
+    color: white;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .catalog-layout {
+      padding: 20px 16px;
+  }
+}

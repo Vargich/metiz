@@ -31,52 +31,51 @@
     </div>
   </header>
 
-  <main id="main-content">
-    <section class="page-title-section">
-       <!-- <div class="page-title-tag">Industrial Catalog</div> -->
-       <h1 class="page-title-text">Каталог<br/>Товаров</h1>
-    </section>
-
-    <!-- Фильтры категорий и поиск -->
-    <div class="category-tags-grid" id="filters">
-       <!-- Categories will be loaded here dynamically as .cat-tag-item -->
-    </div>
-
-    <div class="catalog-controls">
-       <div class="search-wrapper">
-          <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию...">
+ <main id="main-content">
+  <section class="catalog-layout">
+    <!-- БОКОВОЙ САЙДБАР (Фильтры) -->
+    <aside class="catalog-sidebar" id="catalogSidebar">
+      <!-- Кнопка закрытия шторки на мобильных -->
+      <button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button>
+      
+      <!-- Блок 1: Поиск -->
+      <div class="sidebar-block">
+        <h3 class="sidebar-title">Поиск</h3>
+        <div class="search-wrapper" style="min-width: 100%;">
+          <input type="text" id="searchInput" placeholder="ПОИСК ПО НАЗВАНИЮ..." class="search-input">
           <i class="fas fa-search search-icon"></i>
-       </div>
-       
-       <select id="sortSelect" class="sort-select">
-          <option value="default">Сортировка (По умолчанию)</option>
-          <option value="price-asc">Цена: По возрастанию</option>
-          <option value="price-desc">Цена: По убыванию</option>
-          <option value="name">По названию (А-Я)</option>
-       </select>
-    </div>
+        </div>
+      </div>
 
-    <section class="catalog-section" style="padding-top: 40px;">
+      <!-- Блок 2: Выбор категории -->
+      <div class="sidebar-block">
+        <h3 class="sidebar-title">Категория</h3>
+        <div id="filters"></div> <!-- Сюда динамически вставится select из js -->
+      </div>
+
+      <!-- Блок 3: Сортировка -->
+      
+    </aside>
+
+    <!-- ТЕМНАЯ ПОДЛОЖКА ДЛЯ МОБИЛЬНЫХ (Затемнение при выезде шторки) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ (Сетка товаров) -->
+    <div class="catalog-content">
+      <!-- Кнопка открытия фильтров на мобильных (скрыта на десктопе) -->
+      <div class="mobile-filter-bar">
+        <button class="hero-btn mobile-filter-btn" onclick="toggleSidebar()">
+          <i class="fas fa-sliders-h"></i> Показать фильтры
+        </button>
+      </div>
+
+      <!-- Сетка товаров -->
       <div class="products-grid" id="productsGrid">
-        <!-- Products will be loaded here -->
-      </div>
-    </section>
-
-    <section class="promo-section" style="cursor:pointer;" onclick="navigate('/contacts')">
-       <div class="promo-bg-text">МЕТИЗЭЛЕКТРОД</div>
-       <div class="promo-content">
-          <h2 class="promo-title">Гибкие<br/>цены</h2>
-          <button class="promo-btn">Запросить прайс</button>
-       </div>
-       
-    </section>
-    <div class="ticker-wrap">
-      <div class="ticker">
-        <span>БОЛТЫ • ГАЙКИ • ШАЙБЫ • ШПИЛЬКИ • АНКЕРЫ • ДЮБЕЛИ • ШУРУПЫ • ГВОЗДИ • ЗАКЛЁПКИ • ШТИФТЫ • ТРОСЫ • ЦЕПИ • СВАРОЧНЫЕ АППАРАТЫ • ЭЛЕКТРОДЫ • ПРОВОЛОКА • ГАЗОРЕЗКА • ДРЕЛИ • УШМ • ПЕРФОРАТОРЫ •</span>
-        <span>БОЛТЫ • ГАЙКИ • ШАЙБЫ • ШПИЛЬКИ • АНКЕРЫ • ДЮБЕЛИ • ШУРУПЫ • ГВОЗДИ • ЗАКЛЁПКИ • ШТИФТЫ • ТРОСЫ • ЦЕПИ • СВАРОЧНЫЕ АППАРАТЫ • ЭЛЕКТРОДЫ • ПРОВОЛОКА • ГАЗОРЕЗКА • ДРЕЛИ • УШМ • ПЕРФОРАТОРЫ •</span>
+        <!-- Товары загрузятся сюда -->
       </div>
     </div>
-  </main>
+  </section>
+</main>
   
   <footer style="border-top:1px solid var(--dark);">
     <div class="footer-bottom">

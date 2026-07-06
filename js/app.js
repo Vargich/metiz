@@ -445,6 +445,7 @@ async function initHomeCategories() {
 }
 
 // ===== КАТЕГОРИИ И ТОВАРЫ КАТАЛОГА =====
+// Найти в app.js и заменить функцию initCatalog() на эту версию:
 async function initCatalog(params) {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
@@ -477,28 +478,23 @@ async function initCatalog(params) {
     ]);
     allProducts = products;
     allCategories = cats;
+    
     const catGrid = document.getElementById("filters");
     if (catGrid) {
-      catGrid.innerHTML =
-        `<div class="cat-tag-item ${
-          currentFilter === "all" ? "active" : ""
-        }" data-id="all">Все товары</div>` +
-        cats
-          .map(
-            (c) =>
-              `<div class="cat-tag-item ${
-                currentFilter == c.slug ? "active" : ""
-              }" data-id="${c.slug}">${c.name}</div>`,
-          )
-          .join("");
-      catGrid.querySelectorAll(".cat-tag-item").forEach((item) => {
-        item.onclick = () => {
-          catGrid
-            .querySelectorAll(".cat-tag-item")
-            .forEach((i) => i.classList.remove("active"));
-          item.classList.add("active");
-          currentFilter = item.dataset.id;
+      catGrid.className = ""; // Сбрасываем старый сеточный класс тегов
+      
+      // Рендерим выпадающий список (адаптирован под ширину сайдбара)
+      catGrid.innerHTML = `
+        <select id="categorySelect" style="width: 100%; padding: 12px; border: 1px solid var(--dark); font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 11px; outline: none; background: white; border-radius: 0; cursor: pointer;">
+          <option value="all" ${currentFilter === "all" ? "selected" : ""}>Все товары</option>
+          ${cats.map(c => `<option value="${c.slug}" ${currentFilter === c.slug ? "selected" : ""}>${c.name}</option>`).join('')}
+        </select>
+      `;
 
+      const select = document.getElementById("categorySelect");
+      if (select) {
+        select.onchange = (e) => {
+          currentFilter = e.target.value;
           window.history.replaceState(
             {},
             "",
@@ -506,10 +502,21 @@ async function initCatalog(params) {
               ? "/catalog"
               : `/catalog?category=${currentFilter}`,
           );
+          
+          // UX-фишка: Закрываем шторку на мобильных сразу после выбора категории
+          const sidebar = document.getElementById("catalogSidebar");
+          const overlay = document.getElementById("sidebarOverlay");
+          if (sidebar && sidebar.classList.contains("open")) {
+              sidebar.classList.remove("open");
+              overlay.classList.remove("open");
+              document.body.style.overflow = "";
+          }
+
           renderProducts();
         };
-      });
+      }
     }
+
     setTimeout(() => {
       renderProducts();
     }, 300);
@@ -528,6 +535,25 @@ async function initCatalog(params) {
       };
   } catch (err) {
     grid.innerHTML = `<div style="grid-column:1/-1; color:red; font-weight:900;">Ошибка сервера при загрузке.</div>`;
+  }
+}
+
+
+// ===== ФУНКЦИЯ ДЛЯ ВЫДВИЖНОЙ ШТОРКИ ФИЛЬТРОВ НА МОБИЛЬНЫХ =====
+function toggleSidebar() {
+  const sidebar = document.getElementById("catalogSidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+  if (sidebar && overlay) {
+    const isOpen = sidebar.classList.contains("open");
+    if (isOpen) {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("open");
+      document.body.style.overflow = ""; // Возвращаем скролл сайту
+    } else {
+      sidebar.classList.add("open");
+      overlay.classList.add("open");
+      document.body.style.overflow = "hidden"; // Блокируем скролл сайта под шторкой
+    }
   }
 }
 
@@ -2506,4 +2532,5 @@ window.toggleEditPhone = toggleEditPhone;
 window.sendPhoneVerifyCode = sendPhoneVerifyCode;
 window.verifyPhoneCode = verifyPhoneCode;
 window.resetPhoneVerify = resetPhoneVerify;
+window.toggleSidebar = toggleSidebar;
 document.addEventListener("DOMContentLoaded", bootstrap);
