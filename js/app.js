@@ -120,7 +120,7 @@ function initPageFunctions(
   }
 }
 
-// ===== НОВИНКИ НА ГЛАВНОЙ (Карточки переработаны для отображения полного длинного имени) =====
+// ===== НОВИНКИ НА ГЛАВНОЙ (Адаптивные и переработанные карточки) =====
 async function initNewProducts() {
   const container = document.getElementById("newProductsContainer");
   if (!container) return;
@@ -149,13 +149,10 @@ async function initNewProducts() {
         ${imgHtml}
         <div class="product-badge new">✨ Новинка</div>
     </div>
-    <div class="product-info" style="display:flex; flex-direction:column; justify-content:space-between; padding:16px; flex-grow:1;">
-        <h3 style="font-size:12px; font-weight:900; text-transform:uppercase; line-height:1.4; margin:0 0 8px; white-space: normal; word-wrap: break-word;">
+    <div class="product-info" style="display:flex; flex-direction:column; justify-content:center; padding:16px; height:100%;">
+        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:72px; line-height:1.3; margin:0;">
             ${p.name}
         </h3>
-        <div style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.4; margin-top:auto;">
-            ${p.category_name || "Новинки"}
-        </div>
     </div>
 </div>`;
       })
@@ -167,7 +164,7 @@ async function initNewProducts() {
 }
 
 // ===== КАТЕГОРИИ И ТОВАРЫ КАТАЛОГА =====
-// Меню категорий переработано: вместо селекта выводится вертикальный список плиток-кнопок, поддерживающий перенос длинных названий
+// Выпадающий список переработан: возвращен и стилизован под жесткий нео-брутализм с кастомной стрелкой
 async function initCatalog(params) {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
@@ -205,32 +202,21 @@ async function initCatalog(params) {
     if (catGrid) {
       catGrid.className = ""; 
       
-      // Вертикальное кнопочное меню, поддерживающее перенос длинных слов и названий
+      // Стилизованный нео-бруталистский селект с кастомной стрелкой, поддержкой тени и сбросом стилей iOS/Android
       catGrid.innerHTML = `
-        <div class="category-menu-vertical" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-          <button class="cat-menu-item ${currentFilter === "all" ? "active" : ""}" data-slug="all" 
-            style="width: 100%; text-align: left; background: ${currentFilter === "all" ? "var(--brand)" : "white"}; color: ${currentFilter === "all" ? "white" : "var(--dark)"}; border: 1px solid var(--dark); padding: 12px; font-family: inherit; font-weight: 700; text-transform: uppercase; font-size: 10px; cursor: pointer; white-space: normal; word-wrap: break-word; line-height: 1.4; transition: 0.2s;"
-            onmouseover="if(this.dataset.slug !== currentFilter) { this.style.background='var(--gray-bg)'; }"
-            onmouseout="if(this.dataset.slug !== currentFilter) { this.style.background='white'; }">
-            Все товары
-          </button>
-          ${cats.map(c => `
-            <button class="cat-menu-item ${currentFilter === c.slug ? "active" : ""}" data-slug="${c.slug}" 
-              style="width: 100%; text-align: left; background: ${currentFilter === c.slug ? "var(--brand)" : "white"}; color: ${currentFilter === c.slug ? "white" : "var(--dark)"}; border: 1px solid var(--dark); padding: 12px; font-family: inherit; font-weight: 700; text-transform: uppercase; font-size: 10px; cursor: pointer; white-space: normal; word-wrap: break-word; line-height: 1.4; transition: 0.2s;"
-              onmouseover="if(this.dataset.slug !== currentFilter) { this.style.background='var(--gray-bg)'; }"
-              onmouseout="if(this.dataset.slug !== currentFilter) { this.style.background='white'; }">
-              ${c.name}
-            </button>
-          `).join('')}
+        <div style="position: relative; width: 100%; margin-bottom: 20px;">
+          <select id="categorySelect" 
+            style="width: 100%; padding: 14px 48px 14px 16px; border: 2px solid var(--dark); font-family: inherit; font-weight: 900; text-transform: uppercase; font-size: 11px; outline: none; background: #ffffff url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%23111827&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;square&quot;><polyline points=&quot;6 9 12 15 18 9&quot;/></svg>') no-repeat right 16px center; background-size: 16px; -webkit-appearance: none; -moz-appearance: none; appearance: none; border-radius: 0; cursor: pointer; box-shadow: 6px 6px 0 var(--dark); transition: all 0.2s;">
+            <option value="all" ${currentFilter === "all" ? "selected" : ""}>Все товары</option>
+            ${cats.map(c => `<option value="${c.slug}" ${currentFilter === c.slug ? "selected" : ""}>${c.name}</option>`).join('')}
+          </select>
         </div>
       `;
 
-      // Навешиваем событие клика на кнопки категорий
-      document.querySelectorAll(".cat-menu-item").forEach(btn => {
-        btn.onclick = (e) => {
-          const targetBtn = e.target.closest(".cat-menu-item");
-          if (!targetBtn) return;
-          currentFilter = targetBtn.dataset.slug;
+      const select = document.getElementById("categorySelect");
+      if (select) {
+        select.onchange = (e) => {
+          currentFilter = e.target.value;
           window.history.replaceState(
             {},
             "",
@@ -247,15 +233,9 @@ async function initCatalog(params) {
               document.body.style.overflow = "";
           }
 
-          document.querySelectorAll(".cat-menu-item").forEach(b => {
-            const isActive = b.dataset.slug === currentFilter;
-            b.style.background = isActive ? "var(--brand)" : "white";
-            b.style.color = isActive ? "white" : "var(--dark)";
-          });
-
           renderProducts();
         };
-      });
+      }
     }
 
     setTimeout(() => {
@@ -290,7 +270,7 @@ function toggleSidebar() {
   }
 }
 
-// Карточки товаров переработаны: убран line-clamp, название выводится полностью
+// Карточки в списке товаров перестроены на flex, чтобы высота растягивалась под любое длинное название
 function renderProducts() {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
@@ -345,7 +325,7 @@ function renderProducts() {
   .join("");
 }
 
-// ===== ХИТЫ / РЕКОМЕНДАЦИИ (Для безопасной работы, если вызывается на сторонних страницах) =====
+// ===== РЕКОМЕНДАЦИИ (Для безопасной работы на главной) =====
 async function initPromoProducts() {
   const container = document.getElementById("promoProductsContainer");
   if (!container) return;
