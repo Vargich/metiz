@@ -13,87 +13,7 @@
 </head>
 <body>
 
-  <!-- Модальное окно корзины -->
-  <div id="cartModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 600px;">
-      <button onclick="closeCart()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
-      
-      <div style="margin-bottom:2rem;">
-        <div style="width:48px;height:48px;background:var(--brand);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
-          <i class="fas fa-shopping-cart" style="color:white;"></i>
-        </div>
-        <h2 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;">Ваша корзина</h2>
-      </div>
-
-      <div id="cartItems" style="max-height: 400px; overflow-y: auto; margin-bottom: 2rem;">
-        <p style="opacity: 0.5; text-align: center; padding: 40px 0;">Корзина пуста</p>
-      </div>
-
-      <div id="cartFooter" style="display:none; border-top: 2px solid var(--dark); padding-top: 20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-          <span style="font-size: 10px; font-weight: 900; text-transform: uppercase;">Итого к оплате:</span>
-          <span id="cartTotal" style="font-size: 24px; font-weight: 900; color: var(--brand);">0 ₽</span>
-        </div>
-        <div id="pickupSelect" style="margin-bottom: 20px;">
-          <label style="font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block;">Пункт самовывоза</label>
-          <select id="pickupPoint" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; font-size: 11px;">
-              <option value="">Выберите магазин</option>
-          </select>
-        </div>
-        <button onclick="checkout()" style="width:100%;padding:1rem;background:var(--dark);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;">Оформить заказ</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Модальное окно авторизации -->
-  <div id="authModal" class="modal-overlay">
-    <div class="modal-content">
-      <button onclick="closeAuthModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
-      
-      <div id="authStep1">
-        <div style="margin-bottom:2rem;">
-          <div style="width:48px;height:48px;background:var(--brand);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
-            <i class="fas fa-user-lock" style="color:white;"></i>
-          </div>
-          <h2 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;">Вход / Регистрация</h2>
-        </div>
-        <div style="margin-bottom:1.5rem;">
-          <div id="authContactStep">
-            <div style="position:relative; margin-bottom:1rem;">
-               <input type="text" id="authContact" placeholder="EMAIL ИЛИ ТЕЛЕФОН" 
-                style="width:100%;padding:1rem;border:2px solid var(--dark);font-weight:700;outline:none;" />
-               <div id="input-type-icon" style="position:absolute; right:15px; top:15px; opacity:0.3; font-size:12px;"></div>
-            </div>
-          </div>
-
-          <div id="authCodeStep" style="display:none; margin-bottom:1rem;">
-            <input type="text" id="authCode" placeholder="КОД" maxlength="4"
-              style="width:100%;padding:1rem;border:2px solid var(--dark);font-weight:700;outline:none;text-align:center;letter-spacing:10px;font-size:20px;" />
-            <div id="codePreview" style="font-size:10px; opacity:0.5; margin-top:5px; text-align:center;"></div>
-            <div style="text-align:center; margin-top:10px;">
-              <button id="resendCodeBtn" onclick="resendAuthCode()" style="background:none;border:none;color:var(--brand);font-size:10px;font-weight:900;text-transform:uppercase;cursor:pointer;opacity:1;transition:0.3s;">Отправить повторно</button>
-              <span id="resendTimer" style="font-size:10px; font-weight:900; opacity:0.5; display:none; margin-left:8px;">(60 сек)</span>
-            </div>
-          </div>
-
-          <div id="authNameStep" style="display:none; margin-bottom:1rem;">
-            <p style="font-size:10px; font-weight:900; margin-bottom:10px; opacity:0.5; text-align:center;">ВЫ У НАС ВПЕРВЫЕ! КАК ВАС ЗОВУТ?</p>
-            <input type="text" id="authName" placeholder="ВАШЕ ИМЯ" 
-              style="width:100%;padding:1rem;border:2px solid var(--dark);font-weight:700;outline:none;text-align:center;" />
-          </div>
-        </div>
-        <button id="authActionBtn" onclick="handleAuth()" style="width:100%;padding:1rem;background:var(--dark);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;">Получить код</button>
-      </div>
-
-      <div id="authStep2" style="display:none;">
-        <h2 style="font-size:1.5rem;font-weight:900;text-transform:uppercase;margin-bottom:1.5rem;">Добро пожаловать</h2>
-        <p>Вы успешно вошли в систему.</p>
-        <button onclick="closeAuthModal()" style="width:100%;padding:1rem;background:var(--brand);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;margin-top:1rem;">Продолжить</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ШАПКА (изменена ширина и возвращены интерактивные элементы) -->
+  <!-- ШАПКА -->
   <header class="shop-header">
     <div class="shop-header__container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
@@ -106,11 +26,9 @@
       </nav>
       
       <div class="shop-header__actions">
-        <div id="auth-actions" style="display: flex; gap: 8px;">
-          <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
-          <button class="icon-btn" onclick="handleLogout()" id="logout-btn" style="display:none; color: #EF4444;"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
-        <button class="icon-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-count">0</span></button>
+        <a href="tel:+78445790099" class="hero-btn" style="padding: 10px 20px; font-size: 11px; white-space: nowrap;">
+          <i class="fas fa-phone-alt" style="margin-right: 8px;"></i>+7 (84457) 9-00-99
+        </a>
       </div>
     </div>
   </header>
@@ -141,19 +59,19 @@
               <h4 style="font-size:1.2rem;">Электроинструмент</h4>
             </li>
             <li class="about-list-item" style="margin-bottom:0;">
-              <h4 style="font-size:1.2rem;">Промышленный прокат</h4>
+              <h4 style="font-size:1.2rem;">Цветной металлопрокат</h4>
             </li>
           </ul>
         </div>
-        <!-- Раскомментирован важный блок информации о дилерстве и опыте -->
+        <!-- Измененный блок: Наши клиенты -->
         <div class="hero-info-box bg-dark text-white">
           <div style="padding-bottom:20px;">
-             <h3 style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--brand);margin-bottom:20px;">Официальный дилер</h3>
+             <h3 style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--brand);margin-bottom:20px;">Наши клиенты</h3>
              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-               <div style="border:1px solid rgba(255,255,255,0.2);padding:12px;text-align:center;font-size:20px;font-weight:900;">ДОНМЕТ</div>
-               <div style="border:1px solid rgba(255,255,255,0.2);padding:12px;text-align:center;font-size:20px;font-weight:900;">НЭЗ</div>
-               <div style="border:1px solid rgba(255,255,255,0.2);padding:12px;text-align:center;font-size:20px;font-weight:900;">РЕСАНТА</div>
-               <div style="border:1px solid rgba(255,255,255,0.2);padding:12px;text-align:center;font-size:20px;font-weight:900;">КЗ-ПРОКАТ</div>
+               <div style="border:1px solid rgba(255,255,255,0.2);padding:12px;text-align:center;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;min-height:54px;">Застройщики</div>
+               <div style="border:1px solid rgba(255,255,255,0.2);padding:12px;text-align:center;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;min-height:54px;">Производства</div>
+               <div style="border:1px solid rgba(255,255,255,0.2);padding:12px;text-align:center;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;min-height:54px;">Мастерские</div>
+               <div style="border:1px solid rgba(255,255,255,0.2);padding:12px;text-align:center;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:center;min-height:54px;">Частные лица</div>
              </div>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;">
@@ -164,11 +82,6 @@
       </div>
     </section>
 
-    <!-- Сетка категорий (раскомментирована для наполнения структуры) -->
-    <section class="categories-grid" id="homeCategories">
-       <!-- Сюда подгружаются категории товаров -->
-    </section>
-
     <section class="hits-section">
       <div style=" margin: 0 auto;">
         <h2 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; color: var(--brand); margin-bottom: 8px;">Рекомендуем</h2>
@@ -177,17 +90,6 @@
         <div class="products-grid" id="promoProductsContainer">
           <p style="font-size: 11px; opacity:0.5; text-transform:uppercase; font-weight:900;">Загрузка рекомендаций...</p>
         </div>
-      </div>
-    </section>
-
-    <section class="new-section">
-      <div style=" margin: 0 auto;">
-          <h2 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; color: #10B981; margin-bottom: 8px;">Новинки</h2>
-          <div style="font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 40px; line-height: 1.1;">Свежие<br/><span class="text-outline">Поступления</span></div>
-          
-          <div class="products-grid" id="newProductsContainer">
-              <p style="font-size: 11px; opacity:0.5; text-transform:uppercase; font-weight:900;">Загрузка новинок...</p>
-          </div>
       </div>
     </section>
 
@@ -203,7 +105,7 @@
           <div class="about-grid-item">Работаем с НДС</div>
           <div class="about-grid-item">привезем позиции под заказ</div>
           <div class="about-grid-item">более 15 лет на рынке</div>
-          <div class="about-grid-item">1000+ позиций</div>
+          <div class="about-grid-item">3000+ позиций</div>
         </div>
       </div>
       <div class="about-sidebar">
@@ -228,49 +130,23 @@
       </div>
     </section>
 
-    <!-- БЛОК ВОПРОС-ОТВЕТ (FAQ) в стиле нео-брутализма -->
-    <section class="faq-section">
-      <div class="faq-header">
-        <div class="faq-tag">База знаний</div>
-        <h2 class="faq-title">Вопросы <br/><span class="text-outline">и Ответы</span></h2>
+   
+
+    <!-- НОВЫЙ БЛОК: Популярные бренды -->
+    <section class="brands-section">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <div class="brand-tag">Работаем с проверенными марками</div>
+        <h2 class="brand-section-title">Ассортимент известных <span class="text-brand">производителей</span></h2>
       </div>
-      <div class="faq-accordion">
-        <div class="faq-item">
-          <button class="faq-trigger">
-            <span>Как оформить заказ через сайт?</span>
-            <i class="fas fa-plus"></i>
-          </button>
-          <div class="faq-content">
-            <p>Перейдите в «Каталог», выберите необходимые позиции, укажите нужное количество/вес и добавьте их в корзину. Затем откройте корзину, выберите удобный магазин для самовывоза и нажмите «Оформить заказ». Наш менеджер свяжется с вами для подтверждения.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-trigger">
-            <span>Работаете ли вы с юридическими лицами?</span>
-            <i class="fas fa-plus"></i>
-          </button>
-          <div class="faq-content">
-            <p>Да, мы работаем с юридическими лицами и индивидуальными предпринимателями по безналичному расчету с предоставлением всех необходимых закрывающих документов (в том числе работаем с НДС). Для выставления счета отправьте реквизиты на почту metiz-elektrod@mail.ru.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-trigger">
-            <span>Возможна ли поставка позиций под заказ?</span>
-            <i class="fas fa-plus"></i>
-          </button>
-          <div class="faq-content">
-            <p>Да. Если вы не нашли нужный типоразмер крепежа или определенную модель оборудования в наличии, мы можем привезти их напрямую от заводов-производителей под заказ в кратчайшие сроки.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-trigger">
-            <span>Где можно забрать оплаченный товар?</span>
-            <i class="fas fa-plus"></i>
-          </button>
-          <div class="faq-content">
-            <p>Вы можете забрать заказ самостоятельно в одном из наших розничных магазинов. Точные адреса филиалов и график их работы вы можете посмотреть на вкладке «Контакты».</p>
-          </div>
-        </div>
+      <div class="brands-grid">
+        <div class="brand-item">MAKITA</div>
+        <div class="brand-item">BOSCH</div>
+        <div class="brand-item">РЕСАНТА</div>
+        <div class="brand-item">ДЕКО</div>
+        <div class="brand-item">СИБРТЕХ</div>
+        <div class="brand-item">КРАТОН</div>
+        <div class="brand-item">ЧЗСИ</div>
+        <div class="brand-item">ДОНМЕТ</div>
       </div>
     </section>
 
@@ -339,26 +215,5 @@
   </footer>
 
   <script type="module" src="/js/app.js"></script>
-
-  <!-- Скрипт для интерактивной работы аккордеона FAQ -->
-  <script>
-    $(document).ready(function() {
-      $('.faq-trigger').on('click', function() {
-        const item = $(this).closest('.faq-item');
-        const content = item.find('.faq-content');
-        
-        if (item.hasClass('active')) {
-          item.removeClass('active');
-          content.css('max-height', '0');
-        } else {
-          $('.faq-item').removeClass('active');
-          $('.faq-content').css('max-height', '0');
-          
-          item.addClass('active');
-          content.css('max-height', content[0].scrollHeight + 'px');
-        }
-      });
-    });
-  </script>
 </body>
 </html>

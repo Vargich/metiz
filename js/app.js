@@ -48,7 +48,7 @@ let authStep = 1;
 
 // Найти в app.js и заменить функцию bootstrap() на упрощенную:
 async function bootstrap() {
-  ensureModalsExist();
+  //ensureModalsExist();
 
   const yearEl = document.getElementById("current-year");
   if (yearEl) yearEl.innerText = new Date().getFullYear();
@@ -2125,7 +2125,7 @@ function ensureModalsExist() {
               <span style="font-size: 10px; font-weight: 900; text-transform: uppercase;">Итого к оплате:</span>
               <span id="cartTotal" style="font-size: 24px; font-weight: 900; color: var(--brand);">0 ₽</span>
             </div>
-            <div id="pickupSelect" style="margin-bottom: 20px;">
+          <div id="pickupSelect" style="margin-bottom: 20px;">
     <label style="font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block;">Пункт самовывоза</label>
     <select id="pickupPoint" style="width:100%; padding:12px; border:1px solid var(--dark); font-weight:700; font-size: 11px;">
         <option value="">Выберите магазин</option>

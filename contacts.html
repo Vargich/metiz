@@ -9,9 +9,11 @@
   <meta name="format-detection" content="telephone=no">
 </head>
 <body>
+  <!-- ШАПКА -->
   <header class="shop-header">
     <div class="shop-header__container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
+      
       <nav class="shop-nav">
         <a href="/">Главная</a>
         <a href="/catalog">Каталог</a>
@@ -19,13 +21,11 @@
         <a href="/contacts" class="active">Контакты</a>
       </nav>
       
-      <!-- <div class="shop-header__actions">
-        <div id="auth-actions" style="display: flex; gap: 8px;">
-          <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
-          <button class="icon-btn" onclick="handleLogout()" id="logout-btn" style="display:none; color: #EF4444;"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
-        <button class="icon-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-count">0</span></button>
-      </div> -->
+      <div class="shop-header__actions">
+        <a href="tel:+78445790099" class="hero-btn" style="padding: 10px 20px; font-size: 11px; white-space: nowrap;">
+          <i class="fas fa-phone-alt" style="margin-right: 8px;"></i>+7 (84457) 9-00-99
+        </a>
+      </div>
     </div>
   </header>
 
@@ -34,7 +34,8 @@
       <!-- ИНТЕРАКТИВНАЯ КАРТА (Левая часть) -->
       <div class="about-sidebar contacts-map-sidebar">
         <div id="map" style="width:100%; height:400px; filter: grayscale(1) invert(1) contrast(0.8) brightness(1.2);"></div>
-        <div id="shops" style="width:100%; flex: 1; overflow-y:auto; background: white; color:white; border-top:2px solid var(--dark); padding:0;">
+        <!-- Исправлена контрастность и фоновый цвет контейнера списка филиалов -->
+        <div id="shops" style="width:100%; flex: 1; overflow-y:auto; background: #111827; color: white; border-top:2px solid var(--dark); padding:0;">
           <div style="padding:24px; opacity:0.4; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:2px; text-align:center;">Загрузка филиалов...</div>
         </div>
       </div>
@@ -71,9 +72,9 @@
 
            <div style="font-size:10px; font-weight:900; color:var(--brand); text-transform:uppercase; margin-bottom:12px;">Юридическая информация (Реквизиты)</div>
            <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.8; opacity: 0.8; font-weight: 500;">
-             <li><strong>ИП:</strong>Варгич Вадим Леонидович</li>
-             <li><strong>ОГРНИП:</strong>306345321600035</li>
-             <li><strong>ИНН:</strong>343608258210</li>
+             <li><strong>ИП:</strong> Варгич Вадим Леонидович</li>
+             <li><strong>ОГРНИП:</strong> 306345321600035</li>
+             <li><strong>ИНН:</strong> 343608258210</li>
              <li><strong>Юридический адрес:</strong> 403893, Волгоградская обл., г. Камышин, ул. Спартаковская, д. 75, кв. 2</li>
            </ul>
         </div>
@@ -81,6 +82,7 @@
     </section>
   </main>
 
+  <!-- ФУТЕР -->
   <footer style="border-top:1px solid var(--dark);">
     <div class="footer-bottom">
       <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
@@ -92,16 +94,18 @@
       </div>
       
       <div class="footer-socials">
-        <div class="social-btn">VK</div>
-        <div class="social-btn">TG</div>
+        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">VK</a>
+        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">TG</a>
       </div>
     </div>
   </footer>
 
   <script type="module" src="/js/app.js"></script>
   <!-- Яндекс Карта -->
-  <!-- <script src="https://api-maps.yandex.ru/2.1/?lang=ru-RU&amp;apikey=33642748-9cc0-49a1-8516-cef1e3433a34" type="text/javascript"></script> -->
   <script src="https://api-maps.yandex.ru/2.1/?lang=ru-RU&apikey={{YANDEX_MAPS_API_KEY}}" type="text/javascript"></script>
   <script src="https://yandex.st/jquery/2.2.3/jquery.min.js" type="text/javascript"></script>
+  <script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
