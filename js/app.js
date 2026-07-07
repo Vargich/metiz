@@ -167,12 +167,14 @@ async function initNewProducts() {
 }
 
 // ===== КАТЕГОРИИ И ТОВАРЫ КАТАЛОГА =====
-// Список категорий переработан: симулирует выпадающее бруталистское меню на div с поддержкой адаптивного переноса длинных слов
+// Баг устранен: принудительно читаем URLSearchParams из текущего состояния окна браузера
 async function initCatalog(params) {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
-  currentFilter =
-    params && params.get("category") ? params.get("category") : "all";
+
+  // Всегда читаем актуальный URL из адресной строки, чтобы избежать устаревших параметров в SPA-замыканиях
+  const urlParams = new URLSearchParams(window.location.search);
+  currentFilter = urlParams.get("category") || "all";
 
   const skeletonHtml = Array(8)
     .fill()
@@ -208,24 +210,24 @@ async function initCatalog(params) {
       const activeCat = cats.find(c => c.slug === currentFilter);
       const activeName = activeCat ? activeCat.name : "Все товары";
 
-      // Кастомный раскрывающийся список (mock-dropdown), позволяющий тексту переноситься на несколько строк
+      // Стилизованное кастомное выпадающее меню, поддерживающее перенос слов на новую строку
       catGrid.innerHTML = `
         <div class="custom-select-wrap" style="position: relative; width: 100%; margin-bottom: 24px;">
           <div id="categorySelectBtn" 
-            style="width: 100%; padding: 14px 44px 14px 16px; border: 2px solid var(--dark); font-family: inherit; font-weight: 900; text-transform: uppercase; font-size: 11px; outline: none; background: #ffffff url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%23111827&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;square&quot;><polyline points=&quot;6 9 12 15 18 9&quot;/></svg>') no-repeat right 12px center; background-size: 14px; border-radius: 0; cursor: pointer; box-shadow: 6px 6px 0 var(--dark); transition: all 0.2s; white-space: normal; line-height: 1.4; word-wrap: break-word;">
+            style="width: 100%; padding: 14px 40px 14px 16px; border: 2px solid var(--dark); font-family: inherit; font-weight: 900; text-transform: uppercase; font-size: 10px; outline: none; background: #ffffff url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%23111827&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;square&quot;><polyline points=&quot;6 9 12 15 18 9&quot;/></svg>') no-repeat right 12px center; background-size: 14px; border-radius: 0; cursor: pointer; box-shadow: 6px 6px 0 var(--dark); transition: all 0.2s; white-space: normal; line-height: 1.4; word-wrap: break-word;">
             ${activeName}
           </div>
           <div id="categorySelectDropdown" 
-            style="display: none; position: absolute; top: calc(100% + 6px); left: 0; width: 100%; max-height: 250px; overflow-y: auto; background: white; border: 2px solid var(--dark); box-shadow: 6px 6px 0 var(--dark); z-index: 1100; margin: 0; padding: 0;">
+            style="display: none; position: absolute; top: calc(100% + 6px); left: 0; width: 100%; max-height: 250px; overflow-y: auto; background: white; border: 2px solid var(--dark); box-shadow: 4px 4px 0 var(--dark); z-index: 1100; margin: 0; padding: 0;">
             <div class="custom-select-option" data-slug="all" 
-              style="padding: 12px 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border-bottom: 1px solid var(--gray-bg); white-space: normal; line-height: 1.4; word-wrap: break-word; transition: 0.15s; background: ${currentFilter === 'all' ? 'var(--gray-bg)' : 'white'}"
+              style="padding: 12px 16px; font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer; border-bottom: 1px solid var(--gray-bg); white-space: normal; line-height: 1.4; word-wrap: break-word; transition: 0.15s; background: ${currentFilter === 'all' ? 'var(--gray-bg)' : 'white'}"
               onmouseover="this.style.background='var(--gray-bg)'"
               onmouseout="if(currentFilter !== 'all') { this.style.background='white'; }">
               Все товары
             </div>
             ${cats.map(c => `
               <div class="custom-select-option" data-slug="${c.slug}" 
-                style="padding: 12px 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border-bottom: 1px solid var(--gray-bg); white-space: normal; line-height: 1.4; word-wrap: break-word; transition: 0.15s; background: ${currentFilter === c.slug ? 'var(--gray-bg)' : 'white'}"
+                style="padding: 12px 16px; font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer; border-bottom: 1px solid var(--gray-bg); white-space: normal; line-height: 1.4; word-wrap: break-word; transition: 0.15s; background: ${currentFilter === c.slug ? 'var(--gray-bg)' : 'white'}"
                 onmouseover="this.style.background='var(--gray-bg)'"
                 onmouseout="if(currentFilter !== '${c.slug}') { this.style.background='white'; }">
                 ${c.name}
@@ -252,14 +254,28 @@ async function initCatalog(params) {
         const options = dropdown.querySelectorAll(".custom-select-option");
         options.forEach(opt => {
           opt.onclick = (e) => {
-            currentFilter = opt.dataset.slug;
+            e.stopPropagation();
+            const selectedSlug = opt.dataset.slug;
+            currentFilter = selectedSlug;
+            
+            // Записываем актуальный роут в URL браузера
             window.history.replaceState(
               {},
               "",
-              currentFilter === "all"
+              selectedSlug === "all"
                 ? "/catalog"
-                : `/catalog?category=${currentFilter}`,
+                : `/catalog?category=${selectedSlug}`,
             );
+
+            // Мгновенно меняем текст кнопки без перерисовки и скелетонов
+            btn.innerText = opt.innerText.trim();
+            dropdown.style.display = "none";
+
+            // Сбрасываем подложки у всех опций и подсвечиваем активную
+            options.forEach(o => {
+              const isActive = o.dataset.slug === selectedSlug;
+              o.style.background = isActive ? "var(--gray-bg)" : "white";
+            });
 
             const sidebar = document.getElementById("catalogSidebar");
             const overlay = document.getElementById("sidebarOverlay");
@@ -269,8 +285,8 @@ async function initCatalog(params) {
                 document.body.style.overflow = "";
             }
 
+            // Мгновенная плавная фильтрация товаров на клиенте
             renderProducts();
-            initCatalog(params);
           };
         });
       }
@@ -308,7 +324,7 @@ function toggleSidebar() {
   }
 }
 
-// Отрисовка товаров каталога
+// Отрисовка каталога
 function renderProducts() {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
