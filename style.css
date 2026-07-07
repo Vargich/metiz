@@ -2162,3 +2162,29 @@ input[type="number"] {
     padding: 0 16px !important;
   }
 }
+
+/* ===== СТИЛИ ДЛЯ БЛОКА НОВИНОК (NEW SECTION) ===== */
+.new-section {
+  padding: 80px;
+  background: var(--white);
+  border-bottom: 1px solid var(--dark);
+}
+
+/* Ярлык (badge) для новинок зеленого цвета */
+.product-badge.new {
+  background: #10B981 !important;
+}
+
+/* Адаптивность отступов для средних экранов (планшеты) */
+@media (max-width: 992px) {
+  .new-section {
+    padding: 40px !important;
+  }
+}
+
+/* Адаптивность отступов для мобильных экранов */
+@media (max-width: 576px) {
+  .new-section {
+    padding: 40px 16px !important;
+  }
+}
