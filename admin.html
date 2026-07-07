@@ -253,6 +253,31 @@
           box-shadow: 0 0 8px var(--brand);
         }
       }
+      /* ===== СТИЛИ МОДАЛЬНЫХ ОКОН ДЛЯ АДМИН-ПАНЕЛИ ===== */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.85);
+        backdrop-filter: blur(8px);
+        display: none; /* Скрыты по умолчанию */
+        align-items: center;
+        justify-content: center;
+        z-index: 9999; /* Поверх всех элементов */
+        padding: 20px;
+      }
+
+      .modal-overlay.open {
+        display: flex; /* Показываются при вызове из JS */
+      }
+
+      .modal-content {
+        background: white;
+        border: 2px solid var(--dark);
+        width: 100%;
+        padding: 40px;
+        position: relative;
+        box-shadow: 15px 15px 0 var(--dark); /* Фирменный нео-брутализм */
+      }
     </style>
   </head>
 
