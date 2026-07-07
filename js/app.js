@@ -120,7 +120,7 @@ function initPageFunctions(
   }
 }
 
-// ===== НОВИНКИ НА ГЛАВНОЙ (Адаптивные и переработанные карточки) =====
+// ===== НОВИНКИ НА ГЛАВНОЙ =====
 async function initNewProducts() {
   const container = document.getElementById("newProductsContainer");
   if (!container) return;
@@ -149,10 +149,13 @@ async function initNewProducts() {
         ${imgHtml}
         <div class="product-badge new">✨ Новинка</div>
     </div>
-    <div class="product-info" style="display:flex; flex-direction:column; justify-content:center; padding:16px; height:100%;">
-        <h3 style="font-size:13px; font-weight:900; text-transform:uppercase; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; min-height:72px; line-height:1.3; margin:0;">
+    <div class="product-info" style="display:flex; flex-direction:column; justify-content:space-between; padding:16px; flex-grow:1;">
+        <h3 style="font-size:12px; font-weight:900; text-transform:uppercase; line-height:1.4; margin:0 0 8px; white-space: normal; word-wrap: break-word;">
             ${p.name}
         </h3>
+        <div style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.4; margin-top:auto;">
+            ${p.category_name || "Новинки"}
+        </div>
     </div>
 </div>`;
       })
@@ -164,7 +167,7 @@ async function initNewProducts() {
 }
 
 // ===== КАТЕГОРИИ И ТОВАРЫ КАТАЛОГА =====
-// Выпадающий список переработан: возвращен и стилизован под жесткий нео-брутализм с кастомной стрелкой
+// Список категорий переработан: симулирует выпадающее бруталистское меню на div с поддержкой адаптивного переноса длинных слов
 async function initCatalog(params) {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
@@ -202,39 +205,74 @@ async function initCatalog(params) {
     if (catGrid) {
       catGrid.className = ""; 
       
-      // Стилизованный нео-бруталистский селект с кастомной стрелкой, поддержкой тени и сбросом стилей iOS/Android
+      const activeCat = cats.find(c => c.slug === currentFilter);
+      const activeName = activeCat ? activeCat.name : "Все товары";
+
+      // Кастомный раскрывающийся список (mock-dropdown), позволяющий тексту переноситься на несколько строк
       catGrid.innerHTML = `
-        <div style="position: relative; width: 100%; margin-bottom: 20px;">
-          <select id="categorySelect" 
-            style="width: 100%; padding: 14px 48px 14px 16px; border: 2px solid var(--dark); font-family: inherit; font-weight: 900; text-transform: uppercase; font-size: 11px; outline: none; background: #ffffff url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%23111827&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;square&quot;><polyline points=&quot;6 9 12 15 18 9&quot;/></svg>') no-repeat right 16px center; background-size: 16px; -webkit-appearance: none; -moz-appearance: none; appearance: none; border-radius: 0; cursor: pointer; box-shadow: 6px 6px 0 var(--dark); transition: all 0.2s;">
-            <option value="all" ${currentFilter === "all" ? "selected" : ""}>Все товары</option>
-            ${cats.map(c => `<option value="${c.slug}" ${currentFilter === c.slug ? "selected" : ""}>${c.name}</option>`).join('')}
-          </select>
+        <div class="custom-select-wrap" style="position: relative; width: 100%; margin-bottom: 24px;">
+          <div id="categorySelectBtn" 
+            style="width: 100%; padding: 14px 44px 14px 16px; border: 2px solid var(--dark); font-family: inherit; font-weight: 900; text-transform: uppercase; font-size: 11px; outline: none; background: #ffffff url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;%23111827&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;square&quot;><polyline points=&quot;6 9 12 15 18 9&quot;/></svg>') no-repeat right 12px center; background-size: 14px; border-radius: 0; cursor: pointer; box-shadow: 6px 6px 0 var(--dark); transition: all 0.2s; white-space: normal; line-height: 1.4; word-wrap: break-word;">
+            ${activeName}
+          </div>
+          <div id="categorySelectDropdown" 
+            style="display: none; position: absolute; top: calc(100% + 6px); left: 0; width: 100%; max-height: 250px; overflow-y: auto; background: white; border: 2px solid var(--dark); box-shadow: 6px 6px 0 var(--dark); z-index: 1100; margin: 0; padding: 0;">
+            <div class="custom-select-option" data-slug="all" 
+              style="padding: 12px 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border-bottom: 1px solid var(--gray-bg); white-space: normal; line-height: 1.4; word-wrap: break-word; transition: 0.15s; background: ${currentFilter === 'all' ? 'var(--gray-bg)' : 'white'}"
+              onmouseover="this.style.background='var(--gray-bg)'"
+              onmouseout="if(currentFilter !== 'all') { this.style.background='white'; }">
+              Все товары
+            </div>
+            ${cats.map(c => `
+              <div class="custom-select-option" data-slug="${c.slug}" 
+                style="padding: 12px 16px; font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer; border-bottom: 1px solid var(--gray-bg); white-space: normal; line-height: 1.4; word-wrap: break-word; transition: 0.15s; background: ${currentFilter === c.slug ? 'var(--gray-bg)' : 'white'}"
+                onmouseover="this.style.background='var(--gray-bg)'"
+                onmouseout="if(currentFilter !== '${c.slug}') { this.style.background='white'; }">
+                ${c.name}
+              </div>
+            `).join('')}
+          </div>
         </div>
       `;
 
-      const select = document.getElementById("categorySelect");
-      if (select) {
-        select.onchange = (e) => {
-          currentFilter = e.target.value;
-          window.history.replaceState(
-            {},
-            "",
-            currentFilter === "all"
-              ? "/catalog"
-              : `/catalog?category=${currentFilter}`,
-          );
-          
-          const sidebar = document.getElementById("catalogSidebar");
-          const overlay = document.getElementById("sidebarOverlay");
-          if (sidebar && sidebar.classList.contains("open")) {
-              sidebar.classList.remove("open");
-              overlay.classList.remove("open");
-              document.body.style.overflow = "";
-          }
+      const btn = document.getElementById("categorySelectBtn");
+      const dropdown = document.getElementById("categorySelectDropdown");
 
-          renderProducts();
+      if (btn && dropdown) {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const isOpen = dropdown.style.display === "block";
+          dropdown.style.display = isOpen ? "none" : "block";
         };
+
+        document.addEventListener("click", () => {
+          dropdown.style.display = "none";
+        });
+
+        const options = dropdown.querySelectorAll(".custom-select-option");
+        options.forEach(opt => {
+          opt.onclick = (e) => {
+            currentFilter = opt.dataset.slug;
+            window.history.replaceState(
+              {},
+              "",
+              currentFilter === "all"
+                ? "/catalog"
+                : `/catalog?category=${currentFilter}`,
+            );
+
+            const sidebar = document.getElementById("catalogSidebar");
+            const overlay = document.getElementById("sidebarOverlay");
+            if (sidebar && sidebar.classList.contains("open")) {
+                sidebar.classList.remove("open");
+                overlay.classList.remove("open");
+                document.body.style.overflow = "";
+            }
+
+            renderProducts();
+            initCatalog(params);
+          };
+        });
       }
     }
 
@@ -270,7 +308,7 @@ function toggleSidebar() {
   }
 }
 
-// Карточки в списке товаров перестроены на flex, чтобы высота растягивалась под любое длинное название
+// Отрисовка товаров каталога
 function renderProducts() {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
@@ -325,7 +363,7 @@ function renderProducts() {
   .join("");
 }
 
-// ===== РЕКОМЕНДАЦИИ (Для безопасной работы на главной) =====
+// ===== РЕКОМЕНДАЦИИ =====
 async function initPromoProducts() {
   const container = document.getElementById("promoProductsContainer");
   if (!container) return;
