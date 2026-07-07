@@ -367,7 +367,7 @@ function renderProducts() {
       : ''}
   </div>
   <div class="product-info" style="display:flex; flex-direction:column; justify-content:space-between; padding:16px; flex-grow:1;">
-      <h3 style="font-size:12px; font-weight:900; text-transform:uppercase; line-height:1.4; margin:0 0 8px; white-space: normal; word-wrap: break-word;">
+      <h3 style="font-size:12px; font-weight:600; text-transform:uppercase; line-height:1.4; margin:0 0 8px; white-space: normal; word-wrap: break-word;">
           ${p.name}
       </h3>
       <div style="font-size:9px; font-weight:900; text-transform:uppercase; opacity:0.4; margin-top:auto;">
