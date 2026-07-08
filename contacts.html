@@ -22,10 +22,10 @@
       </nav>
       
       <div class="shop-header__actions">
-        <a href="tel:+78445790099" class="hero-btn" style="padding: 10px 20px; font-size: 11px; white-space: nowrap;">
-          <i class="fas fa-phone-alt" style="margin-right: 8px;"></i>+7 (84457) 9-00-99
-        </a>
-      </div>
+  <a href="tel:+78445790099" class="header-phone-btn">
+    <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+  </a>
+</div>
     </div>
   </header>
 
@@ -46,24 +46,30 @@
         <div class="about-title" style="font-size: clamp(32px, 4vw, 56px); margin-bottom: 40px;">Мы<br/><span class="text-outline">На</span><br/>Связи</div>
         
         <div class="contacts-grid contacts-vertical-grid">
-           <div class="contact-box" style="text-align:left; padding:0; border:none;">
-             <div class="contact-tag">Отдел продаж</div>
-             <div class="contact-value" style="font-size:24px;">+7(84457) 9-00-99</div>
-             <div class="contact-sub">Консультации и наличие</div>
-           </div>
-           
-           <div class="contact-box" style="text-align:left; padding:0; border:none;">
-             <div class="contact-tag">Оптовые закупки</div>
-             <div class="contact-value" style="font-size:24px;">+7(961)089-38-12</div>
-             <div class="contact-sub">Спецпредложения для компаний</div>
-           </div>
+   <div class="contact-box" style="text-align:left; padding:0; border:none;">
+     <div class="contact-tag">Отдел продаж</div>
+     <a href="tel:+78445790099" style="text-decoration: none; color: inherit;">
+       <div class="contact-value" style="font-size:24px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">+7(84457) 9-00-99</div>
+     </a>
+     <div class="contact-sub">Консультации и наличие</div>
+   </div>
+   
+   <div class="contact-box" style="text-align:left; padding:0; border:none;">
+     <div class="contact-tag">Оптовые закупки</div>
+     <a href="tel:+79610893812" style="text-decoration: none; color: inherit;">
+       <div class="contact-value" style="font-size:24px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">+7(961)089-38-12</div>
+     </a>
+     <div class="contact-sub">Спецпредложения для компаний</div>
+   </div>
 
-           <div class="contact-box" style="text-align:left; padding:0; border:none;">
-             <div class="contact-tag">Электронная почта</div>
-             <div class="contact-value" style="font-size:18px;">metiz-elektrod@mail.ru</div>
-             <div class="contact-sub">Для официальных запросов</div>
-           </div>
-        </div>
+   <div class="contact-box" style="text-align:left; padding:0; border:none;">
+     <div class="contact-tag">Электронная почта</div>
+     <a href="mailto:metiz-elektrod@mail.ru" style="text-decoration: none; color: inherit;">
+       <div class="contact-value" style="font-size:18px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">metiz-elektrod@mail.ru</div>
+     </a>
+     <div class="contact-sub">Для официальных запросов</div>
+   </div>
+</div>
 
         <!-- АДРЕС И РЕКВИЗИТЫ ИП -->
         <div style="margin-top:60px; padding-top:40px; border-top:1px solid rgba(0,0,0,0.1);">
@@ -105,6 +111,12 @@
   <script src="https://api-maps.yandex.ru/2.1/?lang=ru-RU&apikey={{YANDEX_MAPS_API_KEY}}" type="text/javascript"></script>
   <script src="https://yandex.st/jquery/2.2.3/jquery.min.js" type="text/javascript"></script>
   <script>
+     document.addEventListener("DOMContentLoaded", () => {
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.classList.remove('loading');
+    }
+  });
     document.getElementById('current-year').textContent = new Date().getFullYear();
   </script>
 </body>

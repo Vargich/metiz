@@ -1,6 +1,45 @@
 <!doctype html>
 <html lang="ru">
 <head>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "Метиз Электрод",
+  "image": "https://metiz-elektrod.ru/logo.png",
+  "@id": "https://metiz-elektrod.ru",
+  "url": "https://metiz-elektrod.ru",
+  "telephone": "+78445790099",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Промзона, проезд Нефтяников",
+    "addressLocality": "Камышин",
+    "addressRegion": "Волгоградская область",
+    "postalCode": "403870",
+    "addressCountry": "RU"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 50.0983, 
+    "longitude": 45.4012
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "opens": "08:00",
+      "closes": "17:00"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": "Saturday",
+      "opens": "08:00",
+      "closes": "14:00"
+    }
+  ]
+}
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Метиз Электрод — крепёж и инструменты</title>
@@ -15,6 +54,7 @@
 
   <!-- ШАПКА -->
   <header class="shop-header">
+    
     <div class="shop-header__container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
       
@@ -26,8 +66,8 @@
       </nav>
       
       <div class="shop-header__actions">
-        <a href="tel:+78445790099" class="hero-btn" style="padding: 10px 20px; font-size: 11px; white-space: nowrap;">
-          <i class="fas fa-phone-alt" style="margin-right: 8px;"></i>+7 (84457) 9-00-99
+        <a href="tel:+78445790099" class="header-phone-btn">
+          <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
         </a>
       </div>
     </div>
@@ -215,6 +255,30 @@
       </div>
     </div>
   </footer>
+
+  <!-- Кнопка скролла вверх -->
+  <button id="scroll-to-top" title="Наверх" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script>
+    // Поведение кнопки прокрутки
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scroll-to-top');
+      if (window.scrollY > 300) {
+        btn.classList.add('show');
+      } else {
+        btn.classList.remove('show');
+      }
+    });
+
+     document.addEventListener("DOMContentLoaded", () => {
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.classList.remove('loading');
+    }
+  });
+  </script>
 
   <script type="module" src="/js/app.js"></script>
 </body>

@@ -23,10 +23,10 @@
       </nav>
       
       <div class="shop-header__actions">
-        <a href="tel:+78445790099" class="hero-btn" style="padding: 10px 20px; font-size: 11px; white-space: nowrap;">
-          <i class="fas fa-phone-alt" style="margin-right: 8px;"></i>+7 (84457) 9-00-99
-        </a>
-      </div>
+  <a href="tel:+78445790099" class="header-phone-btn">
+    <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+  </a>
+</div>
     </div>
   </header>
 
@@ -68,6 +68,30 @@
         <!-- Сетка товаров -->
         <div class="products-grid" id="productsGrid">
           <!-- Товары загрузятся сюда -->
+           <div class="skeleton-card">
+    <div class="skeleton-box" style="aspect-ratio: 1/1; margin-bottom: 12px;"></div>
+    <div class="skeleton-box" style="height: 14px; width: 80%; margin-bottom: 8px;"></div>
+    <div class="skeleton-box" style="height: 12px; width: 40%; margin-bottom: 12px;"></div>
+    <div class="skeleton-box" style="height: 32px; width: 100%;"></div>
+  </div>
+  <div class="skeleton-card">
+    <div class="skeleton-box" style="aspect-ratio: 1/1; margin-bottom: 12px;"></div>
+    <div class="skeleton-box" style="height: 14px; width: 75%; margin-bottom: 8px;"></div>
+    <div class="skeleton-box" style="height: 12px; width: 35%; margin-bottom: 12px;"></div>
+    <div class="skeleton-box" style="height: 32px; width: 100%;"></div>
+  </div>
+  <div class="skeleton-card">
+    <div class="skeleton-box" style="aspect-ratio: 1/1; margin-bottom: 12px;"></div>
+    <div class="skeleton-box" style="height: 14px; width: 85%; margin-bottom: 8px;"></div>
+    <div class="skeleton-box" style="height: 12px; width: 50%; margin-bottom: 12px;"></div>
+    <div class="skeleton-box" style="height: 32px; width: 100%;"></div>
+  </div>
+  <div class="skeleton-card">
+    <div class="skeleton-box" style="aspect-ratio: 1/1; margin-bottom: 12px;"></div>
+    <div class="skeleton-box" style="height: 14px; width: 70%; margin-bottom: 8px;"></div>
+    <div class="skeleton-box" style="height: 12px; width: 40%; margin-bottom: 12px;"></div>
+    <div class="skeleton-box" style="height: 32px; width: 100%;"></div>
+  </div>
         </div>
       </div>
     </section>
@@ -93,6 +117,20 @@
 
   <script type="module" src="/js/app.js"></script>
   <script>
+     document.addEventListener("DOMContentLoaded", () => {
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.classList.remove('loading');
+    }
+  });
+     function toggleSidebar() {
+    const sidebar = document.getElementById('catalogSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar && overlay) {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+  }
     document.getElementById('current-year').textContent = new Date().getFullYear();
   </script>
 </body>
