@@ -595,7 +595,7 @@ footer {
   line-height: 1.6;
 }
 
-/* ===== БРЕНДЫ (BRANDS) ===== */
+/* ===== BRANDS ===== */
 .brands-section {
   padding: 80px;
   background: var(--white);
@@ -2172,3 +2172,150 @@ input[type="number"] {
   animation: metal-heating 1.0s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/*                         new */
+
+/* Кастомный выпадающий список выбора категорий в каталоге */
+.custom-select-wrap {
+  position: relative;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+#categorySelectBtn {
+  width: 100%;
+  padding: 16px 40px 16px 16px;
+  border: 2px solid var(--dark);
+  font-family: inherit;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 13px; /* Крупный и разборчивый шрифт */
+  outline: none;
+  background: #ffffff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23111827" stroke-width="3" stroke-linecap="square"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 16px center;
+  background-size: 14px;
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--brand);
+  transition: all 0.2s ease;
+  white-space: normal;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Раскрытие выпадающего списка на десктопе при наведении */
+@media (min-width: 993px) {
+  .custom-select-wrap:hover #categorySelectBtn {
+    background-color: var(--dark);
+    color: var(--white);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23FFFFFF" stroke-width="3" stroke-linecap="square"><polyline points="6 9 12 15 18 9"/></svg>');
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--brand);
+  }
+
+  .custom-select-wrap:hover #categorySelectDropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    display: block !important; /* Показываем при наведении */
+  }
+}
+
+/* Поддержка кликов и активности на мобильных устройствах */
+#categorySelectDropdown.open {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  display: block !important;
+}
+
+#categorySelectDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
+  background: white;
+  border: 2px solid var(--dark);
+  box-shadow: 6px 6px 0 var(--brand);
+  z-index: 1100;
+  margin: 0;
+  padding: 0;
+  
+  /* Анимация плавного выпадения */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: all 0.25s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.custom-select-option {
+  padding: 14px 16px;
+  font-weight: 900;
+  font-size: 11px; /* Разборчивый шрифт элементов */
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 1px solid var(--gray-bg);
+  white-space: normal;
+  line-height: 1.4;
+  word-wrap: break-word;
+  transition: background 0.15s ease, color 0.15s ease;
+  color: var(--dark);
+  background: white;
+}
+
+.custom-select-option:last-child {
+  border-bottom: none;
+}
+
+.custom-select-option:hover,
+.custom-select-option.active {
+  background: var(--brand) !important;
+  color: var(--white) !important;
+}
+
+/* ВАРИАНТ 1: Плоское вертикальное бруталистское меню */
+.custom-flat-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.custom-flat-option {
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--white);
+  border: 2px solid var(--dark);
+  font-family: inherit;
+  font-size: 13px; /* Крупный разборчивый шрифт */
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--dark);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.custom-flat-option i {
+  font-size: 10px;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+}
+
+/* Эффект наведения и активное состояние */
+.custom-flat-option:hover,
+.custom-flat-option.active {
+  background: var(--dark);
+  color: var(--white);
+  transform: translate(-3px, -3px);
+  box-shadow: 4px 4px 0 var(--brand); /* Фирменная тень */
+}
+
+.custom-flat-option:hover i,
+.custom-flat-option.active i {
+  opacity: 1;
+  transform: translateX(4px);
+}

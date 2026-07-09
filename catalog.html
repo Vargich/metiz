@@ -118,20 +118,72 @@
   <script type="module" src="/js/app.js"></script>
   <script>
      document.addEventListener("DOMContentLoaded", () => {
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-      mainContent.classList.remove('loading');
-    }
-  });
+       const mainContent = document.getElementById('main-content');
+       if (mainContent) {
+         mainContent.classList.remove('loading');
+       }
+
+       // Инициализация наблюдателя за изменениями в фильтрах
+       const filtersContainer = document.getElementById('filters');
+       if (filtersContainer) {
+         const observer = new MutationObserver((mutations) => {
+           const nativeSelect = filtersContainer.querySelector('select');
+           // Если селект появился и мы его еще не скрывали
+           if (nativeSelect && !nativeSelect.classList.contains('hidden-select')) {
+             buildBrutalHoverSelect(nativeSelect);
+           }
+         });
+         observer.observe(filtersContainer, { childList: true, subtree: true });
+       }
+
+       // Функция построения крупного выпадающего списка на наведении
+       function buildBrutalHoverSelect(nativeSelect) {
+         nativeSelect.classList.add('hidden-select');
+
+         const proxyContainer = document.createElement('div');
+         proxyContainer.className = 'brutal-hover-select';
+
+         const btn = document.createElement('button');
+         btn.className = 'brutal-hover-btn';
+         btn.innerHTML = `<span>${nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Выбрать категорию'}</span> <i class="fas fa-chevron-down"></i>`;
+         proxyContainer.appendChild(btn);
+
+         const dropdown = document.createElement('div');
+         dropdown.className = 'brutal-hover-dropdown';
+
+         Array.from(nativeSelect.options).forEach((opt, idx) => {
+           const item = document.createElement('div');
+           item.className = 'brutal-hover-item' + (idx === nativeSelect.selectedIndex ? ' active' : '');
+           item.textContent = opt.text;
+
+           item.addEventListener('click', () => {
+             nativeSelect.value = opt.value;
+             btn.querySelector('span').textContent = opt.text;
+
+             dropdown.querySelectorAll('.brutal-hover-item').forEach(el => el.classList.remove('active'));
+             item.classList.add('active');
+
+             // Вызов нативного события изменения фильтра из app.js
+             nativeSelect.dispatchEvent(new Event('change'));
+           });
+
+           dropdown.appendChild(item);
+         });
+
+         proxyContainer.appendChild(dropdown);
+         nativeSelect.parentNode.appendChild(proxyContainer);
+       }
+     });
+
      function toggleSidebar() {
-    const sidebar = document.getElementById('catalogSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    if (sidebar && overlay) {
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('open');
-    }
-  }
-    document.getElementById('current-year').textContent = new Date().getFullYear();
+       const sidebar = document.getElementById('catalogSidebar');
+       const overlay = document.getElementById('sidebarOverlay');
+       if (sidebar && overlay) {
+         sidebar.classList.toggle('open');
+         overlay.classList.toggle('open');
+       }
+     }
+     document.getElementById('current-year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
