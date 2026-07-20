@@ -10,24 +10,38 @@
 </head>
 <body>
   <!-- ШАПКА -->
-  <header class="shop-header">
-    <div class="shop-header__container">
-      <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
-      
-      <nav class="shop-nav">
-        <a href="/">Главная</a>
-        <a href="/catalog">Каталог</a>
-        <a href="/about" class="active">О нас</a>
-        <a href="/contacts">Контакты</a>
-      </nav>
-      
-      <div class="shop-header__actions">
-  <a href="tel:+78445790099" class="header-phone-btn">
-    <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
-  </a>
-</div>
+<header class="shop-header">
+  <div class="shop-header__container">
+    <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
+    
+    <!-- Телефон по центру (виден на всех экранах) -->
+    <a href="tel:+78445790099" class="header-phone-btn header-phone-mobile">
+      <i class="fas fa-phone-alt"></i>
+      <span>+7 (84457) 9-00-99</span>
+    </a>
+    
+    <!-- Кнопка бургер-меню справа -->
+    <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <nav class="shop-nav" id="shopNav">
+      <a href="/">Главная</a>
+      <a href="/catalog">Каталог</a>
+      <a href="/about" class="active">О нас</a>
+      <a href="/contacts">Контакты</a>
+    </nav>
+    
+    <!-- Десктопная версия телефона (скрывается на мобильных) -->
+    <div class="shop-header__actions">
+      <a href="tel:+78445790099" class="header-phone-btn header-phone-desktop">
+        <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+      </a>
     </div>
-  </header>
+  </div>
+</header>
 
   <main id="main-content">
     <section class="about-section border-b border-dark">

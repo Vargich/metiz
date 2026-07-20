@@ -147,7 +147,7 @@ async function initNewProducts() {
         return `<div class="product-card" style="display: flex; flex-direction: column; height: 100%;">
     <div class="product-img ${hasImg ? "has-img" : ""}" ${imgAction}>
         ${imgHtml}
-        <div class="product-badge new">✨ Новинка</div>
+        <div class="product-badge new">Новинка</div>
     </div>
     <div class="product-info" style="display:flex; flex-direction:column; justify-content:space-between; padding:16px; flex-grow:1;">
         <h3 style="font-size:12px; font-weight:900; text-transform:uppercase; line-height:1.4; margin:0 0 8px; white-space: normal; word-wrap: break-word;">
@@ -201,78 +201,99 @@ async function initCatalog(params) {
     allProducts = products;
     allCategories = cats;
     
-    const catGrid = document.getElementById("filters");
-            if (catGrid) {
-              catGrid.className = ""; 
-              
-              // Генерируем открытый плоский список крупных брутальных кнопок
-              catGrid.innerHTML = `
-                <div class="custom-flat-wrap">
-                  <div class="custom-flat-option" data-slug="all">
-                    <span>Все товары</span>
-                    <i class="fas fa-chevron-right"></i>
-                  </div>
-                  ${cats.map(c => `
-                    <div class="custom-flat-option" data-slug="${c.slug}">
-                      <span>${c.name}</span>
-                      <i class="fas fa-chevron-right"></i>
-                    </div>
-                  `).join('')}
-                </div>
-              `;
-
-              const options = catGrid.querySelectorAll(".custom-flat-option");
-              
-              // Задаем активный класс при первичной загрузке страницы
-              options.forEach(o => {
-                o.classList.toggle("active", o.dataset.slug === currentFilter);
-              });
-
-              options.forEach(opt => {
-                opt.onclick = (e) => {
-                  e.stopPropagation();
-                  const selectedSlug = opt.dataset.slug;
-                  currentFilter = selectedSlug;
-                  
-                  // Синхронизируем состояние с URL-адресом
-                  window.history.replaceState(
-                    {},
-                    "",
-                    selectedSlug === "all"
-                      ? "/catalog"
-                      : `/catalog?category=${selectedSlug}`,
-                  );
-
-                  // Переключаем активный класс в интерфейсе
-                  options.forEach(o => {
-                    o.classList.toggle("active", o.dataset.slug === selectedSlug);
-                  });
-
-                  // Закрываем шторку фильтров на мобильных после выбора категории
-                  const sidebar = document.getElementById("catalogSidebar");
-                  const overlay = document.getElementById("sidebarOverlay");
-                  if (sidebar && sidebar.classList.contains("open")) {
-                      sidebar.classList.remove("open");
-                      overlay.classList.remove("open");
-                      document.body.style.overflow = "";
-                  }
-
-                  // Перерисовываем товары
-                  renderProducts();
-                };
-              });
+    // Заполняем кастомный выпадающий список категорий
+    const dropdown = document.getElementById("categoryDropdown");
+    const btnText = document.getElementById("selectedCategoryName");
+    const hoverSelect = document.getElementById("categoryHoverSelect");
+    
+    if (dropdown && btnText) {
+      const activeCat = cats.find(c => c.slug === currentFilter);
+      btnText.textContent = activeCat ? activeCat.name : "Все товары";
+      
+      dropdown.innerHTML = `
+        <div class="hover-select-option ${currentFilter === 'all' ? 'active' : ''}" data-slug="all">
+          Все товары
+        </div>
+        ${cats.map(c => `
+          <div class="hover-select-option ${c.slug === currentFilter ? 'active' : ''}" data-slug="${c.slug}">
+            ${c.name}
+          </div>
+        `).join('')}
+      `;
+      
+      const options = dropdown.querySelectorAll(".hover-select-option");
+      
+      options.forEach(opt => {
+        opt.onclick = (e) => {
+          e.stopPropagation();
+          const selectedSlug = opt.dataset.slug;
+          currentFilter = selectedSlug;
+          
+          // Обновляем текст кнопки
+          const selectedText = opt.textContent.trim();
+          btnText.textContent = selectedText;
+          
+          // Обновляем активный класс
+          options.forEach(o => {
+            o.classList.toggle("active", o.dataset.slug === selectedSlug);
+          });
+          
+          // Обновляем URL
+          window.history.replaceState(
+            {},
+            "",
+            selectedSlug === "all"
+              ? "/catalog"
+              : `/catalog?category=${selectedSlug}`,
+          );
+          
+          // ПРИНУДИТЕЛЬНО ЗАКРЫВАЕМ ДРОПДАУН - убираем классы
+          if (hoverSelect) {
+            hoverSelect.classList.remove('hover-active');
+            // Добавляем класс, который блокирует :hover
+            hoverSelect.classList.add('closed');
+          }
+          if (dropdown) {
+            dropdown.classList.remove('open');
+          }
+          
+          // Через небольшую задержку убираем блокирующий класс,
+          // чтобы дропдаун снова мог открываться по наведению
+          setTimeout(() => {
+            if (hoverSelect) {
+              hoverSelect.classList.remove('closed');
             }
+          }, 200);
+          
+          renderProducts();
+        };
+      });
+    }
+
+    // Сортировка
+    const sortSelect = document.getElementById("sortSelect");
+    if (sortSelect) {
+      sortSelect.value = currentSort;
+      sortSelect.onchange = (e) => {
+        currentSort = e.target.value;
+        renderProducts();
+      };
+    }
+
+    // Поиск
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+      searchInput.value = currentSearch;
+      searchInput.oninput = (e) => {
+        currentSearch = e.target.value.toLowerCase();
+        renderProducts();
+      };
+    }
 
     setTimeout(() => {
       renderProducts();
     }, 300);
 
-    const searchInput = document.getElementById("searchInput");
-    if (searchInput)
-      searchInput.oninput = (e) => {
-        currentSearch = e.target.value.toLowerCase();
-        renderProducts();
-      };
   } catch (err) {
     grid.innerHTML = `<div style="grid-column:1/-1; color:red; font-weight:900;">Ошибка сервера при загрузке.</div>`;
   }
@@ -334,7 +355,7 @@ function renderProducts() {
   <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
       ${imgHtml}
       ${p.badge === 'hit' || p.badge === 'new' ? 
-         `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? '🔥 Хит' : '✨ Новинка'}</div>` 
+         `<div class="product-badge ${p.badge === 'new' ? 'new' : ''}">${p.badge === 'hit' ? 'Хит' : 'Новинка'}</div>` 
       : ''}
   </div>
   <div class="product-info" style="display:flex; flex-direction:column; justify-content:space-between; padding:16px; flex-grow:1;">
@@ -555,6 +576,130 @@ window.openImageModal = function (src) {
 window.closeImageModal = function () {
   document.getElementById("imgZoomModal").classList.remove("open");
 };
+
+
+// ===== БУРГЕР-МЕНЮ =====
+document.addEventListener('DOMContentLoaded', function() {
+  const burgerBtn = document.getElementById('burgerBtn');
+  const navMenu = document.getElementById('shopNav');
+  const body = document.body;
+
+  if (burgerBtn && navMenu) {
+    // Открытие/закрытие меню по клику на бургер
+    burgerBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.classList.toggle('active');
+      navMenu.classList.toggle('open');
+      body.classList.toggle('menu-open');
+    });
+
+    // Закрытие меню при клике на ссылку
+    const navLinks = navMenu.querySelectorAll('a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', function() {
+        burgerBtn.classList.remove('active');
+        navMenu.classList.remove('open');
+        body.classList.remove('menu-open');
+      });
+    });
+
+    // Закрытие меню при клике вне его (на фон)
+    document.addEventListener('click', function(e) {
+      if (navMenu.classList.contains('open')) {
+        const isClickInside = navMenu.contains(e.target) || burgerBtn.contains(e.target);
+        if (!isClickInside) {
+          burgerBtn.classList.remove('active');
+          navMenu.classList.remove('open');
+          body.classList.remove('menu-open');
+        }
+      }
+    });
+
+    // Закрытие меню при изменении размера окна на десктопный
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 992 && navMenu.classList.contains('open')) {
+        burgerBtn.classList.remove('active');
+        navMenu.classList.remove('open');
+        body.classList.remove('menu-open');
+      }
+    });
+
+    // Закрытие меню при нажатии Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && navMenu.classList.contains('open')) {
+        burgerBtn.classList.remove('active');
+        navMenu.classList.remove('open');
+        body.classList.remove('menu-open');
+      }
+    });
+  }
+});
+
+// ===== МОБИЛЬНЫЙ ДРОПДАУН КАТЕГОРИЙ =====
+function initMobileDropdown() {
+  const hoverSelect = document.getElementById('categoryHoverSelect');
+  const dropdown = document.getElementById('categoryDropdown');
+  const btn = document.getElementById('categorySelectBtn');
+  
+  if (!hoverSelect || !dropdown || !btn) return;
+  
+  // Создаем оверлей для мобильного дропдауна
+  let overlay = document.querySelector('.dropdown-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'dropdown-overlay';
+    document.body.appendChild(overlay);
+  }
+  
+  // Открытие по клику на кнопку
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const isOpen = hoverSelect.classList.contains('open');
+    
+    if (isOpen) {
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
+  });
+  
+  function openDropdown() {
+    hoverSelect.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeDropdown() {
+    hoverSelect.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  
+  // Закрытие при клике на оверлей
+  overlay.addEventListener('click', closeDropdown);
+  
+  // Закрытие при выборе категории
+  const options = dropdown.querySelectorAll('.hover-select-option');
+  options.forEach(opt => {
+    opt.addEventListener('click', function() {
+      setTimeout(closeDropdown, 100);
+    });
+  });
+  
+  // Закрытие при нажатии Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && hoverSelect.classList.contains('open')) {
+      closeDropdown();
+    }
+  });
+}
+
+// Вызываем инициализацию после загрузки
+document.addEventListener('DOMContentLoaded', function() {
+  initBurgerMenu();
+  initMobileDropdown();
+});
+
 
 // ===== ГЛОБАЛЬНЫЕ ПРИВЯЗКИ =====
 window.navigate = navigate;

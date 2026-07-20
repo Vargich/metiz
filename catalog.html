@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,182 +9,183 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
   <meta name="format-detection" content="telephone=no">
 </head>
+
 <body>
 
-  <!-- ШАПКА -->
-  <header class="shop-header">
-    <div class="shop-header__container">
-      <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
-      
-      <nav class="shop-nav">
-        <a href="/">Главная</a>
-        <a href="/catalog" class="active">Каталог</a>
-        <a href="/about">О нас</a>
-        <a href="/contacts">Контакты</a>
-      </nav>
-      
-      <div class="shop-header__actions">
-  <a href="tel:+78445790099" class="header-phone-btn">
-    <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
-  </a>
-</div>
+<!-- ШАПКА -->
+<header class="shop-header">
+  <div class="shop-header__container">
+    <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
+    
+    <!-- Телефон по центру (виден на всех экранах) -->
+    <a href="tel:+78445790099" class="header-phone-btn header-phone-mobile">
+      <i class="fas fa-phone-alt"></i>
+      <span>+7 (84457) 9-00-99</span>
+    </a>
+    
+    <!-- Кнопка бургер-меню справа -->
+    <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <nav class="shop-nav" id="shopNav">
+      <a href="/" >Главная</a>
+      <a href="/catalog" class="active">Каталог</a>
+      <a href="/about">О нас</a>
+      <a href="/contacts">Контакты</a>
+    </nav>
+    
+    <!-- Десктопная версия телефона (скрывается на мобильных) -->
+    <div class="shop-header__actions">
+      <a href="tel:+78445790099" class="header-phone-btn header-phone-desktop">
+        <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+      </a>
     </div>
-  </header>
+  </div>
+</header>
 
   <main id="main-content">
     <section class="catalog-layout">
-      <!-- БОКОВОЙ САЙДБАР (Фильтры) -->
-      <aside class="catalog-sidebar" id="catalogSidebar">
-        <!-- Кнопка закрытия шторки на мобильных -->
-        <button class="sidebar-close-btn" onclick="toggleSidebar()">&times;</button>
-        
-        <!-- Блок 1: Поиск -->
-        <div class="sidebar-block">
-          <h3 class="sidebar-title">Поиск</h3>
-          <div class="search-wrapper" style="min-width: 100%;">
-            <input type="text" id="searchInput" placeholder="ПОИСК ПО НАЗВАНИЮ..." class="search-input">
-            <i class="fas fa-search search-icon"></i>
-          </div>
-        </div>
-
-        <!-- Блок 2: Выбор категории -->
-        <div class="sidebar-block" style="border-bottom: none;">
-          <h3 class="sidebar-title">Категория</h3>
-          <div id="filters"></div> <!-- Сюда динамически вставится select из js -->
-        </div>
-      </aside>
-
-      <!-- ТЕМНАЯ ПОДЛОЖКА ДЛЯ МОБИЛЬНЫХ (Затемнение при выезде шторки) -->
-      <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-      <!-- ОСНОВНОЙ КОНТЕНТ (Сетка товаров) -->
       <div class="catalog-content">
-        <!-- Кнопка открытия фильтров на мобильных (скрыта на десктопе) -->
-        <div class="mobile-filter-bar">
-          <button class="hero-btn mobile-filter-btn" onclick="toggleSidebar()">
-            <i class="fas fa-sliders-h"></i> Показать фильтры
-          </button>
+        <!-- Верхняя панель -->
+        <div class="catalog-top-panel">
+          <!-- Поиск -->
+          <div class="search-wrapper-top">
+            <input type="text" id="searchInput" placeholder="Поиск по наименованию, ГОСТу или артикулу..."
+              class="search-input-top">
+            <button class="search-btn-top"><i class="fas fa-search"></i> Найти</button>
+          </div>
+
+          <!-- Фильтры -->
+          <!-- Ряд фильтрации и сортировки -->
+          <div class="filter-controls-row">
+            <div class="filter-group">
+              <span class="filter-label-top">Категория</span>
+              <div class="custom-hover-select" id="categoryHoverSelect">
+                <button class="hover-select-btn" id="categorySelectBtn">
+                  <span id="selectedCategoryName">Все товары</span>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="hover-select-dropdown" id="categoryDropdown">
+                  <!-- Категории загрузятся через JS -->
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label-top">Сортировка</span>
+              <select id="sortSelect" class="sort-select-top">
+                <option value="default">По умолчанию</option>
+                <option value="name">По алфавиту (А-Я)</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <!-- Сетка товаров -->
         <div class="products-grid" id="productsGrid">
-          <!-- Товары загрузятся сюда -->
-           <div class="skeleton-card">
-    <div class="skeleton-box" style="aspect-ratio: 1/1; margin-bottom: 12px;"></div>
-    <div class="skeleton-box" style="height: 14px; width: 80%; margin-bottom: 8px;"></div>
-    <div class="skeleton-box" style="height: 12px; width: 40%; margin-bottom: 12px;"></div>
-    <div class="skeleton-box" style="height: 32px; width: 100%;"></div>
-  </div>
-  <div class="skeleton-card">
-    <div class="skeleton-box" style="aspect-ratio: 1/1; margin-bottom: 12px;"></div>
-    <div class="skeleton-box" style="height: 14px; width: 75%; margin-bottom: 8px;"></div>
-    <div class="skeleton-box" style="height: 12px; width: 35%; margin-bottom: 12px;"></div>
-    <div class="skeleton-box" style="height: 32px; width: 100%;"></div>
-  </div>
-  <div class="skeleton-card">
-    <div class="skeleton-box" style="aspect-ratio: 1/1; margin-bottom: 12px;"></div>
-    <div class="skeleton-box" style="height: 14px; width: 85%; margin-bottom: 8px;"></div>
-    <div class="skeleton-box" style="height: 12px; width: 50%; margin-bottom: 12px;"></div>
-    <div class="skeleton-box" style="height: 32px; width: 100%;"></div>
-  </div>
-  <div class="skeleton-card">
-    <div class="skeleton-box" style="aspect-ratio: 1/1; margin-bottom: 12px;"></div>
-    <div class="skeleton-box" style="height: 14px; width: 70%; margin-bottom: 8px;"></div>
-    <div class="skeleton-box" style="height: 12px; width: 40%; margin-bottom: 12px;"></div>
-    <div class="skeleton-box" style="height: 32px; width: 100%;"></div>
-  </div>
+          <!-- Скелетоны -->
+          <div class="skeleton-card">
+            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
+              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
+              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
+              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
+              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
+              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
+              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
+              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
+              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
+              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </main>
-  
+
   <!-- ФУТЕР -->
-  <footer style="border-top:1px solid var(--dark);">
+  <footer style="border-top:1px solid var(--border-color);">
     <div class="footer-bottom">
       <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
-      
+
       <div class="footer-links">
         <a href="/admin-login">Админ-панель</a>
-        <a href="#">Политика</a>
-        <a href="#">Условия</a>
+        <a href="/policy">Политика конфиденциальности</a>
+        <a href="/terms">Пользовательское соглашение</a>
       </div>
-      
+
       <div class="footer-socials">
-        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">VK</a>
-        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">TG</a>
+        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn"
+          style="text-decoration: none; color: inherit;">VK</a>
+        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn"
+          style="text-decoration: none; color: inherit;">TG</a>
       </div>
     </div>
   </footer>
 
   <script type="module" src="/js/app.js"></script>
   <script>
-     document.addEventListener("DOMContentLoaded", () => {
-       const mainContent = document.getElementById('main-content');
-       if (mainContent) {
-         mainContent.classList.remove('loading');
-       }
-
-       // Инициализация наблюдателя за изменениями в фильтрах
-       const filtersContainer = document.getElementById('filters');
-       if (filtersContainer) {
-         const observer = new MutationObserver((mutations) => {
-           const nativeSelect = filtersContainer.querySelector('select');
-           // Если селект появился и мы его еще не скрывали
-           if (nativeSelect && !nativeSelect.classList.contains('hidden-select')) {
-             buildBrutalHoverSelect(nativeSelect);
-           }
-         });
-         observer.observe(filtersContainer, { childList: true, subtree: true });
-       }
-
-       // Функция построения крупного выпадающего списка на наведении
-       function buildBrutalHoverSelect(nativeSelect) {
-         nativeSelect.classList.add('hidden-select');
-
-         const proxyContainer = document.createElement('div');
-         proxyContainer.className = 'brutal-hover-select';
-
-         const btn = document.createElement('button');
-         btn.className = 'brutal-hover-btn';
-         btn.innerHTML = `<span>${nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Выбрать категорию'}</span> <i class="fas fa-chevron-down"></i>`;
-         proxyContainer.appendChild(btn);
-
-         const dropdown = document.createElement('div');
-         dropdown.className = 'brutal-hover-dropdown';
-
-         Array.from(nativeSelect.options).forEach((opt, idx) => {
-           const item = document.createElement('div');
-           item.className = 'brutal-hover-item' + (idx === nativeSelect.selectedIndex ? ' active' : '');
-           item.textContent = opt.text;
-
-           item.addEventListener('click', () => {
-             nativeSelect.value = opt.value;
-             btn.querySelector('span').textContent = opt.text;
-
-             dropdown.querySelectorAll('.brutal-hover-item').forEach(el => el.classList.remove('active'));
-             item.classList.add('active');
-
-             // Вызов нативного события изменения фильтра из app.js
-             nativeSelect.dispatchEvent(new Event('change'));
-           });
-
-           dropdown.appendChild(item);
-         });
-
-         proxyContainer.appendChild(dropdown);
-         nativeSelect.parentNode.appendChild(proxyContainer);
-       }
-     });
-
-     function toggleSidebar() {
-       const sidebar = document.getElementById('catalogSidebar');
-       const overlay = document.getElementById('sidebarOverlay');
-       if (sidebar && overlay) {
-         sidebar.classList.toggle('open');
-         overlay.classList.toggle('open');
-       }
-     }
-     document.getElementById('current-year').textContent = new Date().getFullYear();
+    document.addEventListener("DOMContentLoaded", () => {
+      const mainContent = document.getElementById('main-content');
+      if (mainContent) {
+        mainContent.classList.remove('loading');
+      }
+    });
+    document.getElementById('current-year').textContent = new Date().getFullYear();
   </script>
 </body>
+
 </html>
