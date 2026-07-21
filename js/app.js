@@ -108,6 +108,7 @@ function initPageFunctions(
   params = new URLSearchParams(window.location.search),
 ) {
   if (path === "/" || path === "/index") {
+    initHeroSlider();
     initPromoProducts();
     initNewProducts();
   } else if (path.includes("catalog")) initCatalog(params);
@@ -201,7 +202,6 @@ async function initCatalog(params) {
     allProducts = products;
     allCategories = cats;
     
-    // Заполняем кастомный выпадающий список категорий
     const dropdown = document.getElementById("categoryDropdown");
     const btnText = document.getElementById("selectedCategoryName");
     const hoverSelect = document.getElementById("categoryHoverSelect");
@@ -229,16 +229,13 @@ async function initCatalog(params) {
           const selectedSlug = opt.dataset.slug;
           currentFilter = selectedSlug;
           
-          // Обновляем текст кнопки
           const selectedText = opt.textContent.trim();
           btnText.textContent = selectedText;
           
-          // Обновляем активный класс
           options.forEach(o => {
             o.classList.toggle("active", o.dataset.slug === selectedSlug);
           });
           
-          // Обновляем URL
           window.history.replaceState(
             {},
             "",
@@ -247,18 +244,14 @@ async function initCatalog(params) {
               : `/catalog?category=${selectedSlug}`,
           );
           
-          // ПРИНУДИТЕЛЬНО ЗАКРЫВАЕМ ДРОПДАУН - убираем классы
           if (hoverSelect) {
             hoverSelect.classList.remove('hover-active');
-            // Добавляем класс, который блокирует :hover
             hoverSelect.classList.add('closed');
           }
           if (dropdown) {
             dropdown.classList.remove('open');
           }
           
-          // Через небольшую задержку убираем блокирующий класс,
-          // чтобы дропдаун снова мог открываться по наведению
           setTimeout(() => {
             if (hoverSelect) {
               hoverSelect.classList.remove('closed');
@@ -270,7 +263,6 @@ async function initCatalog(params) {
       });
     }
 
-    // Сортировка
     const sortSelect = document.getElementById("sortSelect");
     if (sortSelect) {
       sortSelect.value = currentSort;
@@ -280,7 +272,6 @@ async function initCatalog(params) {
       };
     }
 
-    // Поиск
     const searchInput = document.getElementById("searchInput");
     if (searchInput) {
       searchInput.value = currentSearch;
@@ -316,7 +307,6 @@ function toggleSidebar() {
   }
 }
 
-// Отрисовка каталога
 function renderProducts() {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
@@ -577,63 +567,57 @@ window.closeImageModal = function () {
   document.getElementById("imgZoomModal").classList.remove("open");
 };
 
-
 // ===== БУРГЕР-МЕНЮ =====
-document.addEventListener('DOMContentLoaded', function() {
+function initBurgerMenu() {
   const burgerBtn = document.getElementById('burgerBtn');
   const navMenu = document.getElementById('shopNav');
   const body = document.body;
 
-  if (burgerBtn && navMenu) {
-    // Открытие/закрытие меню по клику на бургер
-    burgerBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      this.classList.toggle('active');
-      navMenu.classList.toggle('open');
-      body.classList.toggle('menu-open');
-    });
+  if (!burgerBtn || !navMenu) return;
 
-    // Закрытие меню при клике на ссылку
-    const navLinks = navMenu.querySelectorAll('a');
-    navLinks.forEach(link => {
-      link.addEventListener('click', function() {
-        burgerBtn.classList.remove('active');
-        navMenu.classList.remove('open');
-        body.classList.remove('menu-open');
-      });
-    });
+  burgerBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    this.classList.toggle('active');
+    navMenu.classList.toggle('open');
+    body.classList.toggle('menu-open');
+  });
 
-    // Закрытие меню при клике вне его (на фон)
-    document.addEventListener('click', function(e) {
-      if (navMenu.classList.contains('open')) {
-        const isClickInside = navMenu.contains(e.target) || burgerBtn.contains(e.target);
-        if (!isClickInside) {
-          burgerBtn.classList.remove('active');
-          navMenu.classList.remove('open');
-          body.classList.remove('menu-open');
-        }
-      }
+  const navLinks = navMenu.querySelectorAll('a');
+  navLinks.forEach(link => {
+    link.addEventListener('click', function() {
+      burgerBtn.classList.remove('active');
+      navMenu.classList.remove('open');
+      body.classList.remove('menu-open');
     });
+  });
 
-    // Закрытие меню при изменении размера окна на десктопный
-    window.addEventListener('resize', function() {
-      if (window.innerWidth > 992 && navMenu.classList.contains('open')) {
+  document.addEventListener('click', function(e) {
+    if (navMenu.classList.contains('open')) {
+      const isClickInside = navMenu.contains(e.target) || burgerBtn.contains(e.target);
+      if (!isClickInside) {
         burgerBtn.classList.remove('active');
         navMenu.classList.remove('open');
         body.classList.remove('menu-open');
       }
-    });
+    }
+  });
 
-    // Закрытие меню при нажатии Escape
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && navMenu.classList.contains('open')) {
-        burgerBtn.classList.remove('active');
-        navMenu.classList.remove('open');
-        body.classList.remove('menu-open');
-      }
-    });
-  }
-});
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 992 && navMenu.classList.contains('open')) {
+      burgerBtn.classList.remove('active');
+      navMenu.classList.remove('open');
+      body.classList.remove('menu-open');
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && navMenu.classList.contains('open')) {
+      burgerBtn.classList.remove('active');
+      navMenu.classList.remove('open');
+      body.classList.remove('menu-open');
+    }
+  });
+}
 
 // ===== МОБИЛЬНЫЙ ДРОПДАУН КАТЕГОРИЙ =====
 function initMobileDropdown() {
@@ -643,7 +627,6 @@ function initMobileDropdown() {
   
   if (!hoverSelect || !dropdown || !btn) return;
   
-  // Создаем оверлей для мобильного дропдауна
   let overlay = document.querySelector('.dropdown-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -651,7 +634,6 @@ function initMobileDropdown() {
     document.body.appendChild(overlay);
   }
   
-  // Открытие по клику на кнопку
   btn.addEventListener('click', function(e) {
     e.stopPropagation();
     const isOpen = hoverSelect.classList.contains('open');
@@ -675,10 +657,8 @@ function initMobileDropdown() {
     document.body.style.overflow = '';
   }
   
-  // Закрытие при клике на оверлей
   overlay.addEventListener('click', closeDropdown);
   
-  // Закрытие при выборе категории
   const options = dropdown.querySelectorAll('.hover-select-option');
   options.forEach(opt => {
     opt.addEventListener('click', function() {
@@ -686,7 +666,6 @@ function initMobileDropdown() {
     });
   });
   
-  // Закрытие при нажатии Escape
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && hoverSelect.classList.contains('open')) {
       closeDropdown();
@@ -694,12 +673,201 @@ function initMobileDropdown() {
   });
 }
 
-// Вызываем инициализацию после загрузки
 document.addEventListener('DOMContentLoaded', function() {
   initBurgerMenu();
   initMobileDropdown();
 });
 
+// ===== HERO СЛАЙДЕР =====
+async function initHeroSlider() {
+  const slider = document.getElementById('heroSlider');
+  const dotsContainer = document.getElementById('heroSliderDots');
+  
+  if (!slider || !dotsContainer) {
+    console.warn('Элементы слайдера не найдены');
+    return;
+  }
+
+  try {
+    const response = await fetch('/banner/list.json');
+    
+    if (!response.ok) {
+      throw new Error(`Ошибка загрузки: ${response.status}`);
+    }
+    
+    const banners = await response.json();
+    console.log(`📸 Найдено баннеров: ${banners.length}`, banners);
+    
+    const textSlide = {
+      tag: 'Надежный партнер с 2006 года',
+      title: 'Крепёж<br/>Сила<br/><span class="text-outline">Сталь</span>',
+      desc: 'Знаем толк в крепеже и сварке',
+      btn1: { text: 'Смотреть каталог', link: '/catalog' },
+      btn2: { text: 'О компании', link: '/about' }
+    };
+
+    const promoData = [
+      { badge: 'Новинка', title: 'Высокопрочный крепёж класса 10.9', desc: 'Новое поступление болтов и гаек повышенной прочности.', price: '350', unit: 'кг', link: '/catalog?category=fasteners' },
+      { badge: 'Поступление', title: 'Электроды УОНИ-13/55 (ЧЗСИ)', desc: 'Профессиональные сварочные электроды для ответственных швов.', price: '280', unit: 'уп', link: '/catalog?category=welding' },
+      { badge: 'Хит', title: 'Сварочное оборудование ДОНМЕТ', desc: 'Надежная техника для сварки и резки металла.', price: '1200', unit: 'шт', link: '/catalog?category=equipment' },
+      { badge: 'Акция', title: 'Электроинструмент Makita и Bosch', desc: 'Профессиональный инструмент для строительных задач.', price: '500', unit: 'шт', link: '/catalog?category=tools' },
+      { badge: 'Новинка', title: 'Промышленный прокат металла', desc: 'Листы, уголки, арматура и профтрубы в наличии.', price: '200', unit: 'кг', link: '/catalog?category=metal' }
+    ];
+
+    let allSlides = [];
+
+    allSlides.push({ type: 'text', data: textSlide });
+
+    banners.forEach((filename, index) => {
+      const data = promoData[index % promoData.length];
+      allSlides.push({ type: 'image', filename: filename, data: data });
+    });
+
+    const slidesHtml = allSlides.map((slide, index) => {
+      const activeClass = index === 0 ? 'active' : '';
+      
+      if (slide.type === 'text') {
+        const d = slide.data;
+        return `
+          <div class="hero-slide hero-slide-text ${activeClass}">
+            <div class="hero-slide-text-content">
+              <div class="hero-slide-text-tag">${d.tag}</div>
+              <h1 class="hero-slide-text-title">${d.title}</h1>
+              <p class="hero-slide-text-desc">${d.desc}</p>
+              <div class="hero-slide-text-buttons">
+                <a href="${d.btn1.link}" class="hero-slide-text-btn primary">${d.btn1.text}</a>
+                <a href="${d.btn2.link}" class="hero-slide-text-btn secondary">${d.btn2.text}</a>
+              </div>
+            </div>
+            <div class="hero-slide-overlay"></div>
+          </div>
+        `;
+      } else {
+        const d = slide.data;
+        return `
+          <div class="hero-slide ${activeClass}">
+            <img src="/banner/${slide.filename}" alt="${d.title}" loading="${index === 0 ? 'eager' : 'lazy'}">
+            <div class="hero-slide-overlay"></div>
+            <!--<div class="promo-banner-card">
+              <span class="promo-banner-badge">${d.badge}</span>
+              <h3 class="promo-banner-title">${d.title}</h3>
+              <p class="promo-banner-desc">${d.desc}</p>
+              <div class="promo-banner-action-row">
+                <div class="promo-banner-price">от <span class="price-num">${d.price}</span> ₽/${d.unit}</div>
+                <a href="${d.link}" class="promo-banner-btn">Подробнее <i class="fas fa-arrow-right"></i></a>
+              </div>
+            </div>-->
+          </div>
+        `;
+      }
+    }).join('');
+
+    slider.innerHTML = slidesHtml;
+
+    const totalSlides = allSlides.length;
+    dotsContainer.innerHTML = Array.from({ length: totalSlides }, (_, i) => `
+      <button class="hero-slider-dot ${i === 0 ? 'active' : ''}" data-index="${i}" aria-label="Слайд ${i + 1}"></button>
+    `).join('');
+
+    startSlider(slider, dotsContainer, totalSlides);
+
+  } catch (error) {
+    console.error('❌ Ошибка загрузки баннеров:', error);
+    
+    slider.innerHTML = `
+      <div class="hero-slide active hero-slide-text">
+        <div class="hero-slide-text-content">
+          <div class="hero-slide-text-tag">Надежный партнер с 2006 года</div>
+          <h1 class="hero-slide-text-title">Крепёж<br/>Сила<br/><span class="text-outline">Сталь</span></h1>
+          <p class="hero-slide-text-desc">Знаем толк в крепеже и сварке</p>
+          <div class="hero-slide-text-buttons">
+            <a href="/catalog" class="hero-slide-text-btn primary">Смотреть каталог</a>
+            <a href="/about" class="hero-slide-text-btn secondary">О компании</a>
+          </div>
+        </div>
+        <div class="hero-slide-overlay"></div>
+      </div>
+    `;
+    dotsContainer.innerHTML = `<button class="hero-slider-dot active" data-index="0"></button>`;
+  }
+}
+
+// ===== ЗАПУСК СЛАЙДЕРА (ОДНА ФУНКЦИЯ) =====
+function startSlider(slider, dotsContainer, totalSlides) {
+  if (totalSlides === 0) return;
+  
+  let current = 0;
+  let interval;
+
+  function goTo(index) {
+    if (index === current) return;
+    const slidesElements = slider.querySelectorAll('.hero-slide');
+    const dots = dotsContainer.querySelectorAll('.hero-slider-dot');
+    
+    if (slidesElements.length === 0) return;
+    
+    slidesElements[current]?.classList.remove('active');
+    dots[current]?.classList.remove('active');
+    
+    const targetIndex = ((index % totalSlides) + totalSlides) % totalSlides;
+    slidesElements[targetIndex]?.classList.add('active');
+    dots[targetIndex]?.classList.add('active');
+    
+    current = targetIndex;
+  }
+
+  function next() {
+    goTo(current + 1);
+  }
+
+  dotsContainer.querySelectorAll('.hero-slider-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      const index = parseInt(dot.dataset.index);
+      if (!isNaN(index)) {
+        goTo(index);
+        resetInterval();
+      }
+    });
+  });
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+  
+  slider.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  slider.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        goTo(current + 1);
+      } else {
+        goTo(current - 1);
+      }
+      resetInterval();
+    }
+  }, { passive: true });
+
+  function startInterval() {
+    if (interval) clearInterval(interval);
+    interval = setInterval(next, 6000);
+  }
+
+  function resetInterval() {
+    clearInterval(interval);
+    startInterval();
+  }
+
+  const container = slider.closest('.hero');
+  if (container) {
+    container.addEventListener('mouseenter', () => clearInterval(interval));
+    container.addEventListener('mouseleave', startInterval);
+  }
+
+  startInterval();
+}
 
 // ===== ГЛОБАЛЬНЫЕ ПРИВЯЗКИ =====
 window.navigate = navigate;

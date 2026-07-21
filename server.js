@@ -294,6 +294,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use('/image', express.static(path.join(__dirname, 'image')));
+app.use('/banner', express.static(path.join(__dirname, 'banner')));
 
 const authenticateToken = async (req, res, next) => {
     const token = req.cookies.token;
