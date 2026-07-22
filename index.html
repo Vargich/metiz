@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="ru">
+
 <head>
   <script type="application/ld+json">
 {
@@ -50,187 +51,246 @@
   <meta name="description" content="Метизы, сварочное оборудование, инструмент и промышленный прокат" />
   <meta name="format-detection" content="telephone=no">
 </head>
+
 <body>
 
-<!-- ШАПКА -->
-<header class="shop-header">
-  <div class="shop-header__container">
-    <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
-    
-    <a href="tel:+78445790099" class="header-phone-btn header-phone-mobile">
-      <i class="fas fa-phone-alt"></i>
-      <span>+7 (84457) 9-00-99</span>
-    </a>
-    
-    <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-    
-    <nav class="shop-nav" id="shopNav">
-      <a href="/" class="active">Главная</a>
-      <a href="/catalog">Каталог</a>
-      <a href="/about">О нас</a>
-      <a href="/contacts">Контакты</a>
-    </nav>
-    
-    <div class="shop-header__actions">
-      <a href="tel:+78445790099" class="header-phone-btn header-phone-desktop">
-        <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+  <!-- ШАПКА -->
+  <header class="shop-header">
+    <div class="shop-header__container">
+      <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
+
+      <a href="tel:+78445790099" class="header-phone-btn header-phone-mobile">
+        <i class="fas fa-phone-alt"></i>
+        <span>+7 (84457) 9-00-99</span>
       </a>
-    </div>
-  </div>
-</header>
 
-<main id="main-content">
-  
- <!-- HERO СЛАЙДЕР НА ВСЮ ШИРИНУ -->
-<!-- HERO СЛАЙДЕР -->
-<section class="hero loaded">
-  <div class="hero-slider" id="heroSlider">
-    <!-- Слайды генерируются JS -->
-  </div>
-  <div class="hero-slider-dots" id="heroSliderDots"></div>
-</section>
+      <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
 
-  <!-- НОВИНКИ -->
-  <section class="new-section">
-    <div style="margin: 0 auto;">
-      <h2 style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; color: #10B981; margin-bottom: 8px;">Новинки</h2>
-      <div style="font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 40px; line-height: 1.1;">Свежие<br/><span class="text-outline">Поступления</span></div>
-      
-      <div class="products-grid" id="newProductsContainer">
-        <p style="font-size: 11px; opacity:0.5; text-transform:uppercase; font-weight:900;">Загрузка новинок...</p>
+      <nav class="shop-nav" id="shopNav">
+        <a href="/" class="active">Главная</a>
+        <a href="/catalog">Каталог</a>
+        <a href="/about">О нас</a>
+        <a href="/contacts">Контакты</a>
+      </nav>
+
+      <div class="shop-header__actions">
+        <a href="tel:+78445790099" class="header-phone-btn header-phone-desktop">
+          <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+        </a>
       </div>
     </div>
-  </section>
+  </header>
 
-  <!-- О КОМПАНИИ -->
-  <section id="about" class="about-section border-b border-dark">
-    <div class="about-content">
-      <div class="about-title">Наш опыт —<br/>Ваша <span class="text-brand">надёжность</span></div>
-      <p class="about-p">
-        Метиз Электрод — ведущий поставщик промышленных материалов и оборудования. 
-        С 2006 года мы обеспечиваем предприятия Камышина и Волгоградской области высококачественным крепежом и сварочной техникой.
-      </p>
-      <div class="about-grid">
-        <div class="about-grid-item">Работаем с НДС</div>
-        <div class="about-grid-item">привезем позиции под заказ</div>
-        <div class="about-grid-item">более 15 лет на рынке</div>
-        <div class="about-grid-item">1000+ позиций</div>
+  <main id="main-content">
+
+    <!-- О КОМПАНИИ + СЛАЙДЕР -->
+    <section id="about" class="about-section about-fullscreen">
+      <div class="about-content about-content-full">
+        <div class="about-tag">О компании</div>
+        <div class="about-title">Наш опыт —<br />Ваша <span class="text-brand">надёжность</span></div>
+        <p class="about-p">
+          Метиз Электрод — ведущий поставщик промышленных материалов и оборудования.
+          С 2006 года мы обеспечиваем предприятия Камышина и Волгоградской области высококачественным крепежом и
+          сварочной техникой.
+        </p>
+        <div class="about-grid">
+          <div class="about-grid-item">Работаем с НДС</div>
+          <div class="about-grid-item">привезем позиции под заказ</div>
+          <div class="about-grid-item">более 15 лет на рынке</div>
+          <div class="about-grid-item">1000+ позиций</div>
+        </div>
+      </div>
+
+      <!-- СЛАЙДЕР С БАННЕРАМИ -->
+      <div class="about-sidebar about-slider-wrapper">
+        <div class="about-slider-container">
+          <div class="about-slider" id="aboutSlider">
+            <!-- Баннер 1: Сварочные материалы -->
+            <div class="about-slide active">
+              <div class="about-banner-slide about-banner-welding">
+                <span class="about-banner-watermark">СВАРКА</span>
+                <div class="about-banner-content">
+                  <div class="about-banner-divider"></div>
+                  <span class="about-banner-badge">НАКС сертификация</span>
+                  <h3 class="about-banner-title">Сварочные <span class="accent">материалы</span></h3>
+                  <p class="about-banner-subtitle">Электроды УОНИ, МР-3, сварочная проволока и припои.</p>
+                  <a href="/catalog?category=welding" class="about-banner-btn">Подробнее <i
+                      class="fas fa-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Баннер 2: Крепеж и метизы -->
+            <div class="about-slide">
+              <div class="about-banner-slide about-banner-fasteners">
+                <span class="about-banner-watermark">КРЕПЕЖ</span>
+                <div class="about-banner-content">
+                  <div class="about-banner-divider"></div>
+                  <span class="about-banner-badge">Класс прочности до 12.9</span>
+                  <h3 class="about-banner-title">Метизы и <span class="accent">крепеж</span></h3>
+                  <p class="about-banner-subtitle">Болты, гайки, шайбы, анкеры и дюбели всех типоразмеров.</p>
+                  <a href="/catalog?category=fasteners" class="about-banner-btn">Подробнее <i
+                      class="fas fa-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Баннер 3: Электроинструмент -->
+            <div class="about-slide">
+              <div class="about-banner-slide about-banner-tools">
+                <span class="about-banner-watermark">ИНСТРУМЕНТ</span>
+                <div class="about-banner-content">
+                  <div class="about-banner-divider"></div>
+                  <span class="about-banner-badge">Официальный дилер</span>
+                  <h3 class="about-banner-title">Электро<span class="accent">инструмент</span></h3>
+                  <p class="about-banner-subtitle">Дрели, УШМ, перфораторы Makita, Bosch, Ресанта.</p>
+                  <a href="/catalog?category=tools" class="about-banner-btn">Подробнее <i
+                      class="fas fa-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Баннер 4: Прокат металла -->
+            <div class="about-slide">
+              <div class="about-banner-slide about-banner-metal">
+                <span class="about-banner-watermark">ПРОКАТ</span>
+                <div class="about-banner-content">
+                  <div class="about-banner-divider"></div>
+                  <span class="about-banner-badge">Поставки по ГОСТ</span>
+                  <h3 class="about-banner-title">Прокат <span class="accent">металла</span></h3>
+                  <p class="about-banner-subtitle">Листовой прокат, уголки, арматура, профильные трубы.</p>
+                  <a href="/catalog?category=metal" class="about-banner-btn">Подробнее <i
+                      class="fas fa-arrow-right"></i></a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Точки навигации для about слайдера -->
+            <div class="about-slider-dots" id="aboutSliderDots">
+              <button class="about-slider-dot active" data-index="0"></button>
+              <button class="about-slider-dot" data-index="1"></button>
+              <button class="about-slider-dot" data-index="2"></button>
+              <button class="about-slider-dot" data-index="3"></button>
+            </div>
+          </div>
+        </div>
+    </section>
+
+
+    <!-- НОВИНКИ -->
+    <section class="new-section">
+      <div style="margin: 0 auto;">
+        <h2
+          style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; color: #10B981; margin-bottom: 8px;">
+          Новинки</h2>
+        <div
+          style="font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 40px; line-height: 1.1;">
+          Свежие<br /><span class="text-outline">Поступления</span></div>
+
+        <div class="products-grid" id="newProductsContainer">
+          <p style="font-size: 11px; opacity:0.5; text-transform:uppercase; font-weight:900;">Загрузка новинок...</p>
+        </div>
+      </div>
+    </section>
+    <!-- БРЕНДЫ -->
+    <section class="brands-section">
+      <div style="text-align: center; margin-bottom: 40px;">
+        <div class="brand-tag">Работаем с проверенными марками</div>
+        <h2 class="brand-section-title">Ассортимент известных <span class="text-brand">производителей</span></h2>
+      </div>
+      <div class="brands-grid">
+        <div class="brand-item">MAKITA</div>
+        <div class="brand-item">BOSCH</div>
+        <div class="brand-item">РЕСАНТА</div>
+        <div class="brand-item">ДЕКО</div>
+        <div class="brand-item">СИБРТЕХ</div>
+        <div class="brand-item">КРАТОН</div>
+        <div class="brand-item">ЧЗСИ</div>
+        <div class="brand-item">ДОНМЕТ</div>
+      </div>
+    </section>
+
+    <!-- КОНТАКТЫ -->
+    <section id="contacts" class="contacts-grid">
+      <div class="contact-box">
+        <div class="contact-tag">Менеджеры</div>
+        <div class="contact-value">+7(84457) 9-00-99</div>
+      </div>
+      <div class="contact-box">
+        <div class="contact-tag">Коммерческий отдел</div>
+        <div class="contact-value">+7(961)089-38-12</div>
+      </div>
+      <div class="contact-box">
+        <div class="contact-tag">Email</div>
+        <div class="contact-value">metiz-elektrod@mail.ru</div>
+      </div>
+    </section>
+
+    <!-- PROMO -->
+    <section class="promo-section">
+      <div class="promo-bg-text">МЕТИЗЭЛЕКТРОД</div>
+      <div class="promo-content">
+        <h2 class="promo-title">Гибкие<br />Цены</h2>
+        <button class="promo-btn"
+          onclick="location.href='mailto:metiz-elektrod@mail.ru?subject=Сотрудничество&body=Здравствуйте!%0A%0AМеня интересует сотрудничество с Метиз Электрод.%0A%0AС уважением,'">Сотрудничать
+          с нами</button>
+      </div>
+    </section>
+
+    <!-- БЕГУЩАЯ СТРОКА -->
+    <div class="ticker-wrap">
+      <div class="ticker">
+        <span>БОЛТЫ • ГАЙКИ • ШАЙБЫ • ШПИЛЬКИ • АНКЕРЫ • ДЮБЕЛИ • ШУРУПЫ • ГВОЗДИ • ЗАКЛЁПКИ • ШТИФТЫ • ТРОСЫ • ЦЕПИ •
+          СВАРОЧНЫЕ АППАРАТЫ • ЭЛЕКТРОДЫ • ПРОВОЛОКА • ГАЗОРЕЗКА • ДРЕЛИ • УШМ • ПЕРФОРАТОРЫ •</span>
+        <span>БОЛТЫ • ГАЙКИ • ШАЙБЫ • ШПИЛЬКИ • АНКЕРЫ • ДЮБЕЛИ • ШУРУПЫ • ГВОЗДИ • ЗАКЛЁПКИ • ШТИФТЫ • ТРОСЫ • ЦЕПИ •
+          СВАРОЧНЫЕ АППАРАТЫ • ЭЛЕКТРОДЫ • ПРОВОЛОКА • ГАЗОРЕЗКА • ДРЕЛИ • УШМ • ПЕРФОРАТОРЫ •</span>
       </div>
     </div>
-    <div class="about-sidebar">
-      <ul class="about-list">
-        <li class="about-list-item">
-          <h2>Метизы и крепёж</h2>
-          <p>Болты, гайки, шайбы, анкеры и дюбели всех типоразмеров.</p>
-        </li>
-        <li class="about-list-item">
-          <h2>Сварочная техника</h2>
-          <p>Профессиональное оборудование ДОНМЕТ и НЭЗ.</p>
-        </li>
-        <li class="about-list-item">
-          <h2>Электроинструмент</h2>
-          <p>Makita, Bosch, Ресанта — всё для строительства.</p>
-        </li>
-        <li class="about-list-item" style="margin-bottom:0;">
-          <h2>Промышленный прокат</h2>
-          <p>Листы, уголки, арматура и профтрубы.</p>
-        </li>
-      </ul>
-    </div>
-  </section>
 
-  <!-- БРЕНДЫ -->
-  <section class="brands-section">
-    <div style="text-align: center; margin-bottom: 40px;">
-      <div class="brand-tag">Работаем с проверенными марками</div>
-      <h2 class="brand-section-title">Ассортимент известных <span class="text-brand">производителей</span></h2>
-    </div>
-    <div class="brands-grid">
-      <div class="brand-item">MAKITA</div>
-      <div class="brand-item">BOSCH</div>
-      <div class="brand-item">РЕСАНТА</div>
-      <div class="brand-item">ДЕКО</div>
-      <div class="brand-item">СИБРТЕХ</div>
-      <div class="brand-item">КРАТОН</div>
-      <div class="brand-item">ЧЗСИ</div>
-      <div class="brand-item">ДОНМЕТ</div>
-    </div>
-  </section>
+    <!-- ПРЕИМУЩЕСТВА -->
+    <section class="footer-benefits">
+      <div class="benefit-item">
+        <div class="benefit-title">Налоги</div>
+        <div class="benefit-desc">Работаем с НДС</div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title">Склад</div>
+        <div class="benefit-desc">3000+ позиций в наличии</div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title">Оплата</div>
+        <div class="benefit-desc">Безнал и наличные</div>
+      </div>
+    </section>
+  </main>
 
-  <!-- КОНТАКТЫ -->
-  <section id="contacts" class="contacts-grid">
-    <div class="contact-box">
-      <div class="contact-tag">Менеджеры</div>
-      <div class="contact-value">+7(84457) 9-00-99</div>
-    </div>
-    <div class="contact-box">
-      <div class="contact-tag">Коммерческий отдел</div>
-      <div class="contact-value">+7(961)089-38-12</div>
-    </div>
-    <div class="contact-box">
-      <div class="contact-tag">Email</div>
-      <div class="contact-value">metiz-elektrod@mail.ru</div>
-    </div>
-  </section>
+  <footer style="border-top:1px solid var(--dark);">
+    <div class="footer-bottom">
+      <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
 
-  <!-- PROMO -->
-  <section class="promo-section">
-    <div class="promo-bg-text">МЕТИЗЭЛЕКТРОД</div>
-    <div class="promo-content">
-      <h2 class="promo-title">Гибкие<br/>Цены</h2>
-      <button class="promo-btn" onclick="location.href='mailto:metiz-elektrod@mail.ru?subject=Сотрудничество&body=Здравствуйте!%0A%0AМеня интересует сотрудничество с Метиз Электрод.%0A%0AС уважением,'">Сотрудничать с нами</button>
-    </div>
-  </section>
+      <div class="footer-links">
+        <a href="/policy">Политика</a>
+        <a href="/terms">Условия</a>
+      </div>
 
-  <!-- БЕГУЩАЯ СТРОКА -->
-  <div class="ticker-wrap">
-    <div class="ticker">
-      <span>БОЛТЫ • ГАЙКИ • ШАЙБЫ • ШПИЛЬКИ • АНКЕРЫ • ДЮБЕЛИ • ШУРУПЫ • ГВОЗДИ • ЗАКЛЁПКИ • ШТИФТЫ • ТРОСЫ • ЦЕПИ • СВАРОЧНЫЕ АППАРАТЫ • ЭЛЕКТРОДЫ • ПРОВОЛОКА • ГАЗОРЕЗКА • ДРЕЛИ • УШМ • ПЕРФОРАТОРЫ •</span>
-      <span>БОЛТЫ • ГАЙКИ • ШАЙБЫ • ШПИЛЬКИ • АНКЕРЫ • ДЮБЕЛИ • ШУРУПЫ • ГВОЗДИ • ЗАКЛЁПКИ • ШТИФТЫ • ТРОСЫ • ЦЕПИ • СВАРОЧНЫЕ АППАРАТЫ • ЭЛЕКТРОДЫ • ПРОВОЛОКА • ГАЗОРЕЗКА • ДРЕЛИ • УШМ • ПЕРФОРАТОРЫ •</span>
+      <div class="footer-socials">
+        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn"
+          style="text-decoration: none; color: inherit;">VK</a>
+        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn"
+          style="text-decoration: none; color: inherit;">TG</a>
+      </div>
     </div>
-  </div>
+  </footer>
 
-  <!-- ПРЕИМУЩЕСТВА -->
-  <section class="footer-benefits">
-    <div class="benefit-item">
-      <div class="benefit-title">Налоги</div>
-      <div class="benefit-desc">Работаем с НДС</div>
-    </div>
-    <div class="benefit-item">
-      <div class="benefit-title">Склад</div>
-      <div class="benefit-desc">3000+ позиций в наличии</div>
-    </div>
-    <div class="benefit-item">
-      <div class="benefit-title">Оплата</div>
-      <div class="benefit-desc">Безнал и наличные</div>
-    </div>
-  </section>
-</main>
+  <button id="scroll-to-top" title="Наверх" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    <i class="fas fa-arrow-up"></i>
+  </button>
 
-<footer style="border-top:1px solid var(--dark);">
-  <div class="footer-bottom">
-    <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
-    
-    <div class="footer-links">
-      <a href="/policy">Политика</a>
-      <a href="/terms">Условия</a>
-    </div>
-    
-    <div class="footer-socials">
-      <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">VK</a>
-      <a href="https://t.me/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">TG</a>
-    </div>
-  </div>
-</footer>
-
-<button id="scroll-to-top" title="Наверх" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-  <i class="fas fa-arrow-up"></i>
-</button>
-
-<script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/app.js"></script>
 </body>
+
 </html>

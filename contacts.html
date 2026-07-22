@@ -9,7 +9,8 @@
   <meta name="format-detection" content="telephone=no">
 </head>
 <body>
- <!-- ШАПКА -->
+
+<!-- ШАПКА -->
 <header class="shop-header">
   <div class="shop-header__container">
     <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
@@ -43,95 +44,98 @@
   </div>
 </header>
 
-  <main id="main-content">
-    <section class="about-section border-b border-dark">
-      <!-- ИНТЕРАКТИВНАЯ КАРТА (Левая часть) -->
-      <div class="about-sidebar contacts-map-sidebar">
-        <div id="map" style="width:100%; height:400px; filter: grayscale(1) invert(1) contrast(0.8) brightness(1.2);"></div>
-        <!-- Исправлена контрастность и фоновый цвет контейнера списка филиалов -->
-        <div id="shops" style="width:100%; flex: 1; overflow-y:auto; background: #111827; color: white; border-top:2px solid var(--dark); padding:0;">
-          <div style="padding:24px; opacity:0.4; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:2px; text-align:center;">Загрузка филиалов...</div>
-        </div>
-      </div>
-
-      <!-- ПАНЕЛЬ КОНТАКТОВ (Правая часть) -->
-      <div class="about-content contacts-info-panel">
-        <h2 class="about-tag">Связь с нами</h2>
-        <div class="about-title" style="font-size: clamp(32px, 4vw, 56px); margin-bottom: 40px;">Мы<br/><span class="text-outline">На</span><br/>Связи</div>
-        
-        <div class="contacts-grid contacts-vertical-grid">
-   <div class="contact-box" style="text-align:left; padding:0; border:none;">
-     <div class="contact-tag">Отдел продаж</div>
-     <a href="tel:+78445790099" style="text-decoration: none; color: inherit;">
-       <div class="contact-value" style="font-size:24px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">+7(84457) 9-00-99</div>
-     </a>
-     <div class="contact-sub">Консультации и наличие</div>
-   </div>
-   
-   <div class="contact-box" style="text-align:left; padding:0; border:none;">
-     <div class="contact-tag">Оптовые закупки</div>
-     <a href="tel:+79610893812" style="text-decoration: none; color: inherit;">
-       <div class="contact-value" style="font-size:24px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">+7(961)089-38-12</div>
-     </a>
-     <div class="contact-sub">Спецпредложения для компаний</div>
-   </div>
-
-   <div class="contact-box" style="text-align:left; padding:0; border:none;">
-     <div class="contact-tag">Электронная почта</div>
-     <a href="mailto:metiz-elektrod@mail.ru" style="text-decoration: none; color: inherit;">
-       <div class="contact-value" style="font-size:18px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">metiz-elektrod@mail.ru</div>
-     </a>
-     <div class="contact-sub">Для официальных запросов</div>
-   </div>
-</div>
-
-        <!-- АДРЕС И РЕКВИЗИТЫ ИП -->
-        <div style="margin-top:60px; padding-top:40px; border-top:1px solid rgba(0,0,0,0.1);">
-           <div style="font-size:10px; font-weight:900; color:var(--brand); text-transform:uppercase; margin-bottom:12px;">Центральный офис</div>
-           <p style="font-size:13px; line-height:1.6; opacity:0.7; margin-bottom: 32px;">г. Камышин, 2-й железнодорожный переезд, корпус 1.</p>
-
-           <div style="font-size:10px; font-weight:900; color:var(--brand); text-transform:uppercase; margin-bottom:12px;">Юридическая информация (Реквизиты)</div>
-           <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.8; opacity: 0.8; font-weight: 500;">
-             <li><strong>ИП:</strong> Варгич Вадим Леонидович</li>
-             <li><strong>ОГРНИП:</strong> 306345321600035</li>
-             <li><strong>ИНН:</strong> 343608258210</li>
-             <li><strong>Юридический адрес:</strong> 403893, Волгоградская обл., г. Камышин, ул. Спартаковская, д. 75, кв. 2</li>
-           </ul>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ФУТЕР -->
-  <footer style="border-top:1px solid var(--dark);">
-    <div class="footer-bottom">
-      <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
-      
-      <div class="footer-links">
-        <a href="/admin-login">Админ-панель</a>
-        <a href="#">Политика</a>
-        <a href="#">Условия</a>
-      </div>
-      
-      <div class="footer-socials">
-        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">VK</a>
-        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">TG</a>
+<main id="main-content">
+  <section class="about-section border-b border-dark">
+    <!-- ИНТЕРАКТИВНАЯ КАРТА (Левая часть) -->
+    <div class="about-sidebar contacts-map-sidebar">
+      <div id="map" style="width:100%; height:400px; filter: grayscale(1) invert(1) contrast(0.8) brightness(1.2);"></div>
+      <div id="shops" style="width:100%; flex: 1; overflow-y:auto; background: #FFFFFF; border-top:2px solid var(--border-color); padding:0;">
+        <!-- Список филиалов заполняется мгновенно через map.js -->
       </div>
     </div>
-  </footer>
 
-  <script type="module" src="/js/app.js"></script>
-  <!-- Яндекс Карта -->
-  <script src="https://api-maps.yandex.ru/2.1/?lang=ru-RU&apikey={{YANDEX_MAPS_API_KEY}}" type="text/javascript"></script>
-  <script src="https://yandex.st/jquery/2.2.3/jquery.min.js" type="text/javascript"></script>
-  <script>
-     document.addEventListener("DOMContentLoaded", () => {
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-      mainContent.classList.remove('loading');
-    }
-  });
+    <!-- ПАНЕЛЬ КОНТАКТОВ (Правая часть) -->
+    <div class="about-content contacts-info-panel">
+      <h2 class="about-tag">Связь с нами</h2>
+      <div class="about-title" style="font-size: clamp(32px, 4vw, 56px); margin-bottom: 40px;">Мы<br/><span class="text-outline">На</span><br/>Связи</div>
+      
+      <div class="contacts-grid contacts-vertical-grid">
+        <div class="contact-box" style="text-align:left; padding:0; border:none;">
+          <div class="contact-tag">Отдел продаж</div>
+          <a href="tel:+78445790099" style="text-decoration: none; color: inherit;">
+            <div class="contact-value" style="font-size:24px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">+7(84457) 9-00-99</div>
+          </a>
+          <div class="contact-sub">Консультации и наличие</div>
+        </div>
+        
+        <div class="contact-box" style="text-align:left; padding:0; border:none;">
+          <div class="contact-tag">Оптовые закупки</div>
+          <a href="tel:+79610893812" style="text-decoration: none; color: inherit;">
+            <div class="contact-value" style="font-size:24px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">+7(961)089-38-12</div>
+          </a>
+          <div class="contact-sub">Спецпредложения для компаний</div>
+        </div>
+
+        <div class="contact-box" style="text-align:left; padding:0; border:none;">
+          <div class="contact-tag">Электронная почта</div>
+          <a href="mailto:metiz-elektrod@mail.ru" style="text-decoration: none; color: inherit;">
+            <div class="contact-value" style="font-size:18px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">metiz-elektrod@mail.ru</div>
+          </a>
+          <div class="contact-sub">Для официальных запросов</div>
+        </div>
+      </div>
+
+      <!-- АДРЕС И РЕКВИЗИТЫ ИП -->
+      <div style="margin-top:60px; padding-top:40px; border-top:1px solid rgba(0,0,0,0.1);">
+        <div style="font-size:10px; font-weight:900; color:var(--brand); text-transform:uppercase; margin-bottom:12px;">Центральный офис</div>
+        <p style="font-size:13px; line-height:1.6; opacity:0.7; margin-bottom: 32px;">г. Камышин, 2-й железнодорожный переезд, корпус 1.</p>
+
+        <div style="font-size:10px; font-weight:900; color:var(--brand); text-transform:uppercase; margin-bottom:12px;">Юридическая информация (Реквизиты)</div>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.8; opacity: 0.8; font-weight: 500;">
+          <li><strong>ИП:</strong> Варгич Вадим Леонидович</li>
+          <li><strong>ОГРНИП:</strong> 306345321600035</li>
+          <li><strong>ИНН:</strong> 343608258210</li>
+          <li><strong>Юридический адрес:</strong> 403893, Волгоградская обл., г. Камышин, ул. Спартаковская, д. 75, кв. 2</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ФУТЕР -->
+<footer style="border-top:1px solid var(--border-color);">
+  <div class="footer-bottom">
+    <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
+    
+    <div class="footer-links">
+      <a href="/admin-login">Админ-панель</a>
+      <a href="/policy">Политика конфиденциальности</a>
+      <a href="/terms">Пользовательское соглашение</a>
+    </div>
+    
+    <div class="footer-socials">
+      <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">VK</a>
+      <a href="https://t.me/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">TG</a>
+    </div>
+  </div>
+</footer>
+
+<!-- СКРИПТЫ -->
+<script type="module">
+  import { initYandexMap } from './js/map.js';
+  
+  // Инициализация карты при загрузке страницы
+  document.addEventListener('DOMContentLoaded', () => {
+    // Обновляем год в футере
     document.getElementById('current-year').textContent = new Date().getFullYear();
-  </script>
+    
+    // Запускаем карту
+    initYandexMap();
+  });
+</script>
+
+<!-- Подключаем основной app.js для бургер-меню и SPA -->
+<script type="module" src="/js/app.js"></script>
+
 </body>
 </html>

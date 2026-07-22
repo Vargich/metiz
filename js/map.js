@@ -1,253 +1,346 @@
-// Локальные объявления функций (исключают ReferenceError при инициализации)
-function openFullscreenCard(shopData) {
-    let modal = document.getElementById("shop-fullscreen-modal");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "shop-fullscreen-modal";
-        document.body.appendChild(modal);
-    }
+// map.js — МГНОВЕННАЯ ЗАГРУЗКА КАРТЫ
+// Сначала рендерится список филиалов (0ms), затем подгружается карта
 
-    modal.innerHTML = `
-        <div class="modal-overlay-industrial" onclick="closeFullscreenCard()" style="z-index: 9000; position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center;">
-            <div class="modal-card-industrial" onclick="event.stopPropagation()" style="background:white; border:2px solid var(--dark); max-width:400px; position:relative; box-shadow: 15px 15px 0 var(--dark);">
-                <button class="modal-close-industrial" onclick="closeFullscreenCard()" style="position:absolute; right:-20px; top:-20px; background:var(--brand); border:2px solid var(--dark); color:white; width:40px; height:40px; cursor:pointer;"><i class="fas fa-times"></i></button>
-                <div class="modal-content-industrial" style="padding:40px;">
-                    <div class="modal-label-industrial" style="color:var(--brand); font-weight:900; font-size:10px; letter-spacing:2px; text-transform:uppercase;">Локация пункта</div>
-                    <h2 class="modal-title-industrial" style="font-size:24px; font-weight:900; line-height:1.2; text-transform:uppercase; margin:16px 0;">${shopData.address}</h2>
-                    <div class="modal-info-block-industrial" style="background:#f3f4f6; padding:16px; margin: 24px 0;">
-                        <div class="info-label" style="opacity:0.5; font-size:10px; font-weight:900; text-transform:uppercase; margin-bottom:8px;">Режим работы</div>
-                        <div class="info-value" style="font-weight:700;">${shopData.time}</div>
-                    </div>
-                    <a href="${shopData.route}" target="_blank" class="modal-btn-industrial hero-btn" style="text-decoration:none; display:block; text-align:center; padding:16px;">
-                       ПРОЛОЖИТЬ МАРШРУТ <i class="fas fa-external-link-alt ml-2"></i>
-                    </a>
-                </div>
-            </div>
+let mapInstance = null;
+let isMapReady = false;
+
+// ===== ДАННЫЕ ФИЛИАЛОВ =====
+const shopList = [
+  {
+    cityName: "Камышин",
+    shops: [
+      {
+        coordinates: [50.10007069457058, 45.40316283702851],
+        name: "г.Камышин, 2-й железнодорожный переезд, корпус 1",
+        timework: "пн-пт: 8:00 - 17:00<br>сб: 8:30 - 15:00<br>вс: 8:30 - 14:00<br>ПЕРЕРЫВ: 12:00 - 12:30",
+        how: "https://yandex.ru/maps/10959/kamishin/?ll=45.406037%2C50.097563&mode=routes&rtext=~50.100138%2C45.403078&rtt=auto&z=16.15",
+        phone: "+78445790099",
+      },
+      {
+        coordinates: [50.105875308002666, 45.4138970375061],
+        name: "г.Камышин, ул.Ленина, 14А",
+        timework: "пн-пт: 8:00 - 17:00<br>сб: 8:30 - 15:00<br>вс: 8:30 - 14:00<br>ПЕРЕРЫВ: 12:00 - 12:30",
+        how: "https://yandex.ru/maps/10959/kamishin/?ll=45.406037%2C50.097563&mode=routes&rtext=~50.100138%2C45.403078&rtt=auto&z=16.15",
+        phone: "+78445791119",
+      },
+      {
+        coordinates: [50.08035315572386, 45.407588481903076],
+        name: "г.Камышин, ул.Спартаковская, 75",
+        timework: "пн-пт: 8:00 - 17:00<br>сб: 8:30 - 15:00<br>вс: 8:30 - 14:00<br>ПЕРЕРЫВ: 12:00 - 12:30",
+        how: "https://yandex.ru/maps/10959/kamishin/?ll=45.406037%2C50.097563&mode=routes&rtext=~50.100138%2C45.403078&rtt=auto&z=16.15",
+        phone: "+78445790099",
+      },
+      {
+        coordinates: [50.135726811041174, 45.20690023899079],
+        name: "г.Петров-Вал, ул.Ленина, 29",
+        timework: "пн-пт: 8:00 - 18:00<br>сб: 8:30 - 15:00<br>вс: 8:30 - 14:00<br>ПЕРЕРЫВ: 12:00 - 12:30",
+        how: "https://yandex.ru/maps/10959/kamishin/?ll=45.406037%2C50.097563&mode=routes&rtext=~50.100138%2C45.403078&rtt=auto&z=16.15",
+        phone: "+78445790099",
+      },
+    ],
+  },
+];
+
+// ===== МГНОВЕННЫЙ РЕНДЕРИНГ СПИСКА ФИЛИАЛОВ (0ms) =====
+function renderShopsListInstant() {
+  const shopsContainer = document.getElementById("shops");
+  if (!shopsContainer) return;
+
+  // Очищаем контейнер
+  shopsContainer.innerHTML = "";
+  shopsContainer.style.background = "#FFFFFF";
+
+  shopList.forEach((city) => {
+    city.shops.forEach((shop) => {
+      const shopData = {
+        address: shop.name,
+        time: shop.timework,
+        route: shop.how,
+        phone: shop.phone,
+      };
+
+      const item = document.createElement("div");
+      item.className = "shop-list-item-industrial";
+      item.style.cssText = `
+        padding: 16px 20px;
+        border-bottom: 1px solid #F1F5F9;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: transparent;
+        color: #0F172A;
+      `;
+
+      item.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+          <span style="color:var(--brand); font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:1.5px;">Склад/Магазин</span>
+          <span style="font-size:11px; color:#94A3B8;">•</span>
+          <span style="font-size:11px; color:#94A3B8;">${shop.phone}</span>
         </div>
-    `;
-    
-    // Принудительно перебиваем стиль "display: none" из CSS файла
-    modal.style.display = "block";
-    
-    // Запускаем плавную CSS-анимацию через класс .show
-    setTimeout(() => {
-        modal.classList.add("show");
-    }, 10);
+        <h4 style="font-size:14px; font-weight:700; color:#0F172A; margin-bottom:4px;">${shop.name}</h4>
+        <p style="font-size:12px; color:#64748B; font-weight:500; line-height:1.5;">${shop.timework}</p>
+        <div style="margin-top:8px; font-size:11px; font-weight:600; color:var(--brand); opacity:0; transition:all 0.3s;">
+          <i class="fas fa-arrow-right"></i> Подробнее
+        </div>
+      `;
 
-    // Блокируем прокрутку основного сайта
-    document.body.style.overflow = "hidden";
+      // Ховер эффект через CSS
+      item.addEventListener("mouseenter", () => {
+        item.style.background = "#F8FAFC";
+        item.style.paddingLeft = "28px";
+        const link = item.querySelector("div:last-child");
+        if (link) link.style.opacity = "1";
+      });
+
+      item.addEventListener("mouseleave", () => {
+        item.style.background = "transparent";
+        item.style.paddingLeft = "20px";
+        const link = item.querySelector("div:last-child");
+        if (link) link.style.opacity = "0";
+      });
+
+      item.onclick = () => {
+        // Если карта уже загружена - центрируем
+        if (mapInstance && isMapReady) {
+          mapInstance.setCenter(shop.coordinates, 15, { duration: 400 });
+        }
+        openFullscreenCard(shopData);
+      };
+
+      shopsContainer.appendChild(item);
+    });
+  });
+}
+
+// ===== МОДАЛЬНОЕ ОКНО =====
+function openFullscreenCard(shopData) {
+  let modal = document.getElementById("shop-fullscreen-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "shop-fullscreen-modal";
+    document.body.appendChild(modal);
+  }
+
+  modal.innerHTML = `
+    <div onclick="window.closeFullscreenCard && closeFullscreenCard()" style="z-index: 9000; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:20px;">
+      <div onclick="event.stopPropagation()" style="background:white; border-radius:12px; max-width:440px; width:100%; position:relative; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+        <button onclick="window.closeFullscreenCard && closeFullscreenCard()" style="position:absolute; right:14px; top:14px; background:none; border:none; color:#94A3B8; font-size:20px; cursor:pointer; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background 0.2s;">
+          <i class="fas fa-times"></i>
+        </button>
+        <div style="padding:32px 28px 28px;">
+          <div style="color:var(--brand); font-weight:800; font-size:11px; letter-spacing:1px; text-transform:uppercase;">Пункт выдачи</div>
+          <h2 style="font-size:19px; font-weight:800; line-height:1.3; margin:12px 0 16px; color:#0F172A;">${shopData.address}</h2>
+          <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:14px 16px; margin-bottom:20px;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#94A3B8; margin-bottom:4px;">Режим работы</div>
+            <div style="font-size:13px; font-weight:600; color:#0F172A; line-height:1.6;">${shopData.time}</div>
+          </div>
+          <a href="${shopData.route}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:10px; width:100%; padding:14px; background:#0F172A; color:white; text-decoration:none; border-radius:8px; font-weight:700; font-size:13px; transition:background 0.2s;">
+            <span>Проложить маршрут</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.style.display = "block";
+  document.body.style.overflow = "hidden";
 }
 
 function closeFullscreenCard() {
-    const modal = document.getElementById("shop-fullscreen-modal");
-    if (modal) {
-        // Убираем класс анимации (запускает плавное исчезновение opacity)
-        modal.classList.remove("show");
-        
-        // Даем 400 миллисекунд на завершение CSS-анимации, после чего удаляем элемент из DOM
-        setTimeout(() => {
-            modal.remove();
-        }, 400);
-        
-        // Возвращаем прокрутку основному сайту
-        document.body.style.overflow = "";
-    }
+  const modal = document.getElementById("shop-fullscreen-modal");
+  if (modal) {
+    modal.remove();
+    document.body.style.overflow = "";
+  }
 }
 
-// Привязываем к глобальному объекту window для inline-обработчиков
+// Глобальные привязки для inline-обработчиков
 window.openFullscreenCard = openFullscreenCard;
 window.closeFullscreenCard = closeFullscreenCard;
 
-export function initYandexMap() {
-    const mapEl = document.getElementById("map");
-    if (!mapEl) return;
+// ===== БЫСТРАЯ ЗАГРУЗКА СКРИПТА ЯНДЕКСА =====
+let ymapsLoadPromise = null;
 
-    mapEl.innerHTML = "";
+function loadYandexScript() {
+  if (ymapsLoadPromise) return ymapsLoadPromise;
 
-    const loadMap = () => {
-        ymaps.ready(init);
-    };
-
-    if (typeof ymaps === 'undefined') {
-        fetch('/api/config/yandex-maps')
-            .then(res => res.json())
-            .then(config => {
-                const script = document.createElement('script');
-                script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${config.apiKey}`;
-                script.type = "text/javascript";
-                script.onload = loadMap;
-                document.head.appendChild(script);
-            })
-            .catch(err => {
-                console.error("Не удалось получить API ключ Яндекс.Карт:", err);
-            });
-    } else {
-        loadMap();
+  ymapsLoadPromise = new Promise((resolve, reject) => {
+    // Проверяем, загружен ли уже ymaps
+    if (typeof ymaps !== "undefined" && ymaps.ready) {
+      ymaps.ready(resolve);
+      return;
     }
 
-    function init() {
-        const shopList = [
-            {
-                cityName: "Камышин",
-                shops: [
-                    {
-                        coordinates: [50.10007069457058, 45.40316283702851],
-                        name: "г.Камышин, 2-й железнодорожный переезд, корпус 1",
-                        timework: "пн-пт: 8:00 - 17:00<br>сб: 8:30 - 15:00<br>вс: 8:30 - 14:00<br>ПЕРЕРЫВ: 12:00 - 12:30",
-                        how: "https://yandex.ru/maps/10959/kamishin/?ll=45.406037%2C50.097563&mode=routes&rtext=~50.100138%2C45.403078&rtt=auto&ruri=~&z=16.15",
-                        phone: "+78445790099",
-                    },
-                    {
-                        coordinates: [50.105875308002666, 45.4138970375061],
-                        name: "г.Камышин, ул.Ленина, 14А",
-                        timework: "пн-пт: 8:00 - 17:00<br>сб: 8:30 - 15:00<br>вс: 8:30 - 14:00<br>ПЕРЕРЫВ: 12:00 - 12:30",
-                        how: "https://yandex.ru/maps/10959/kamishin/?ll=45.406037%2C50.097563&mode=routes&rtext=~50.100138%2C45.403078&rtt=auto&ruri=~&z=16.15",
-                        phone: "+78445791119",
-                    },
-                    {
-                        coordinates: [50.08035315572386, 45.407588481903076],
-                        name: "г.Камышин, ул.Спартаковская, 75",
-                        timework: "пн-пт: 8:00 - 17:00<br>сб: 8:30 - 15:00<br>вс: 8:30 - 14:00<br>ПЕРЕРЫВ: 12:00 - 12:30",
-                        how: "https://yandex.ru/maps/10959/kamishin/?ll=45.406037%2C50.097563&mode=routes&rtext=~50.100138%2C45.403078&rtt=auto&ruri=~&z=16.15",
-                        phone: "+78445790099",
-                    },
-                    {
-                        coordinates: [50.135726811041174, 45.20690023899079],
-                        name: "г.Петров-Вал, ул.Ленина, 29",
-                        timework: "пн-пт: 8:00 - 18:00<br>сб: 8:30 - 15:00<br>вс: 8:30 - 14:00<br>ПЕРЕРЫВ: 12:00 - 12:30",
-                        how: "https://yandex.ru/maps/10959/kamishin/?ll=45.406037%2C50.097563&mode=routes&rtext=~50.100138%2C45.403078&rtt=auto&ruri=~&z=16.15",
-                        phone: "+78445790099",
-                    },
-                ],
-            },
-        ];
-
-        const myMap = new ymaps.Map("map", {
-            center: [50.108462, 45.307467],
-            zoom: 11,
-            controls: ["zoomControl"],
-        });
-
-        const shopsContainer = document.getElementById("shops");
-        if (shopsContainer) {
-            shopsContainer.innerHTML = "";
-            shopsContainer.style.background = "white";
+    // Проверяем, есть ли уже скрипт в DOM
+    let script = document.querySelector('script[src*="api-maps.yandex.ru"]');
+    if (script) {
+      // Если скрипт уже есть, ждем его загрузки
+      const checkReady = setInterval(() => {
+        if (typeof ymaps !== "undefined" && ymaps.ready) {
+          clearInterval(checkReady);
+          ymaps.ready(resolve);
         }
-
-        shopList.forEach((city) => {
-            const cityCollection = new ymaps.GeoObjectCollection();
-
-            city.shops.forEach((shop) => {
-                const shopData = {
-                    address: shop.name,
-                    time: shop.timework,
-                    route: shop.how,
-                };
-
-                const shopPlacemark = new ymaps.Placemark(
-                    shop.coordinates,
-                    {
-                        hintContent: shop.name,
-                        shopData: shopData,
-                        balloonContent: "",
-                    },
-                    { preset: "islands#redDotIcon" }
-                );
-
-                // Корректный вызов локально доступного метода
-                shopPlacemark.events.add("click", function (e) {
-                    const target = e.get("target");
-                    const data = target.properties.get("shopData");
-                    openFullscreenCard(data);
-                });
-
-                cityCollection.add(shopPlacemark);
-
-                if (shopsContainer) {
-                    const item = document.createElement('div');
-                    item.className = 'shop-list-item-industrial';
-                    item.style.color = '#000';
-                    item.style.borderBottom = '1px solid #e5e7eb';
-                    item.innerHTML = `
-                      <div class="shop-item-tag" style="color:var(--brand); font-weight:900; font-size:10px; text-transform:uppercase;">Склад/Магазин</div>
-                      <h4 class="shop-item-name" style="margin-top:4px;">${shop.name}</h4>
-                      <p class="shop-item-time" style="opacity:0.6; font-size:12px;">${shop.timework}</p>
-                      `;
-                    item.onclick = () => {
-                        myMap.setCenter(shop.coordinates, 15, { duration: 500 });
-                        openFullscreenCard(shopData);
-                    };
-                    shopsContainer.appendChild(item);
-                }
-            });
-            myMap.geoObjects.add(cityCollection);
-        });
+      }, 50);
+      setTimeout(() => clearInterval(checkReady), 10000);
+      return;
     }
+
+    // Загружаем скрипт
+    fetch("/api/config/yandex-maps")
+      .then((res) => res.json())
+      .then((config) => {
+        const apiKey = config.apiKey || "";
+        script = document.createElement("script");
+        script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU${apiKey ? `&apikey=${apiKey}` : ""}`;
+        script.async = true;
+        script.onload = () => {
+          if (typeof ymaps !== "undefined") {
+            ymaps.ready(resolve);
+          } else {
+            reject(new Error("ymaps не загрузился"));
+          }
+        };
+        script.onerror = () => {
+          reject(new Error("Ошибка загрузки скрипта Яндекс.Карт"));
+        };
+        document.head.appendChild(script);
+      })
+      .catch((err) => {
+        // Если ключ не получен, пробуем загрузить без ключа
+        script = document.createElement("script");
+        script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU";
+        script.async = true;
+        script.onload = () => {
+          if (typeof ymaps !== "undefined") {
+            ymaps.ready(resolve);
+          } else {
+            reject(new Error("ymaps не загрузился"));
+          }
+        };
+        script.onerror = () => reject(err);
+        document.head.appendChild(script);
+      });
+  });
+
+  return ymapsLoadPromise;
 }
 
-// Мини-карта для корзины — загружает точки из API
-export function initPickupMap(containerId, onSelectCallback) {
-    const mapEl = document.getElementById(containerId);
-    if (!mapEl) return;
+// ===== ОСНОВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ =====
+export async function initYandexMap() {
+  const mapEl = document.getElementById("map");
+  if (!mapEl) {
+    console.warn("Элемент #map не найден");
+    return;
+  }
 
+  // 1. МГНОВЕННЫЙ РЕНДЕРИНГ СПИСКА (0ms)
+  renderShopsListInstant();
+
+  // 2. ПАРАЛЛЕЛЬНАЯ ЗАГРУЗКА КАРТЫ
+  try {
+    await loadYandexScript();
+
+    // Проверяем, существует ли элемент (вдруг страница уже перезагружена)
+    if (!document.getElementById("map")) return;
+
+    // Создаем карту
     mapEl.innerHTML = "";
 
-    const loadMap = async () => {
-        await ymaps.ready();
-        try {
-            const res = await fetch('/api/pickup-points');
-            const points = await res.json();
-            initPickup(mapEl, points, onSelectCallback);
-        } catch (e) {
-            console.error('Ошибка загрузки пунктов выдачи:', e);
-        }
-    };
-
-    if (typeof ymaps === 'undefined') {
-        fetch('/api/config/yandex-maps')
-            .then(res => res.json())
-            .then(config => {
-                const script = document.createElement('script');
-                script.src = `https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${config.apiKey}`;
-                script.type = "text/javascript";
-                script.onload = loadMap;
-                document.head.appendChild(script);
-            })
-            .catch(err => {
-                console.error('Ошибка загрузки скрипта Яндекс.Карт:', err);
-            });
-    } else {
-        loadMap();
-    }
-}
-
-function initPickup(container, points, onSelectCallback) {
-    if (points.length === 0) return;
-
-    const map = new ymaps.Map(container, {
-        center: [50.108462, 45.307467],
-        zoom: 11,
-        controls: ["zoomControl"]
+    mapInstance = new ymaps.Map("map", {
+      center: [50.108462, 45.307467],
+      zoom: 11,
+      controls: ["zoomControl"],
     });
 
-    points.forEach(point => {
-        const coords = point.coords ? JSON.parse(point.coords) : [50.1, 45.4];
+    // Добавляем метки
+    shopList.forEach((city) => {
+      const cityCollection = new ymaps.GeoObjectCollection();
+
+      city.shops.forEach((shop) => {
+        const shopData = {
+          address: shop.name,
+          time: shop.timework,
+          route: shop.how,
+        };
+
         const placemark = new ymaps.Placemark(
-            coords,
-            {
-                hintContent: point.name,
-                balloonContent: `<strong>${point.name}</strong><br>${point.address}<br>${point.worktime || ''}`
-            },
-            { preset: "islands#redDotIcon" }
+          shop.coordinates,
+          {
+            hintContent: shop.name,
+            shopData: shopData,
+          },
+          { preset: "islands#redDotIcon" }
         );
 
-        placemark.events.add("click", function () {
-            if (onSelectCallback) onSelectCallback(point);
-            map.setCenter(coords, 14, { duration: 400 });
+        placemark.events.add("click", function (e) {
+          const target = e.get("target");
+          const data = target.properties.get("shopData");
+          openFullscreenCard(data);
         });
 
-        map.geoObjects.add(placemark);
+        cityCollection.add(placemark);
+      });
+
+      mapInstance.geoObjects.add(cityCollection);
     });
 
-    container._mapInstance = map;
+    isMapReady = true;
+
+    // Добавляем resize для правильного отображения
+    setTimeout(() => {
+      if (mapInstance) mapInstance.container.fitToViewport();
+    }, 100);
+
+  } catch (err) {
+    console.warn("Карта не загрузилась:", err);
+    // Показываем сообщение, но список филиалов уже есть
+    if (mapEl && !mapEl.innerHTML) {
+      mapEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#F8FAFC;color:#94A3B8;font-size:13px;font-weight:600;text-align:center;padding:20px;">
+        <div>
+          <i class="fas fa-map" style="font-size:24px;display:block;margin-bottom:8px;color:#CBD5E1;"></i>
+          Карта временно недоступна<br>
+          <span style="font-size:12px;font-weight:400;">Список филиалов доступен ниже</span>
+        </div>
+      </div>`;
+    }
+  }
+}
+
+// ===== ПИКАП МАП (для корзины) =====
+export async function initPickupMap(containerId, onSelectCallback) {
+  const mapEl = document.getElementById(containerId);
+  if (!mapEl) return;
+
+  try {
+    await loadYandexScript();
+
+    const res = await fetch("/api/pickup-points");
+    const points = await res.json();
+
+    if (!points || points.length === 0) return;
+
+    const map = new ymaps.Map(containerId, {
+      center: [50.108462, 45.307467],
+      zoom: 11,
+      controls: ["zoomControl"],
+    });
+
+    points.forEach((point) => {
+      const coords = point.coords ? JSON.parse(point.coords) : [50.1, 45.4];
+      const placemark = new ymaps.Placemark(
+        coords,
+        { hintContent: point.name },
+        { preset: "islands#redDotIcon" }
+      );
+
+      placemark.events.add("click", () => {
+        if (onSelectCallback) onSelectCallback(point);
+        map.setCenter(coords, 14, { duration: 400 });
+      });
+
+      map.geoObjects.add(placemark);
+    });
+  } catch (err) {
+    console.error("Ошибка загрузки карты пунктов выдачи:", err);
+  }
 }

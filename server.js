@@ -350,6 +350,78 @@ app.use(async (req, res, next) => {
 // 5. РОУТЫ (API)
 // ==========================================
 
+// Пагинированный каталог
+app.get('/api/products/paginated', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 24;
+    const category = req.query.category || null;
+    const search = req.query.search || '';
+    const sort = req.query.sort || 'default';
+    
+    const offset = (page - 1) * limit;
+    let conditions = [];
+    let params = [];
+    let paramIndex = 1;
+    
+    // Фильтр по категории
+    if (category && category !== 'all') {
+      const cat = await queryOne("SELECT id FROM categories WHERE slug = ?", [category]);
+      if (cat) {
+        conditions.push(`p.category_id = $${paramIndex++}`);
+        params.push(cat.id);
+      }
+    }
+    
+    // Поиск
+    if (search.trim()) {
+      conditions.push(`(p.name ILIKE $${paramIndex++} OR p.article ILIKE $${paramIndex++})`);
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    
+    // Только в наличии
+    conditions.push(`p.quantity > 0`);
+    
+    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    
+    // Сортировка
+    let orderClause = 'ORDER BY p.id DESC';
+    if (sort === 'name') orderClause = 'ORDER BY p.name ASC';
+    else if (sort === 'price_asc') orderClause = 'ORDER BY p.price ASC';
+    else if (sort === 'price_desc') orderClause = 'ORDER BY p.price DESC';
+    
+    // Получаем общее количество
+    const countRes = await pool.query(
+      `SELECT COUNT(*)::int as total FROM products p ${whereClause}`,
+      params
+    );
+    const total = countRes.rows[0]?.total || 0;
+    
+    // Получаем товары с пагинацией
+    const dataRes = await pool.query(
+      `SELECT p.*, c.name as category_name 
+       FROM products p 
+       LEFT JOIN categories c ON p.category_id = c.id 
+       ${whereClause} 
+       ${orderClause} 
+       LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
+      [...params, limit, offset]
+    );
+    
+    res.json({
+      products: dataRes.rows,
+      total: total,
+      page: page,
+      limit: limit,
+      totalPages: Math.ceil(total / limit)
+    });
+  } catch (err) {
+    logger.error(`Ошибка пагинированного каталога: ${err.message}`);
+    res.status(500).json({ error: 'Ошибка загрузки каталога' });
+  }
+});
+
+
 // Аутентификация
 app.post('/api/admin/login', async (req, res) => {
     const { contact, password } = req.body;
@@ -938,6 +1010,10 @@ app.use((err, req, res, next) => {
     logger.error(`[Unhandled Error] ${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
     res.status(err.status || 500).json({ error: 'Внутренняя ошибка сервера. Подробности записаны в системный журнал.' });
 });
+
+
+
+
 // ==========================================
 // 7. ЗАПУСК СЕРВЕРА
 // ==========================================
@@ -979,3 +1055,4 @@ initDatabase().then(async () => {
     console.error("❌ Database connection failed:", err.message);
     process.exit(1);
 });
+

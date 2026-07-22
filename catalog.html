@@ -12,145 +12,73 @@
 
 <body>
 
-<!-- ШАПКА -->
-<header class="shop-header">
-  <div class="shop-header__container">
-    <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
-    
-    <!-- Телефон по центру (виден на всех экранах) -->
-    <a href="tel:+78445790099" class="header-phone-btn header-phone-mobile">
-      <i class="fas fa-phone-alt"></i>
-      <span>+7 (84457) 9-00-99</span>
-    </a>
-    
-    <!-- Кнопка бургер-меню справа -->
-    <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-    
-    <nav class="shop-nav" id="shopNav">
-      <a href="/" >Главная</a>
-      <a href="/catalog" class="active">Каталог</a>
-      <a href="/about">О нас</a>
-      <a href="/contacts">Контакты</a>
-    </nav>
-    
-    <!-- Десктопная версия телефона (скрывается на мобильных) -->
-    <div class="shop-header__actions">
-      <a href="tel:+78445790099" class="header-phone-btn header-phone-desktop">
-        <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+  <!-- ШАПКА -->
+  <header class="shop-header">
+    <div class="shop-header__container">
+      <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
+
+      <a href="tel:+78445790099" class="header-phone-btn header-phone-mobile">
+        <i class="fas fa-phone-alt"></i>
+        <span>+7 (84457) 9-00-99</span>
       </a>
+
+      <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="shop-nav" id="shopNav">
+        <a href="/">Главная</a>
+        <a href="/catalog" class="active">Каталог</a>
+        <a href="/about">О нас</a>
+        <a href="/contacts">Контакты</a>
+      </nav>
+
+      <div class="shop-header__actions">
+        <a href="tel:+78445790099" class="header-phone-btn header-phone-desktop">
+          <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+        </a>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
   <main id="main-content">
     <section class="catalog-layout">
+      <!-- ЛЕВАЯ ПАНЕЛЬ ФИЛЬТРОВ -->
+     <div class="catalog-filter-bar">
+  <div class="catalog-search-container">
+    <input type="text" id="searchInput" placeholder="Поиск по названию..." class="search-input-top">
+  </div>
+  <div class="catalog-category-container">
+    <!-- Сюда будет вставлен выпадающий список категорий -->
+  </div>
+  <div class="catalog-sort-container">
+    <!-- Сюда будет вставлен выпадающий список сортировки -->
+  </div>
+</div>
+
+      <!-- КОНТЕНТ КАТАЛОГА -->
       <div class="catalog-content">
-        <!-- Верхняя панель -->
-        <div class="catalog-top-panel">
-          <!-- Поиск -->
-          <div class="search-wrapper-top">
-            <input type="text" id="searchInput" placeholder="Поиск по наименованию, ГОСТу или артикулу..."
-              class="search-input-top">
-            <button class="search-btn-top"><i class="fas fa-search"></i> Найти</button>
-          </div>
-
-          <!-- Фильтры -->
-          <!-- Ряд фильтрации и сортировки -->
-          <div class="filter-controls-row">
-            <div class="filter-group">
-              <span class="filter-label-top">Категория</span>
-              <div class="custom-hover-select" id="categoryHoverSelect">
-                <button class="hover-select-btn" id="categorySelectBtn">
-                  <span id="selectedCategoryName">Все товары</span>
-                  <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="hover-select-dropdown" id="categoryDropdown">
-                  <!-- Категории загрузятся через JS -->
-                </div>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <span class="filter-label-top">Сортировка</span>
-              <select id="sortSelect" class="sort-select-top">
-                <option value="default">По умолчанию</option>
-                <option value="name">По алфавиту (А-Я)</option>
-              </select>
-            </div>
-          </div>
+        <div class="mobile-filter-bar">
+          <button class="hero-btn mobile-filter-btn" onclick="toggleSidebar()">
+            <i class="fas fa-sliders-h"></i> Фильтры и категории
+          </button>
         </div>
 
         <!-- Сетка товаров -->
         <div class="products-grid" id="productsGrid">
-          <!-- Скелетоны -->
-          <div class="skeleton-card">
-            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
-              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
-              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
-            </div>
-          </div>
-          <div class="skeleton-card">
-            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
-              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
-              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
-            </div>
-          </div>
-          <div class="skeleton-card">
-            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
-              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
-              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
-            </div>
-          </div>
-          <div class="skeleton-card">
-            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
-              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
-              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
-            </div>
-          </div>
-          <div class="skeleton-card">
-            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
-              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
-              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
-            </div>
-          </div>
-          <div class="skeleton-card">
-            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
-              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
-              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
-            </div>
-          </div>
-          <div class="skeleton-card">
-            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
-              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
-              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
-            </div>
-          </div>
-          <div class="skeleton-card">
-            <div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div>
-            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
-              <div class="skeleton-box" style="height: 14px; width: 85%;"></div>
-              <div class="skeleton-box" style="height: 14px; width: 60%;"></div>
-              <div class="skeleton-box" style="height: 10px; width: 35%; margin-top: auto;"></div>
-            </div>
-          </div>
+          <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+          <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+          <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+          <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+        </div>
+
+        <!-- Пагинация -->
+        <div class="pagination-container" id="paginationContainer">
+          <button class="pagination-btn" id="prevPageBtn" disabled>← Назад</button>
+          <span id="pageInfo">Страница 1 из 1</span>
+          <button class="pagination-btn" id="nextPageBtn">Вперёд →</button>
         </div>
       </div>
     </section>
@@ -168,24 +96,14 @@
       </div>
 
       <div class="footer-socials">
-        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn"
-          style="text-decoration: none; color: inherit;">VK</a>
-        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn"
-          style="text-decoration: none; color: inherit;">TG</a>
+        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn">VK</a>
+        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn">TG</a>
       </div>
     </div>
   </footer>
 
-  <script type="module" src="/js/app.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const mainContent = document.getElementById('main-content');
-      if (mainContent) {
-        mainContent.classList.remove('loading');
-      }
-    });
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-  </script>
+  <!-- ИСПРАВЛЕННЫЙ ПУТЬ К СКРИПТУ -->
+  <script type="module" src="./js/app.js"></script>
 </body>
 
 </html>
