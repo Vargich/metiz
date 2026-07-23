@@ -67,7 +67,7 @@ async function loadPage(path) {
       updateHeaderActive(new URL(path, window.location.origin).pathname);
       initPageFunctions(
         new URL(path, window.location.origin).pathname,
-        new URL(path, window.location.origin).searchParams
+        new URL(path, window.location.origin).searchParams,
       );
     }
     enforceRKN();
@@ -83,28 +83,68 @@ function updateHeaderActive(path) {
     const href = a.getAttribute("href");
     a.classList.toggle(
       "active",
-      href === path || (path === "/" && (href === "/" || href === "/index"))
+      href === path || (path === "/" && (href === "/" || href === "/index")),
     );
   });
 }
 
+// app.js - исправленные функции
+
 // ===== ВСПОМОГАТЕЛЬНЫЙ РЕНДЕР ИЗОБРАЖЕНИЯ =====
 function getProductImageHtml(p) {
-  const hasImg = p.image && p.image.length > 5;
-  if (hasImg) {
-    return `<img src="${p.image}" alt="${p.name}" loading="lazy">`;
+  // Проверяем, есть ли массив images
+  let images = [];
+  try {
+    if (p.images && typeof p.images === 'string') {
+      images = JSON.parse(p.images);
+    } else if (Array.isArray(p.images)) {
+      images = p.images;
+    }
+  } catch (e) {
+    images = [];
   }
+
+  // Если images пустой, но есть image, используем его как единственное фото
+  if (images.length === 0 && p.image && p.image.length > 5) {
+    images = [p.image];
+  }
+
+  // Фильтруем пустые строки
+  images = images.filter(img => img && img.length > 5);
+
+  const hasMultiple = images.length > 1;
+
+  if (images.length === 0) {
+    return `
+      <div class="product-img-placeholder">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        <span>Нет фото</span>
+      </div>
+    `;
+  }
+
+  const mainImg = images[0];
+  // Сохраняем данные в data-атрибуте, а в onclick передаем id элемента
+  const galleryId = 'gallery-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+
   return `
-    <div class="product-img-placeholder">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-      </svg>
-      <span>Нет фото</span>
+    <div class="product-gallery" data-images='${JSON.stringify(images)}' data-gallery-id="${galleryId}">
+      <div class="product-gallery-main" onclick="window.openImageModalFromElement(this)">
+        <img src="${mainImg}" alt="${p.name}" loading="lazy" class="gallery-main-img">
+        ${hasMultiple ? `
+          <div class="gallery-nav-btn gallery-prev" data-dir="-1"><i class="fas fa-chevron-left"></i></div>
+          <div class="gallery-nav-btn gallery-next" data-dir="1"><i class="fas fa-chevron-right"></i></div>
+          <div class="gallery-counter">1 / ${images.length}</div>
+        ` : ''}
+      </div>
     </div>
   `;
 }
+
 
 // ===== НОВИНКИ НА ГЛАВНОЙ =====
 async function initNewProducts() {
@@ -112,13 +152,10 @@ async function initNewProducts() {
   if (!container) return;
 
   try {
-    const products = await API.products.getAll();
+    // const products = await API.products.getAll();
     
     // 🔥 ТОЛЬКО товары с бейджем 'new' И в наличии
-    const news = products
-      .filter(p => p.badge === 'new' && (p.quantity || 0) > 0)
-      .sort((a, b) => (b.id || 0) - (a.id || 0))
-      .slice(0, 8);
+    const news = await fetch('/api/products/new?limit=8').then(r => r.json());
 
     if (news.length === 0) {
       container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">Новинки скоро появятся в каталоге</p>';
@@ -127,13 +164,58 @@ async function initNewProducts() {
 
     container.innerHTML = news
       .map((p) => {
-        const hasImg = p.image && p.image.length > 5;
-        const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
+        // Получаем изображения для галереи
+        let images = [];
+        try {
+          if (p.images && typeof p.images === 'string') {
+            images = JSON.parse(p.images);
+          } else if (Array.isArray(p.images)) {
+            images = p.images;
+          }
+        } catch (e) {
+          images = [];
+        }
+        if (images.length === 0 && p.image && p.image.length > 5) {
+          images = [p.image];
+        }
+        images = images.filter(img => img && img.length > 5);
+        
+        const mainImg = images.length > 0 ? images[0] : '';
+        const hasMultiple = images.length > 1;
+        const imagesData = JSON.stringify(images);
+
+        // Формируем HTML галереи
+        let galleryHtml = '';
+        if (images.length === 0) {
+          galleryHtml = `
+            <div class="product-img-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <span>Нет фото</span>
+            </div>
+          `;
+        } else {
+          galleryHtml = `
+            <div class="product-gallery" data-images='${imagesData}'>
+              <div class="product-gallery-main" onclick="window.openImageModalFromElement(this)">
+                <img src="${mainImg}" alt="${p.name}" loading="lazy" class="gallery-main-img">
+                ${hasMultiple ? `
+                  <div class="gallery-nav-btn gallery-prev" data-dir="-1"><i class="fas fa-chevron-left"></i></div>
+                  <div class="gallery-nav-btn gallery-next" data-dir="1"><i class="fas fa-chevron-right"></i></div>
+                  <div class="gallery-counter">1 / ${images.length}</div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
 
         return `
           <div class="product-card">
-            <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
-              ${getProductImageHtml(p)}
+            <div class="product-img ${images.length > 0 ? 'has-img' : ''}">
+              ${galleryHtml}
               <div class="product-badge new">Новинка</div>
             </div>
             <div class="product-info">
@@ -144,135 +226,65 @@ async function initNewProducts() {
         `;
       })
       .join("");
+
+    // Инициализируем галереи в новинках
+    initProductGalleries();
   } catch (err) {
     console.error("New products error:", err);
     container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">Не удалось загрузить новинки</p>';
   }
 }
 
-
-
-
-// ===== ИНИЦИАЛИЗАЦИЯ КАТАЛОГА =====
-async function initCatalog(params) {
-  const grid = document.getElementById("productsGrid");
-  if (!grid) {
-    console.warn('ProductsGrid not found, retrying...');
-    setTimeout(() => initCatalog(params), 200);
-    return;
-  }
-
-  const urlParams = params || new URLSearchParams(window.location.search);
-  currentFilter = urlParams.get("category") || "all";
-  currentPage = parseInt(urlParams.get("page")) || 1;
-
-  // Сортировка как выпадающий список
-  const sortContainer = document.querySelector('.catalog-sort-container');
-  if (sortContainer) {
-    sortContainer.innerHTML = `
-      <select id="sortSelect" class="sort-select-top">
-        <option value="default">По умолчанию</option>
-        <option value="name">По алфавиту (А-Я)</option>
-        <option value="price_asc">Сначала дешевле</option>
-        <option value="price_desc">Сначала дороже</option>
-      </select>
-    `;
-    const sortSelect = document.getElementById('sortSelect');
-    if (sortSelect) {
-      sortSelect.value = currentSort;
-      sortSelect.onchange = (e) => {
-        currentSort = e.target.value;
-        renderProducts(1);
-      };
-    }
-  }
-
-  // Категории как выпадающий список
-  const categoryContainer = document.querySelector('.catalog-category-container');
-  if (categoryContainer) {
+// ===== ИНИЦИАЛИЗАЦИЯ ГАЛЕРЕЙ ТОВАРОВ =====
+function initProductGalleries() {
+  document.querySelectorAll('.product-gallery').forEach(gallery => {
+    const mainImg = gallery.querySelector('.gallery-main-img');
+    const prevBtn = gallery.querySelector('.gallery-prev');
+    const nextBtn = gallery.querySelector('.gallery-next');
+    const counter = gallery.querySelector('.gallery-counter');
+    
+    if (!mainImg) return;
+    
+    let images = [];
     try {
-      const cats = await API.categories.getAll();
-      allCategories = cats;
-      categoryContainer.innerHTML = `
-        <select id="categorySelect" class="sort-select-top">
-          <option value="all">Все категории</option>
-          ${cats.map(c => `<option value="${c.slug}">${c.name}</option>`).join('')}
-        </select>
-      `;
-      const catSelect = document.getElementById('categorySelect');
-      if (catSelect) {
-        // Устанавливаем выбранную категорию из URL
-        catSelect.value = currentFilter;
-        catSelect.onchange = (e) => {
-          currentFilter = e.target.value;
-          window.history.replaceState(
-            {},
-            "",
-            currentFilter === "all" ? "/catalog" : `/catalog?category=${currentFilter}`
-          );
-          renderProducts(1);
-        };
+      const data = gallery.dataset.images;
+      if (data) {
+        images = JSON.parse(data);
       }
-    } catch (err) {
-      console.error('Categories error:', err);
+    } catch (e) {
+      console.warn('Failed to parse gallery images:', e);
+      images = [];
     }
-  }
-
-  // Поиск
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    searchInput.value = currentSearch;
-    let timeout;
-    searchInput.oninput = (e) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        currentSearch = e.target.value;
-        renderProducts(1);
-      }, 300);
-    };
-  }
-
-  // Пагинационные кнопки
-  const prevBtn = document.getElementById("prevPageBtn");
-  const nextBtn = document.getElementById("nextPageBtn");
-
-  if (prevBtn) {
-    prevBtn.onclick = () => {
-      if (currentPage > 1) {
-        renderProducts(currentPage - 1);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+    
+    if (!Array.isArray(images) || images.length < 2) return;
+    
+    let currentIndex = 0;
+    
+    function updateGallery(index) {
+      currentIndex = (index + images.length) % images.length;
+      mainImg.src = images[currentIndex];
+      mainImg.alt = `Фото ${currentIndex + 1}`;
+      
+      if (counter) {
+        counter.textContent = `${currentIndex + 1} / ${images.length}`;
       }
-    };
-  }
-
-  if (nextBtn) {
-    nextBtn.onclick = () => {
-      if (currentPage < totalPages) {
-        renderProducts(currentPage + 1);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    };
-  }
-
-  // 🔥 Добавляем отображение выбранной категории в заголовке
-  updateCategoryTitle(currentFilter);
-  
-  renderProducts(currentPage);
-
-  setTimeout(initStickyFilterBar, 200);
-}
-
-// ===== ОБНОВЛЕНИЕ ЗАГОЛОВКА С ВЫБРАННОЙ КАТЕГОРИЕЙ =====
-function updateCategoryTitle(categorySlug) {
-  const titleElement = document.querySelector('.catalog-title');
-  if (!titleElement) return;
-  
-  if (categorySlug === 'all') {
-    titleElement.textContent = 'Все товары';
-  } else {
-    const category = allCategories.find(c => c.slug === categorySlug);
-    titleElement.textContent = category ? category.name : 'Все товары';
-  }
+    }
+    
+    // Кнопки навигации
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateGallery(currentIndex - 1);
+      });
+    }
+    
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateGallery(currentIndex + 1);
+      });
+    }
+  });
 }
 
 // ===== ОТОБРАЖЕНИЕ ТОВАРОВ С ПАГИНАЦИЕЙ (серверная) =====
@@ -311,13 +323,58 @@ async function renderProducts(page = 1) {
 
     grid.innerHTML = products
       .map((p) => {
-        const hasImg = p.image && p.image.length > 5;
-        const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
+        // Получаем изображения для галереи
+        let images = [];
+        try {
+          if (p.images && typeof p.images === 'string') {
+            images = JSON.parse(p.images);
+          } else if (Array.isArray(p.images)) {
+            images = p.images;
+          }
+        } catch (e) {
+          images = [];
+        }
+        if (images.length === 0 && p.image && p.image.length > 5) {
+          images = [p.image];
+        }
+        images = images.filter(img => img && img.length > 5);
+        
+        const mainImg = images.length > 0 ? images[0] : '';
+        const hasMultiple = images.length > 1;
+        const imagesData = JSON.stringify(images);
+
+        // Формируем HTML галереи
+        let galleryHtml = '';
+        if (images.length === 0) {
+          galleryHtml = `
+            <div class="product-img-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <span>Нет фото</span>
+            </div>
+          `;
+        } else {
+          galleryHtml = `
+            <div class="product-gallery" data-images='${imagesData}'>
+              <div class="product-gallery-main" onclick="window.openImageModalFromElement(this)">
+                <img src="${mainImg}" alt="${p.name}" loading="lazy" class="gallery-main-img">
+                ${hasMultiple ? `
+                  <div class="gallery-nav-btn gallery-prev" data-dir="-1"><i class="fas fa-chevron-left"></i></div>
+                  <div class="gallery-nav-btn gallery-next" data-dir="1"><i class="fas fa-chevron-right"></i></div>
+                  <div class="gallery-counter">1 / ${images.length}</div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
 
         return `
           <div class="product-card">
-            <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
-              ${getProductImageHtml(p)}
+            <div class="product-img ${images.length > 0 ? 'has-img' : ''}">
+              ${galleryHtml}
               ${p.badge ? `<div class="product-badge ${p.badge}">${p.badge === 'hit' ? 'Хит' : 'Новинка'}</div>` : ''}
             </div>
             <div class="product-info">
@@ -329,6 +386,9 @@ async function renderProducts(page = 1) {
       })
       .join("");
 
+    // Инициализируем галереи
+    initProductGalleries();
+
     updatePaginationButtons(currentPage, totalPages);
   } catch (err) {
     console.error("Render products error:", err);
@@ -336,30 +396,467 @@ async function renderProducts(page = 1) {
   }
 }
 
-// ===== ЭФФЕКТ ПРИЛИПАНИЯ ДЛЯ ФИЛЬТРОВ =====
-function initStickyFilterBar() {
-  const filterBar = document.querySelector('.catalog-filter-bar');
-  if (!filterBar) return;
-  
-  let isSticky = false;
-  
-  window.addEventListener('scroll', () => {
-    const rect = filterBar.getBoundingClientRect();
-    const top = rect.top;
-    
-    // Если верх фильтра доходит до шапки
-    if (top <= 80 && !isSticky) {
-      filterBar.classList.add('is-sticky');
-      isSticky = true;
-    } else if (top > 80 && isSticky) {
-      filterBar.classList.remove('is-sticky');
-      isSticky = false;
+// ===== РЕКОМЕНДАЦИИ =====
+async function initPromoProducts() {
+  const container = document.getElementById("promoProductsContainer");
+  if (!container) return;
+
+  try {
+    // const products = await API.products.getAll();
+    const hits = await fetch('/api/products/hit?limit=8').then(r => r.json());
+
+    if (hits.length === 0) {
+      container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">Рекомендации скоро появятся</p>';
+      return;
     }
+
+    container.innerHTML = hits
+      .map((p) => {
+        // Получаем изображения для галереи
+        let images = [];
+        try {
+          if (p.images && typeof p.images === 'string') {
+            images = JSON.parse(p.images);
+          } else if (Array.isArray(p.images)) {
+            images = p.images;
+          }
+        } catch (e) {
+          images = [];
+        }
+        if (images.length === 0 && p.image && p.image.length > 5) {
+          images = [p.image];
+        }
+        images = images.filter(img => img && img.length > 5);
+        
+        const mainImg = images.length > 0 ? images[0] : '';
+        const hasMultiple = images.length > 1;
+        const imagesData = JSON.stringify(images);
+
+        // Формируем HTML галереи
+        let galleryHtml = '';
+        if (images.length === 0) {
+          galleryHtml = `
+            <div class="product-img-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <span>Нет фото</span>
+            </div>
+          `;
+        } else {
+          galleryHtml = `
+            <div class="product-gallery" data-images='${imagesData}'>
+              <div class="product-gallery-main" onclick="window.openImageModalFromElement(this)">
+                <img src="${mainImg}" alt="${p.name}" loading="lazy" class="gallery-main-img">
+                ${hasMultiple ? `
+                  <div class="gallery-nav-btn gallery-prev" data-dir="-1"><i class="fas fa-chevron-left"></i></div>
+                  <div class="gallery-nav-btn gallery-next" data-dir="1"><i class="fas fa-chevron-right"></i></div>
+                  <div class="gallery-counter">1 / ${images.length}</div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="product-card">
+            <div class="product-img ${images.length > 0 ? 'has-img' : ''}">
+              ${galleryHtml}
+              <div class="product-badge">Хит</div>
+            </div>
+            <div class="product-info">
+              <h3 class="product-title" title="${p.name}">${p.name}</h3>
+              <div class="product-category-label">${p.category_name || 'Рекомендации'}</div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    // Инициализируем галереи
+    initProductGalleries();
+  } catch (err) {
+    console.error("Promo products error:", err);
+  }
+}
+
+// ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА ФОТО С НАВИГАЦИЕЙ =====
+window.openImageModalFromElement = function(element) {
+  // Находим родительский элемент .product-gallery
+  const gallery = element.closest('.product-gallery');
+  if (!gallery) {
+    console.warn('Gallery element not found');
+    return;
+  }
+  
+  let images = [];
+  try {
+    const data = gallery.dataset.images;
+    if (data) {
+      images = JSON.parse(data);
+    }
+  } catch (e) {
+    console.warn('Failed to parse images data:', e);
+    images = [];
+  }
+  
+  // Фильтруем пустые
+  images = images.filter(img => img && typeof img === 'string' && img.length > 5);
+  
+  if (images.length === 0) {
+    console.warn('No valid images found');
+    return;
+  }
+  
+  // Определяем текущий индекс по src главного изображения
+  const mainImg = gallery.querySelector('.gallery-main-img');
+  let currentIndex = 0;
+  if (mainImg) {
+    const currentSrc = mainImg.src;
+    const index = images.indexOf(currentSrc);
+    if (index !== -1) {
+      currentIndex = index;
+    }
+  }
+  
+  const modal = document.getElementById("imgZoomModal");
+  const target = document.getElementById("imgZoomTarget");
+  const counter = document.getElementById("imgZoomCounter");
+  const prevBtn = document.getElementById("imgZoomPrev");
+  const nextBtn = document.getElementById("imgZoomNext");
+  
+  if (!modal || !target) return;
+  
+  function updateZoomImage(index) {
+    currentIndex = (index + images.length) % images.length;
+    target.src = images[currentIndex];
+    if (counter) {
+      counter.textContent = `${currentIndex + 1} / ${images.length}`;
+    }
+    if (prevBtn) {
+      prevBtn.style.display = images.length > 1 ? 'flex' : 'none';
+    }
+    if (nextBtn) {
+      nextBtn.style.display = images.length > 1 ? 'flex' : 'none';
+    }
+  }
+  
+  // Обновляем навигацию
+  if (prevBtn) {
+    prevBtn.onclick = (e) => {
+      e.stopPropagation();
+      updateZoomImage(currentIndex - 1);
+    };
+  }
+  
+  if (nextBtn) {
+    nextBtn.onclick = (e) => {
+      e.stopPropagation();
+      updateZoomImage(currentIndex + 1);
+    };
+  }
+  
+  // Клавиши влево/вправо
+  const keyHandler = (e) => {
+    if (!modal.classList.contains('open')) {
+      document.removeEventListener('keydown', keyHandler);
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      updateZoomImage(currentIndex - 1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      updateZoomImage(currentIndex + 1);
+    } else if (e.key === 'Escape') {
+      closeImageModal();
+    }
+  };
+  
+  // Удаляем старый обработчик, добавляем новый
+  document.removeEventListener('keydown', keyHandler);
+  document.addEventListener('keydown', keyHandler);
+  
+  // Сохраняем обработчик для удаления при закрытии
+  modal._keyHandler = keyHandler;
+  
+  updateZoomImage(currentIndex);
+  modal.classList.add("open");
+};
+
+window.closeImageModal = function () {
+  const modal = document.getElementById("imgZoomModal");
+  if (modal) {
+    modal.classList.remove("open");
+    if (modal._keyHandler) {
+      document.removeEventListener('keydown', modal._keyHandler);
+      delete modal._keyHandler;
+    }
+  }
+};
+
+// Добавляем элементы навигации в модальное окно при инициализации
+if (!document.getElementById("imgZoomModal")) {
+  const modalHtml = `
+  <div id="imgZoomModal" class="img-zoom-modal" onclick="closeImageModal()">
+      <div class="img-zoom-content" onclick="event.stopPropagation()">
+          <button class="img-zoom-close" onclick="closeImageModal()">&times;</button>
+          <button class="img-zoom-nav img-zoom-prev" id="imgZoomPrev"><i class="fas fa-chevron-left"></i></button>
+          <img id="imgZoomTarget" src="" alt="Просмотр фото">
+          <button class="img-zoom-nav img-zoom-next" id="imgZoomNext"><i class="fas fa-chevron-right"></i></button>
+          <div class="img-zoom-counter" id="imgZoomCounter">1 / 1</div>
+      </div>
+  </div>`;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+}
+
+// ===== ИНИЦИАЛИЗАЦИЯ КАТАЛОГА =====
+async function initCatalog(params) {
+  const grid = document.getElementById("productsGrid");
+  if (!grid) {
+    // console.warn("ProductsGrid not found, retrying...");
+    setTimeout(() => initCatalog(params), 200);
+    return;
+  }
+
+  const urlParams = params || new URLSearchParams(window.location.search);
+  currentFilter = urlParams.get("category") || "all";
+  currentPage = parseInt(urlParams.get("page")) || 1;
+
+  // ==== СОРТИРОВКА (кастомный дропдаун) ====
+  const sortContainer = document.querySelector(".catalog-sort-container");
+  if (sortContainer) {
+    const sortOptions = [
+      { value: "default", label: "По умолчанию" },
+      { value: "name", label: "По алфавиту (А-Я)" },
+    ];
+
+    sortContainer.innerHTML = `
+      <div class="custom-dropdown" id="sortDropdown">
+        <div class="dropdown-header" id="sortHeader">
+          <span id="sortSelected">${sortOptions.find((o) => o.value === currentSort)?.label || "По умолчанию"}</span>
+          <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+        </div>
+        <div class="dropdown-list" id="sortList">
+          ${sortOptions
+            .map(
+              (o) => `
+            <div class="dropdown-item ${o.value === currentSort ? "active" : ""}" data-value="${o.value}">${o.label}</div>
+          `,
+            )
+            .join("")}
+        </div>
+      </div>
+    `;
+
+    // JavaScript для дропдауна сортировки
+    const sortDropdown = document.getElementById("sortDropdown");
+    const sortHeader = document.getElementById("sortHeader");
+    const sortList = document.getElementById("sortList");
+    const sortSelected = document.getElementById("sortSelected");
+
+    if (sortDropdown && sortHeader && sortList) {
+      sortHeader.addEventListener("click", (e) => {
+        e.stopPropagation();
+        // Закрываем другие дропдауны
+        document.querySelectorAll(".dropdown-list.open").forEach((el) => {
+          if (el !== sortList) el.classList.remove("open");
+        });
+        document.querySelectorAll(".dropdown-header.active").forEach((el) => {
+          if (el !== sortHeader) el.classList.remove("active");
+        });
+        sortList.classList.toggle("open");
+        sortHeader.classList.toggle("active");
+      });
+
+      sortList.querySelectorAll(".dropdown-item").forEach((item) => {
+        item.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const value = item.dataset.value;
+          const text = item.textContent;
+
+          currentSort = value;
+          sortSelected.textContent = text;
+
+          sortList.querySelectorAll(".dropdown-item").forEach((el) => {
+            el.classList.toggle("active", el.dataset.value === value);
+          });
+
+          sortList.classList.remove("open");
+          sortHeader.classList.remove("active");
+
+          renderProducts(1);
+        });
+      });
+    }
+  }
+
+  // ==== КАТЕГОРИИ (кастомный дропдаун) ====
+  const categoryContainer = document.querySelector(
+    ".catalog-category-container",
+  );
+  if (categoryContainer) {
+    try {
+      const cats = await API.categories.getAll();
+      allCategories = cats;
+
+      categoryContainer.innerHTML = `
+        <div class="custom-dropdown" id="categoryDropdown">
+          <div class="dropdown-header" id="categoryHeader">
+            <span id="categorySelected">${currentFilter === "all" ? "Все категории" : cats.find((c) => c.slug === currentFilter)?.name || "Все категории"}</span>
+            <span class="arrow"><i class="fas fa-chevron-down"></i></span>
+          </div>
+          <div class="dropdown-list" id="categoryList">
+            <div class="dropdown-item ${currentFilter === "all" ? "active" : ""}" data-value="all">Все категории</div>
+            ${cats.map((c) => `<div class="dropdown-item ${c.slug === currentFilter ? "active" : ""}" data-value="${c.slug}">${c.name}</div>`).join("")}
+          </div>
+        </div>
+      `;
+
+      // JavaScript для дропдауна категорий
+      const catDropdown = document.getElementById("categoryDropdown");
+      const catHeader = document.getElementById("categoryHeader");
+      const catList = document.getElementById("categoryList");
+      const catSelected = document.getElementById("categorySelected");
+
+      if (catDropdown && catHeader && catList) {
+        catHeader.addEventListener("click", (e) => {
+          e.stopPropagation();
+          // Закрываем другие дропдауны
+          document.querySelectorAll(".dropdown-list.open").forEach((el) => {
+            if (el !== catList) el.classList.remove("open");
+          });
+          document.querySelectorAll(".dropdown-header.active").forEach((el) => {
+            if (el !== catHeader) el.classList.remove("active");
+          });
+          catList.classList.toggle("open");
+          catHeader.classList.toggle("active");
+        });
+
+        catList.querySelectorAll(".dropdown-item").forEach((item) => {
+          item.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const value = item.dataset.value;
+            const text = item.textContent;
+
+            currentFilter = value;
+            catSelected.textContent = text;
+
+            catList.querySelectorAll(".dropdown-item").forEach((el) => {
+              el.classList.toggle("active", el.dataset.value === value);
+            });
+
+            catList.classList.remove("open");
+            catHeader.classList.remove("active");
+
+            window.history.replaceState(
+              {},
+              "",
+              value === "all" ? "/catalog" : `/catalog?category=${value}`,
+            );
+
+            renderProducts(1);
+          });
+        });
+      }
+    } catch (err) {
+      // console.error("Categories error:", err);
+    }
+  }
+
+  // ===== ПОИСК =====
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.value = currentSearch;
+    let timeout;
+    searchInput.oninput = (e) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        currentSearch = e.target.value;
+        renderProducts(1);
+      }, 300);
+    };
+  }
+
+  // ===== ПАГИНАЦИЯ =====
+  const prevBtn = document.getElementById("prevPageBtn");
+  const nextBtn = document.getElementById("nextPageBtn");
+
+  if (prevBtn) {
+    prevBtn.onclick = () => {
+      if (currentPage > 1) {
+        renderProducts(currentPage - 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+  }
+
+  if (nextBtn) {
+    nextBtn.onclick = () => {
+      if (currentPage < totalPages) {
+        renderProducts(currentPage + 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+  }
+
+  // Заголовок
+  updateCategoryTitle(currentFilter);
+
+  renderProducts(currentPage);
+
+  setTimeout(initStickyFilterBar, 200);
+  
+}
+
+// Закрытие всех дропдаунов при клике вне
+document.addEventListener("click", () => {
+  document.querySelectorAll(".dropdown-list.open").forEach((el) => {
+    el.classList.remove("open");
   });
+  document.querySelectorAll(".dropdown-header.active").forEach((el) => {
+    el.classList.remove("active");
+  });
+});
+
+// ===== ОБНОВЛЕНИЕ ЗАГОЛОВКА С ВЫБРАННОЙ КАТЕГОРИЕЙ =====
+function updateCategoryTitle(categorySlug) {
+  const titleElement = document.querySelector(".catalog-title");
+  if (!titleElement) return;
+
+  if (categorySlug === "all") {
+    titleElement.textContent = "Все товары";
+  } else {
+    const category = allCategories.find((c) => c.slug === categorySlug);
+    titleElement.textContent = category ? category.name : "Все товары";
+  }
 }
 
 
 
+// ===== ЭФФЕКТ ПРИЛИПАНИЯ ДЛЯ ФИЛЬТРОВ =====
+function initStickyFilterBar() {
+  const filterBar = document.querySelector(".catalog-filter-bar");
+  if (!filterBar) return;
+
+  let isSticky = false;
+
+  window.addEventListener("scroll", () => {
+    const rect = filterBar.getBoundingClientRect();
+    const top = rect.top;
+
+    // Если верх фильтра доходит до шапки
+    if (top <= 80 && !isSticky) {
+      filterBar.classList.add("is-sticky");
+      isSticky = true;
+    } else if (top > 80 && isSticky) {
+      filterBar.classList.remove("is-sticky");
+      isSticky = false;
+    }
+  });
+}
 
 function updatePaginationButtons(page, totalPages) {
   const prevBtn = document.getElementById("prevPageBtn");
@@ -397,42 +894,36 @@ function toggleSidebar() {
   }
 }
 
-// ===== РЕКОМЕНДАЦИИ =====
-async function initPromoProducts() {
-  const container = document.getElementById("promoProductsContainer");
-  if (!container) return;
 
-  try {
-    const products = await API.products.getAll();
-    const hits = products.filter((p) => p.badge === "hit" && (p.quantity || 0) > 0);
+// Добавляем элементы навигации в модальное окно при инициализации
+if (!document.getElementById("imgZoomModal")) {
+  const modalHtml = `
+  <div id="imgZoomModal" class="img-zoom-modal" onclick="closeImageModal()">
+      <div class="img-zoom-content" onclick="event.stopPropagation()">
+          <button class="img-zoom-close" onclick="closeImageModal()">&times;</button>
+          <button class="img-zoom-nav img-zoom-prev" id="imgZoomPrev"><i class="fas fa-chevron-left"></i></button>
+          <img id="imgZoomTarget" src="" alt="Просмотр фото">
+          <button class="img-zoom-nav img-zoom-next" id="imgZoomNext"><i class="fas fa-chevron-right"></i></button>
+          <div class="img-zoom-counter" id="imgZoomCounter">1 / 1</div>
+      </div>
+  </div>`;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+}
 
-    if (hits.length === 0) {
-      container.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">Рекомендации скоро появятся</p>';
-      return;
-    }
 
-    container.innerHTML = hits
-      .map((p) => {
-        const hasImg = p.image && p.image.length > 5;
-        const imgAction = hasImg ? `onclick="window.openImageModal('${p.image}')"` : "";
-
-        return `
-          <div class="product-card">
-            <div class="product-img ${hasImg ? 'has-img' : ''}" ${imgAction}>
-              ${getProductImageHtml(p)}
-              <div class="product-badge">Хит</div>
-            </div>
-            <div class="product-info">
-              <h3 class="product-title" title="${p.name}">${p.name}</h3>
-              <div class="product-category-label">${p.category_name || 'Рекомендации'}</div>
-            </div>
-          </div>
-        `;
-      })
-      .join("");
-  } catch (err) {
-    console.error("Promo products error:", err);
-  }
+// Добавляем элементы навигации в модальное окно при инициализации
+if (!document.getElementById("imgZoomModal")) {
+  const modalHtml = `
+  <div id="imgZoomModal" class="img-zoom-modal" onclick="closeImageModal()">
+      <div class="img-zoom-content" onclick="event.stopPropagation()">
+          <button class="img-zoom-close" onclick="closeImageModal()">&times;</button>
+          <button class="img-zoom-nav img-zoom-prev" id="imgZoomPrev"><i class="fas fa-chevron-left"></i></button>
+          <img id="imgZoomTarget" src="" alt="Просмотр фото">
+          <button class="img-zoom-nav img-zoom-next" id="imgZoomNext"><i class="fas fa-chevron-right"></i></button>
+          <div class="img-zoom-counter" id="imgZoomCounter">1 / 1</div>
+      </div>
+  </div>`;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
 }
 
 // ===== БУРГЕР-МЕНЮ =====
@@ -457,7 +948,8 @@ function initBurgerMenu() {
 
 function initScrollFeatures() {
   window.addEventListener("scroll", () => {
-    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const winScroll =
+      document.body.scrollTop || document.documentElement.scrollTop;
     const btn = document.getElementById("scroll-to-top");
     if (btn) {
       if (winScroll > 300) btn.classList.add("show");
@@ -507,35 +999,35 @@ window.closeImageModal = function () {
 
 function initPageFunctions(
   path = window.location.pathname,
-  params = new URLSearchParams(window.location.search)
+  params = new URLSearchParams(window.location.search),
 ) {
-  console.log('initPageFunctions called for:', path);
-  
+  // console.log("initPageFunctions called for:", path);
+
   if (path === "/" || path === "/index") {
-    console.log('Initializing main page...');
+    // // console.log("Initializing main page...");
     initPromoProducts();
     initNewProducts();
     initHeroSlider();
     initAboutSlider();
   } else if (path.includes("catalog")) {
-    console.log('Initializing catalog...');
+    // // console.log("Initializing catalog...");
     // Проверяем наличие grid, если нет — ждем
     const grid = document.getElementById("productsGrid");
     if (grid) {
       initCatalog(params);
     } else {
-      console.warn('ProductsGrid not found, retrying in 200ms...');
+      // // console.warn("ProductsGrid not found, retrying in 200ms...");
       setTimeout(() => {
         const gridRetry = document.getElementById("productsGrid");
         if (gridRetry) {
           initCatalog(params);
         } else {
-          console.error('ProductsGrid not found after retry');
+          // //   console.error("ProductsGrid not found after retry");
         }
       }, 200);
     }
   } else if (path.includes("contacts")) {
-    console.log('Initializing contacts...');
+    // //     console.log("Initializing contacts...");
     setTimeout(() => {
       initYandexMap();
     }, 100);
@@ -544,8 +1036,8 @@ function initPageFunctions(
 
 // ===== СЛАЙДЕР НА ГЛАВНОЙ =====
 function initHeroSlider() {
-  const slides = document.querySelectorAll('.hero-slide');
-  const dots = document.querySelectorAll('.hero-slider-dot');
+  const slides = document.querySelectorAll(".hero-slide");
+  const dots = document.querySelectorAll(".hero-slider-dot");
   if (!slides.length) return;
 
   let currentSlide = 0;
@@ -553,10 +1045,10 @@ function initHeroSlider() {
 
   function goToSlide(index) {
     slides.forEach((s, i) => {
-      s.classList.toggle('active', i === index);
+      s.classList.toggle("active", i === index);
     });
     dots.forEach((d, i) => {
-      d.classList.toggle('active', i === index);
+      d.classList.toggle("active", i === index);
     });
     currentSlide = index;
   }
@@ -571,16 +1063,16 @@ function initHeroSlider() {
   }
 
   dots.forEach((dot, index) => {
-    dot.addEventListener('click', () => {
+    dot.addEventListener("click", () => {
       goToSlide(index);
       startAutoPlay();
     });
   });
 
-  const slider = document.querySelector('.hero-slider');
+  const slider = document.querySelector(".hero-slider");
   if (slider) {
-    slider.addEventListener('mouseenter', () => clearInterval(interval));
-    slider.addEventListener('mouseleave', startAutoPlay);
+    slider.addEventListener("mouseenter", () => clearInterval(interval));
+    slider.addEventListener("mouseleave", startAutoPlay);
   }
 
   goToSlide(0);
@@ -589,8 +1081,8 @@ function initHeroSlider() {
 
 // ===== СЛАЙДЕР "О НАС" =====
 function initAboutSlider() {
-  const slides = document.querySelectorAll('.about-slide');
-  const dots = document.querySelectorAll('.about-slider-dot');
+  const slides = document.querySelectorAll(".about-slide");
+  const dots = document.querySelectorAll(".about-slider-dot");
   if (!slides.length) return;
 
   let currentSlide = 0;
@@ -598,10 +1090,10 @@ function initAboutSlider() {
 
   function goToSlide(index) {
     slides.forEach((s, i) => {
-      s.classList.toggle('active', i === index);
+      s.classList.toggle("active", i === index);
     });
     dots.forEach((d, i) => {
-      d.classList.toggle('active', i === index);
+      d.classList.toggle("active", i === index);
     });
     currentSlide = index;
   }
@@ -616,16 +1108,16 @@ function initAboutSlider() {
   }
 
   dots.forEach((dot, index) => {
-    dot.addEventListener('click', () => {
+    dot.addEventListener("click", () => {
       goToSlide(index);
       startAutoPlay();
     });
   });
 
-  const container = document.querySelector('.about-slider-container');
+  const container = document.querySelector(".about-slider-container");
   if (container) {
-    container.addEventListener('mouseenter', () => clearInterval(interval));
-    container.addEventListener('mouseleave', startAutoPlay);
+    container.addEventListener("mouseenter", () => clearInterval(interval));
+    container.addEventListener("mouseleave", startAutoPlay);
   }
 
   goToSlide(0);
@@ -637,23 +1129,23 @@ async function bootstrap() {
   if (yearEl) yearEl.innerText = new Date().getFullYear();
 
   setupNavigation();
-  
+
   // Инициализируем бургер-меню и скролл
   initBurgerMenu();
   initScrollFeatures();
   enforceRKN();
-  
+
   // 🔥 ВАЖНО: инициализируем страницу при загрузке с проверкой готовности DOM
   const currentPath = window.location.pathname;
   const currentParams = new URLSearchParams(window.location.search);
-  
+
   // Функция для безопасной инициализации
   const safeInit = () => {
     // Проверяем, что нужные элементы существуют
     if (currentPath.includes("catalog")) {
       const grid = document.getElementById("productsGrid");
       if (grid) {
-        console.log('DOM ready, initializing catalog...');
+        // console.log("DOM ready, initializing catalog...");
         initCatalog(currentParams);
         return true;
       }
@@ -662,18 +1154,22 @@ async function bootstrap() {
       // Для главной проверяем наличие контейнеров
       const container = document.getElementById("newProductsContainer");
       if (container) {
-        console.log('DOM ready, initializing main page...');
+        // console.log("DOM ready, initializing main page...");
         initPromoProducts();
         initNewProducts();
-        initHeroSlider();
-        initAboutSlider();
+
+        // 🔥 Инициализируем слайдеры с задержкой
+        setTimeout(() => {
+          initHeroSlider();
+          initAboutSlider();
+        }, 100);
         return true;
       }
       return false;
     } else if (currentPath.includes("contacts")) {
       const map = document.getElementById("map");
       if (map) {
-        console.log('DOM ready, initializing contacts...');
+        // console.log("DOM ready, initializing contacts...");
         initYandexMap();
         return true;
       }
@@ -683,22 +1179,45 @@ async function bootstrap() {
   };
 
   // Пробуем инициализировать сразу
-  if (document.readyState === 'complete') {
+  if (document.readyState === "complete") {
     // Страница уже загружена
     setTimeout(safeInit, 50);
   } else {
     // Ждем полной загрузки
     const onLoad = () => {
-      console.log('Page fully loaded, initializing...');
+      // console.log("Page fully loaded, initializing...");
       // Даем браузеру время на отрисовку
       setTimeout(safeInit, 100);
-      document.removeEventListener('readystatechange', onLoad);
+      document.removeEventListener("readystatechange", onLoad);
     };
-    document.addEventListener('readystatechange', onLoad);
+    document.addEventListener("readystatechange", onLoad);
     // Фолбек на случай, если событие не сработает
     setTimeout(onLoad, 1000);
   }
 }
+
+// 🔥 ЕДИНСТВЕННЫЙ И БЕЗОПАСНЫЙ ОБРАБОТЧИК КЛИКА МОБИЛЬНОГО ФИЛЬТРА
+document.addEventListener('click', (e) => {
+  const toggleBtn = e.target.closest('.filter-toggle-mobile');
+  if (toggleBtn) {
+    e.preventDefault();
+    e.stopPropagation(); // Предотвращаем двойной клик
+    
+    const filterBar = document.getElementById('catalogFilterBar');
+    if (filterBar) {
+      filterBar.classList.toggle('is-open');
+    }
+  }
+});
+
+// Резервная глобальная функция
+window.toggleMobileFilters = function(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const filterBar = document.getElementById('catalogFilterBar');
+  if (filterBar) {
+    filterBar.classList.toggle('is-open');
+  }
+};
 
 window.navigate = navigate;
 window.toggleSidebar = toggleSidebar;

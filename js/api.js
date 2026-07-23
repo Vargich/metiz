@@ -82,7 +82,29 @@ const API = {
         async create(orderData) {
             return API.fetch('/api/orders', { method: 'POST', body: JSON.stringify(orderData) });
         }
+    },
+
+    // Внутри объекта API в api.js добавлена секция shops:
+shops: {
+    async getAll() { return API.fetch('/api/shops'); },
+    async getAdminAll() { return API.fetch('/api/shops/all'); },
+    async add(shopData) {
+        return API.fetch('/api/shops', {
+            method: 'POST',
+            body: JSON.stringify(shopData)
+        });
+    },
+    async update(id, shopData) {
+        return API.fetch(`/api/shops/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(shopData)
+        });
+    },
+    async delete(id) {
+        return API.fetch(`/api/shops/${id}`, { method: 'DELETE' });
     }
+}
+
 };
 
 export default API;

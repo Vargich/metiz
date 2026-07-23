@@ -8,6 +8,15 @@
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
   <meta name="format-detection" content="telephone=no">
+
+  <title>Каталог товаров — Метиз Электрод</title>
+  <meta name="description"
+    content="Полный каталог промышленного крепежа, сварочных материалов, болтов, гаек и электроинструмента в Камышине." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Каталог крепежа и инструмента — Метиз Электрод" />
+  <meta property="og:description"
+    content="Широкий ассортимент ГОСТ крепежа, электродов и инструмента. Удобный поиск и фильтры." />
 </head>
 
 <body>
@@ -44,46 +53,55 @@
   </header>
 
   <main id="main-content">
-    <section class="catalog-layout">
-      <!-- ЛЕВАЯ ПАНЕЛЬ ФИЛЬТРОВ -->
-     <div class="catalog-filter-bar">
-  <div class="catalog-search-container">
-    <input type="text" id="searchInput" placeholder="Поиск по названию..." class="search-input-top">
-  </div>
-  <div class="catalog-category-container">
-    <!-- Сюда будет вставлен выпадающий список категорий -->
-  </div>
-  <div class="catalog-sort-container">
-    <!-- Сюда будет вставлен выпадающий список сортировки -->
-  </div>
-</div>
 
-      <!-- КОНТЕНТ КАТАЛОГА -->
-      <div class="catalog-content">
-        <div class="mobile-filter-bar">
-          <button class="hero-btn mobile-filter-btn" onclick="toggleSidebar()">
-            <i class="fas fa-sliders-h"></i> Фильтры и категории
-          </button>
+  <h1 class="catalog-title visually-hidden">Каталог крепежа и сварочных материалов</h1>
+  
+  <section class="catalog-layout">
+    
+    <!-- ЕДИНЫЙ БЛОК ФИЛЬТРОВ И ПОИСКА -->
+    <div class="catalog-filter-bar" id="catalogFilterBar">
+      
+      <!-- Кнопка, видна ТОЛЬКО на мобильных -->
+      <button type="button" class="filter-toggle-mobile">
+  <span><i class="fas fa-sliders-h"></i> Поиск и фильтры</span>
+  <i class="fas fa-chevron-down arrow-icon"></i>
+</button>
+
+      <!-- Выпадающий контент фильтра -->
+      <div class="filter-dropdown-body">
+        <div class="catalog-search-container">
+          <input type="text" id="searchInput" placeholder="Поиск по названию..." class="search-input-top">
         </div>
-
-        <!-- Сетка товаров -->
-        <div class="products-grid" id="productsGrid">
-          <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
-          <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
-          <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
-          <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+        <div class="catalog-category-container">
+          <!-- Категории подгружаются через app.js -->
         </div>
-
-        <!-- Пагинация -->
-        <div class="pagination-container" id="paginationContainer">
-          <button class="pagination-btn" id="prevPageBtn" disabled>← Назад</button>
-          <span id="pageInfo">Страница 1 из 1</span>
-          <button class="pagination-btn" id="nextPageBtn">Вперёд →</button>
+        <div class="catalog-sort-container">
+          <!-- Сортировка подгружается через app.js -->
         </div>
       </div>
-    </section>
-  </main>
 
+    </div>
+
+    <!-- КОНТЕНТ КАТАЛОГА -->
+    <div class="catalog-content">
+      <!-- Сетка товаров -->
+      <div class="products-grid" id="productsGrid">
+        <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+        <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+        <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+        <div class="skeleton-card"><div class="skeleton-box" style="aspect-ratio: 1/1; width: 100%;"></div></div>
+      </div>
+
+      <!-- Пагинация -->
+      <div class="pagination-container" id="paginationContainer">
+        <button class="pagination-btn" id="prevPageBtn" disabled>← Назад</button>
+        <span id="pageInfo">Страница 1 из 1</span>
+        <button class="pagination-btn" id="nextPageBtn">Вперёд →</button>
+      </div>
+    </div>
+
+  </section>
+</main>
   <!-- ФУТЕР -->
   <footer style="border-top:1px solid var(--border-color);">
     <div class="footer-bottom">
