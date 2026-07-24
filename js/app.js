@@ -13,6 +13,8 @@ let currentSort = "default";
 let currentPage = 1;
 const pageLimit = 24; // уменьшил для скорости
 let totalPages = 1;
+const cache = new Map();
+const CACHE_TTL = 60000; 
 
 // ===== SPA НАВИГАЦИЯ =====
 function setupNavigation() {
@@ -42,6 +44,17 @@ function setupNavigation() {
 }
 
 async function navigate(path) {
+  const currentPath = window.location.pathname;
+  const currentParams = new URLSearchParams(window.location.search);
+  const pageParam = currentParams.get('page');
+  const categoryParam = currentParams.get('category');
+  
+  // Если переходим на каталог, но без параметров, добавляем page=1
+  if (path.includes('/catalog') && !path.includes('page=')) {
+    const hasParams = path.includes('?');
+    path = path + (hasParams ? '&' : '?') + 'page=1';
+  }
+
   if (window.location.pathname + window.location.search === path) return;
   window.history.pushState({}, "", path);
   await loadPage(path);
@@ -66,10 +79,10 @@ async function loadPage(path) {
       window.scrollTo(0, 0);
       main.innerHTML = newMain.innerHTML;
       updateHeaderActive(new URL(path, window.location.origin).pathname);
-      initPageFunctions(
-        new URL(path, window.location.origin).pathname,
-        new URL(path, window.location.origin).searchParams,
-      );
+      const url = new URL(path, window.location.origin);
+      initPageFunctions(url.pathname, url.searchParams);
+
+      
     }
     enforceRKN();
   } catch (err) {
@@ -309,8 +322,22 @@ async function renderProducts(page = 1) {
       sort: currentSort
     });
 
-    const response = await fetch(`/api/products/paginated?${params}`);
-    const data = await response.json();
+    // const response = await fetch(`/api/products/paginated?${params}`);
+    // const data = await response.json();
+
+    const cacheKey = params.toString();
+    
+    // ✅ Проверяем кэш
+    let data;
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      data = cached.data;
+    } else {
+      const response = await fetch(`/api/products/paginated?${params}`);
+      data = await response.json();
+      // Сохраняем в кэш
+      cache.set(cacheKey, { data, timestamp: Date.now() });
+    }
 
     const products = data.products || [];
     totalPages = data.totalPages || 1;
@@ -361,7 +388,7 @@ async function renderProducts(page = 1) {
           galleryHtml = `
             <div class="product-gallery" data-images='${imagesData}'>
               <div class="product-gallery-main" onclick="window.openImageModalFromElement(this)">
-                <img src="${mainImg}" alt="${p.name}" loading="lazy" class="gallery-main-img">
+              <img src="${mainImg}" alt="${p.name}" loading="lazy" decoding="async" class="gallery-main-img">
                 ${hasMultiple ? `
                   <div class="gallery-nav-btn gallery-prev" data-dir="-1"><i class="fas fa-chevron-left"></i></div>
                   <div class="gallery-nav-btn gallery-next" data-dir="1"><i class="fas fa-chevron-right"></i></div>
@@ -396,6 +423,51 @@ async function renderProducts(page = 1) {
     grid.innerHTML = '<div style="grid-column:1/-1; padding:60px; text-align:center; color:red;">Ошибка загрузки товаров</div>';
   }
 }
+
+// ===== ПРЕДЗАГРУЗКА СЛЕДУЮЩЕЙ СТРАНИЦЫ =====
+let preloadTimeout = null;
+
+function preloadNextPage() {
+  if (currentPage < totalPages) {
+    clearTimeout(preloadTimeout);
+    preloadTimeout = setTimeout(() => {
+      const nextPage = currentPage + 1;
+      const params = new URLSearchParams({
+        page: nextPage,
+        limit: pageLimit,
+        category: currentFilter,
+        search: currentSearch,
+        sort: currentSort
+      });
+      const cacheKey = params.toString();
+      if (!cache.has(cacheKey)) {
+        fetch(`/api/products/paginated?${params}`)
+          .then(r => r.json())
+          .then(data => {
+            cache.set(cacheKey, { data, timestamp: Date.now() });
+          })
+          .catch(() => {});
+      }
+    }, 500);
+  }
+}
+
+// Вызываем после рендера
+function updatePaginationButtons(page, totalPages) {
+  const prevBtn = document.getElementById("prevPageBtn");
+  const nextBtn = document.getElementById("nextPageBtn");
+  const pageInfo = document.getElementById("pageInfo");
+
+  if (prevBtn) prevBtn.disabled = page <= 1;
+  if (nextBtn) nextBtn.disabled = page >= totalPages;
+  if (pageInfo) pageInfo.textContent = `Страница ${page} из ${totalPages}`;
+  
+  // ✅ Предзагружаем следующую страницу
+  if (page < totalPages) {
+    preloadNextPage();
+  }
+}
+
 
 // ===== РЕКОМЕНДАЦИИ =====
 async function initPromoProducts() {
@@ -613,6 +685,28 @@ if (!document.getElementById("imgZoomModal")) {
   document.body.insertAdjacentHTML("beforeend", modalHtml);
 }
 
+// Единый метод для синхронизации параметров в адресной строке
+function updateCatalogUrl(page = 1, category = currentFilter, search = currentSearch, replace = false) {
+  const params = new URLSearchParams();
+  
+  // Параметр page подставляется ВСЕГДА
+  params.set('page', page);
+
+  if (category && category !== 'all') {
+    params.set('category', category);
+  }
+  if (search && search.trim() !== '') {
+    params.set('search', search.trim());
+  }
+
+  const newUrl = window.location.pathname + '?' + params.toString();
+
+  if (replace) {
+    window.history.replaceState({ page }, '', newUrl);
+  } else {
+    window.history.pushState({ page }, '', newUrl);
+  }
+}
 // ===== ИНИЦИАЛИЗАЦИЯ КАТАЛОГА =====
 async function initCatalog(params) {
   const grid = document.getElementById("productsGrid");
@@ -625,6 +719,11 @@ async function initCatalog(params) {
   const urlParams = params || new URLSearchParams(window.location.search);
   currentFilter = urlParams.get("category") || "all";
   currentPage = parseInt(urlParams.get("page")) || 1;
+  currentSearch = urlParams.get("search") || "";
+
+  if (!new URLSearchParams(window.location.search).has("page")) {
+    updateCatalogUrl(currentPage, currentFilter, currentSearch, true);
+  }
 
   // ==== СОРТИРОВКА (кастомный дропдаун) ====
   const sortContainer = document.querySelector(".catalog-sort-container");
@@ -741,23 +840,21 @@ async function initCatalog(params) {
             e.stopPropagation();
             const value = item.dataset.value;
             const text = item.textContent;
-
+        
             currentFilter = value;
             catSelected.textContent = text;
-
+        
             catList.querySelectorAll(".dropdown-item").forEach((el) => {
               el.classList.toggle("active", el.dataset.value === value);
             });
-
+        
             catList.classList.remove("open");
             catHeader.classList.remove("active");
-
-            window.history.replaceState(
-              {},
-              "",
-              value === "all" ? "/catalog" : `/catalog?category=${value}`,
-            );
-
+        
+            // ✅ Сохраняем страницу 1 при смене категории
+            const pageParam = `?page=1${value !== 'all' ? `&category=${value}` : ''}`;
+            window.history.replaceState({}, "", `/catalog${pageParam}`);
+        
             renderProducts(1);
           });
         });
@@ -776,19 +873,25 @@ async function initCatalog(params) {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         currentSearch = e.target.value;
+        currentPage = 1;
+        // ✅ При поиске сбрасываем на 1 страницу и обновляем URL
+        updateCatalogUrl(1, currentFilter, currentSearch, true);
         renderProducts(1);
       }, 300);
     };
   }
 
-  // ===== ПАГИНАЦИЯ =====
-  const prevBtn = document.getElementById("prevPageBtn");
+// ===== ПАГИНАЦИЯ =====
+
+const prevBtn = document.getElementById("prevPageBtn");
   const nextBtn = document.getElementById("nextPageBtn");
 
   if (prevBtn) {
     prevBtn.onclick = () => {
       if (currentPage > 1) {
-        renderProducts(currentPage - 1);
+        currentPage--;
+        updateCatalogUrl(currentPage, currentFilter, currentSearch, false);
+        renderProducts(currentPage);
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     };
@@ -797,11 +900,27 @@ async function initCatalog(params) {
   if (nextBtn) {
     nextBtn.onclick = () => {
       if (currentPage < totalPages) {
-        renderProducts(currentPage + 1);
+        currentPage++;
+        updateCatalogUrl(currentPage, currentFilter, currentSearch, false);
+        renderProducts(currentPage);
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     };
   }
+function updateUrlWithPage(page) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('page', page);
+  
+  // Если категория не выбрана, удаляем параметр
+  if (currentFilter === 'all') {
+    params.delete('category');
+  } else {
+    params.set('category', currentFilter);
+  }
+  
+  const newUrl = window.location.pathname + '?' + params.toString();
+  window.history.pushState({ page: page }, '', newUrl);
+}
 
   // Заголовок
   updateCategoryTitle(currentFilter);
@@ -859,15 +978,15 @@ function initStickyFilterBar() {
   });
 }
 
-function updatePaginationButtons(page, totalPages) {
-  const prevBtn = document.getElementById("prevPageBtn");
-  const nextBtn = document.getElementById("nextPageBtn");
-  const pageInfo = document.getElementById("pageInfo");
+// function updatePaginationButtons(page, totalPages) {
+//   const prevBtn = document.getElementById("prevPageBtn");
+//   const nextBtn = document.getElementById("nextPageBtn");
+//   const pageInfo = document.getElementById("pageInfo");
 
-  if (prevBtn) prevBtn.disabled = page <= 1;
-  if (nextBtn) nextBtn.disabled = page >= totalPages;
-  if (pageInfo) pageInfo.textContent = `Страница ${page} из ${totalPages}`;
-}
+//   if (prevBtn) prevBtn.disabled = page <= 1;
+//   if (nextBtn) nextBtn.disabled = page >= totalPages;
+//   if (pageInfo) pageInfo.textContent = `Страница ${page} из ${totalPages}`;
+// }
 
 // ===== МОБИЛЬНЫЙ САЙДБАР =====
 function toggleSidebar() {
@@ -1105,30 +1224,32 @@ async function bootstrap() {
   initScrollFeatures();
   enforceRKN();
 
-  // 🔥 ВАЖНО: инициализируем страницу при загрузке с проверкой готовности DOM
   const currentPath = window.location.pathname;
   const currentParams = new URLSearchParams(window.location.search);
 
-  // Функция для безопасной инициализации
+  // Если зашли в каталог без указания page, устанавливаем page=1 по умолчанию
+  if (currentPath.includes('/catalog') && !currentParams.has('page')) {
+    currentParams.set('page', '1');
+    const newUrl = currentPath + '?' + currentParams.toString();
+    window.history.replaceState({}, '', newUrl);
+  }
+
+  // Функция для безопасной инициализации страницы
   const safeInit = () => {
-    // Проверяем, что нужные элементы существуют
     if (currentPath.includes("catalog")) {
       const grid = document.getElementById("productsGrid");
       if (grid) {
-        // console.log("DOM ready, initializing catalog...");
-        initCatalog(currentParams);
+        // ✅ ВАЖНО: берем актуальные параметры прямо из URL
+        const actualParams = new URLSearchParams(window.location.search);
+        initCatalog(actualParams);
         return true;
       }
       return false;
     } else if (currentPath === "/" || currentPath === "/index") {
-      // Для главной проверяем наличие контейнеров
       const container = document.getElementById("newProductsContainer");
       if (container) {
-        // console.log("DOM ready, initializing main page...");
         initPromoProducts();
         initNewProducts();
-
-        // 🔥 Инициализируем слайдеры с задержкой
         setTimeout(() => {
           initHeroSlider();
           initAboutSlider();
@@ -1139,29 +1260,22 @@ async function bootstrap() {
     } else if (currentPath.includes("contacts")) {
       const map = document.getElementById("map");
       if (map) {
-        // console.log("DOM ready, initializing contacts...");
         initYandexMap();
         return true;
       }
       return false;
     }
-    return true; // для других страниц
+    return true;
   };
 
-  // Пробуем инициализировать сразу
   if (document.readyState === "complete") {
-    // Страница уже загружена
     setTimeout(safeInit, 50);
   } else {
-    // Ждем полной загрузки
     const onLoad = () => {
-      // console.log("Page fully loaded, initializing...");
-      // Даем браузеру время на отрисовку
       setTimeout(safeInit, 100);
       document.removeEventListener("readystatechange", onLoad);
     };
     document.addEventListener("readystatechange", onLoad);
-    // Фолбек на случай, если событие не сработает
     setTimeout(onLoad, 1000);
   }
 }

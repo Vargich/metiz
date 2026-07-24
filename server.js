@@ -232,6 +232,14 @@ async function initDatabase() {
             await run("INSERT INTO shops (name, address, city, phone, worktime, coords, route, images) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", s);
         }
     }
+    // ДОПОЛНИТЕЛЬНЫЕ ИНДЕКСЫ ДЛЯ УСКОРЕНИЯ ЗАПРОСОВ
+await run(`CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id)`);
+await run(`CREATE INDEX IF NOT EXISTS idx_products_badge ON products(badge)`);
+await run(`CREATE INDEX IF NOT EXISTS idx_products_quantity ON products(quantity)`);
+await run(`CREATE INDEX IF NOT EXISTS idx_products_in_stock ON products(in_stock)`);
+await run(`CREATE INDEX IF NOT EXISTS idx_products_price ON products(price)`);
+await run(`CREATE INDEX IF NOT EXISTS idx_products_name ON products(name)`);
+await run(`CREATE INDEX IF NOT EXISTS idx_products_article ON products(article)`);
 }
 
 // ==========================================
@@ -311,6 +319,15 @@ const isAdminMiddleware = (req, res, next) => {
     next();
 };
 
+app.use('/image', express.static(path.join(__dirname, 'image'), {
+    maxAge: '30d',
+    setHeaders: (res, path) => {
+        res.setHeader('Cache-Control', 'public, max-age=2592000');
+        // Добавляем заголовок для lazy loading
+        res.setHeader('Content-Disposition', 'inline');
+    }
+}));
+
 // 🔥 ЗАЩИТА АДМИН-ПАНЕЛИ (Перенаправление неавторизованных)
 app.get(['/admin', '/admin.html'], (req, res) => {
     const token = req.cookies.token;
@@ -375,63 +392,80 @@ app.get('/api/products/hit', async (req, res) => {
 });
 
 app.get('/api/products/paginated', async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 24;
-    const category = req.query.category || null;
-    const search = req.query.search || '';
-    const sort = req.query.sort || 'default';
-    
-    const offset = (page - 1) * limit;
-    let conditions = [];
-    let params = [];
-    let paramIndex = 1;
-    
-    if (category && category !== 'all') {
-      const cat = await queryOne("SELECT id FROM categories WHERE slug = ?", [category]);
-      if (cat) {
-        conditions.push(`p.category_id = $${paramIndex++}`);
-        params.push(cat.id);
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 24;
+      const category = req.query.category || null;
+      const search = req.query.search || '';
+      const sort = req.query.sort || 'default';
+      
+      const offset = (page - 1) * limit;
+      let conditions = [];
+      let params = [];
+      let paramIndex = 1;
+      
+      // ✅ Оптимизация: используем EXISTS вместо JOIN для подсчёта
+      if (category && category !== 'all') {
+        const cat = await queryOne("SELECT id FROM categories WHERE slug = ?", [category]);
+        if (cat) {
+          conditions.push(`p.category_id = $${paramIndex++}`);
+          params.push(cat.id);
+        }
       }
+      
+      if (search.trim()) {
+        conditions.push(`(p.name ILIKE $${paramIndex++} OR p.article ILIKE $${paramIndex++})`);
+        params.push(`%${search}%`, `%${search}%`);
+      }
+      
+      conditions.push(`(p.quantity > 0 OR p.in_stock = 1)`);
+      const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+      
+      // ✅ Оптимизация сортировки — используем простые индексы
+      let orderClause = 'ORDER BY p.id DESC';
+      if (sort === 'name') orderClause = 'ORDER BY p.name ASC';
+      else if (sort === 'price_asc') orderClause = 'ORDER BY p.price ASC';
+      else if (sort === 'price_desc') orderClause = 'ORDER BY p.price DESC';
+      
+      // ✅ Используем один запрос с CTE для подсчёта и выборки (быстрее)
+      const query = `
+        WITH filtered AS (
+          SELECT p.id 
+          FROM products p 
+          ${whereClause}
+        ),
+        counted AS (
+          SELECT COUNT(*)::int as total FROM filtered
+        )
+        SELECT 
+          p.*, 
+          c.name as category_name,
+          (SELECT total FROM counted) as total_count
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE p.id IN (SELECT id FROM filtered)
+        ${orderClause}
+        LIMIT $${paramIndex++} OFFSET $${paramIndex++}
+      `;
+      
+      const dataRes = await pool.query(query, [...params, limit, offset]);
+      const rows = dataRes.rows;
+      
+      // ✅ Берём total из первой строки (всегда одинаковый)
+      const total = rows.length > 0 ? rows[0].total_count : 0;
+      
+      res.json({
+        products: rows.map(({ total_count, ...p }) => p), // убираем total_count из каждого товара
+        total: total,
+        page: page,
+        limit: limit,
+        totalPages: Math.ceil(total / limit) || 1
+      });
+    } catch (err) {
+      logger.error(`Ошибка пагинированного каталога: ${err.message}`);
+      res.status(500).json({ error: 'Ошибка загрузки каталога' });
     }
-    
-    if (search.trim()) {
-      conditions.push(`(p.name ILIKE $${paramIndex++} OR p.article ILIKE $${paramIndex++})`);
-      params.push(`%${search}%`, `%${search}%`);
-    }
-    
-    conditions.push(`(p.quantity > 0 OR p.in_stock = 1)`);
-    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-    
-    let orderClause = 'ORDER BY p.id DESC';
-    if (sort === 'name') orderClause = 'ORDER BY p.name ASC';
-    else if (sort === 'price_asc') orderClause = 'ORDER BY p.price ASC';
-    else if (sort === 'price_desc') orderClause = 'ORDER BY p.price DESC';
-    
-    const countRes = await pool.query(`SELECT COUNT(*)::int as total FROM products p ${whereClause}`, params);
-    const total = countRes.rows[0]?.total || 0;
-    
-    const dataRes = await pool.query(
-      `SELECT p.*, c.name as category_name 
-       FROM products p 
-       LEFT JOIN categories c ON p.category_id = c.id 
-       ${whereClause} ${orderClause} 
-       LIMIT $${paramIndex++} OFFSET $${paramIndex++}`,
-      [...params, limit, offset]
-    );
-    
-    res.json({
-      products: dataRes.rows,
-      total: total,
-      page: page,
-      limit: limit,
-      totalPages: Math.ceil(total / limit) || 1
-    });
-  } catch (err) {
-    logger.error(`Ошибка пагинированного каталога: ${err.message}`);
-    res.status(500).json({ error: 'Ошибка загрузки каталога' });
-  }
-});
+  });
 
 app.get('/api/products/search', async (req, res) => {
     const query = req.query.q || '';
