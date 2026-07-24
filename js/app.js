@@ -1,3 +1,4 @@
+
 import API from "./api.js";
 import { initYandexMap, initPickupMap } from "./map.js";
 
@@ -896,35 +897,11 @@ function toggleSidebar() {
 
 
 // Добавляем элементы навигации в модальное окно при инициализации
-if (!document.getElementById("imgZoomModal")) {
-  const modalHtml = `
-  <div id="imgZoomModal" class="img-zoom-modal" onclick="closeImageModal()">
-      <div class="img-zoom-content" onclick="event.stopPropagation()">
-          <button class="img-zoom-close" onclick="closeImageModal()">&times;</button>
-          <button class="img-zoom-nav img-zoom-prev" id="imgZoomPrev"><i class="fas fa-chevron-left"></i></button>
-          <img id="imgZoomTarget" src="" alt="Просмотр фото">
-          <button class="img-zoom-nav img-zoom-next" id="imgZoomNext"><i class="fas fa-chevron-right"></i></button>
-          <div class="img-zoom-counter" id="imgZoomCounter">1 / 1</div>
-      </div>
-  </div>`;
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
-}
+
 
 
 // Добавляем элементы навигации в модальное окно при инициализации
-if (!document.getElementById("imgZoomModal")) {
-  const modalHtml = `
-  <div id="imgZoomModal" class="img-zoom-modal" onclick="closeImageModal()">
-      <div class="img-zoom-content" onclick="event.stopPropagation()">
-          <button class="img-zoom-close" onclick="closeImageModal()">&times;</button>
-          <button class="img-zoom-nav img-zoom-prev" id="imgZoomPrev"><i class="fas fa-chevron-left"></i></button>
-          <img id="imgZoomTarget" src="" alt="Просмотр фото">
-          <button class="img-zoom-nav img-zoom-next" id="imgZoomNext"><i class="fas fa-chevron-right"></i></button>
-          <div class="img-zoom-counter" id="imgZoomCounter">1 / 1</div>
-      </div>
-  </div>`;
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
-}
+
 
 // ===== БУРГЕР-МЕНЮ =====
 function initBurgerMenu() {
@@ -936,12 +913,14 @@ function initBurgerMenu() {
     e.stopPropagation();
     burgerBtn.classList.toggle("active");
     navMenu.classList.toggle("open");
+    document.body.classList.toggle("menu-open");
   };
 
   navMenu.querySelectorAll("a").forEach((link) => {
     link.onclick = () => {
       burgerBtn.classList.remove("active");
       navMenu.classList.remove("open");
+      document.body.classList.remove("menu-open");
     };
   });
 }
@@ -977,16 +956,7 @@ window.acceptCookies = function () {
   if (banner) banner.remove();
 };
 
-if (!document.getElementById("imgZoomModal")) {
-  const modalHtml = `
-  <div id="imgZoomModal" class="img-zoom-modal" onclick="closeImageModal()">
-      <div class="img-zoom-content" onclick="event.stopPropagation()">
-          <button class="img-zoom-close" onclick="closeImageModal()">&times;</button>
-          <img id="imgZoomTarget" src="" alt="Просмотр фото">
-      </div>
-  </div>`;
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
-}
+
 
 window.openImageModal = function (src) {
   document.getElementById("imgZoomTarget").src = src;
@@ -1196,30 +1166,20 @@ async function bootstrap() {
   }
 }
 
-// 🔥 ЕДИНСТВЕННЫЙ И БЕЗОПАСНЫЙ ОБРАБОТЧИК КЛИКА МОБИЛЬНОГО ФИЛЬТРА
-document.addEventListener('click', (e) => {
-  const toggleBtn = e.target.closest('.filter-toggle-mobile');
-  if (toggleBtn) {
-    e.preventDefault();
-    e.stopPropagation(); // Предотвращаем двойной клик
-    
-    const filterBar = document.getElementById('catalogFilterBar');
-    if (filterBar) {
-      filterBar.classList.toggle('is-open');
-    }
-  }
-});
-
-// Резервная глобальная функция
-window.toggleMobileFilters = function(e) {
-  if (e && e.stopPropagation) e.stopPropagation();
-  const filterBar = document.getElementById('catalogFilterBar');
-  if (filterBar) {
-    filterBar.classList.toggle('is-open');
-  }
-};
-
 window.navigate = navigate;
 window.toggleSidebar = toggleSidebar;
 
 document.addEventListener("DOMContentLoaded", bootstrap);
+// ===== УНИВЕРСАЛЬНЫЙ ОБРАБОТЧИК КНОПКИ ФИЛЬТРА (фаза захвата) =====
+document.addEventListener('click', function(e) {
+    const toggleBtn = e.target.closest('#filterToggleBtn');
+    if (toggleBtn) {
+        e.preventDefault();
+        e.stopPropagation(); // Останавливаем всплытие, чтобы другие обработчики не мешали
+        const filterBar = document.getElementById('catalogFilterBar');
+        if (filterBar) {
+            filterBar.classList.toggle('is-open');
+            // console.log('Filter toggled (capture), is-open:', filterBar.classList.contains('is-open'));
+        }
+    }
+}, true); // <-- true включает фазу захвата

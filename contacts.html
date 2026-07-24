@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Контакты — Метиз Электрод</title>
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
   <meta name="format-detection" content="telephone=no">
@@ -52,7 +51,7 @@
   <section class="about-section border-b border-dark">
     <!-- ИНТЕРАКТИВНАЯ КАРТА (Левая часть) -->
     <div class="about-sidebar contacts-map-sidebar">
-      <div id="map" style="width:100%; height:500px; filter: grayscale(1) invert(1) contrast(0.8) brightness(1.2);"></div>
+      <div id="map" style="width:100%; height:500px; filter: grayscale(0.9) contrast(1.05) brightness(1.02);"></div>
       <div id="shops" style="width:100%; flex: 1; overflow-y:auto; background: #FFFFFF; border-top:2px solid var(--border-color); padding:0;">
         <!-- Список филиалов заполняется мгновенно через map.js -->
       </div>
@@ -67,7 +66,7 @@
         <div class="contact-box" style="text-align:left; padding:0; border:none;">
           <div class="contact-tag">Отдел продаж</div>
           <a href="tel:+78445790099" style="text-decoration: none; color: inherit;">
-            <div class="contact-value" style="font-size:24px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">+7(84457) 9-00-99</div>
+            <div class="contact-value contact-value--hoverable" style="font-size:24px;">+7(84457) 9-00-99</div>
           </a>
           <div class="contact-sub">Консультации и наличие</div>
         </div>
@@ -75,7 +74,7 @@
         <div class="contact-box" style="text-align:left; padding:0; border:none;">
           <div class="contact-tag">Оптовые закупки</div>
           <a href="tel:+79610893812" style="text-decoration: none; color: inherit;">
-            <div class="contact-value" style="font-size:24px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">+7(961)089-38-12</div>
+            <div class="contact-value contact-value--hoverable" style="font-size:24px;">+7(961)089-38-12</div>
           </a>
           <div class="contact-sub">Спецпредложения для компаний</div>
         </div>
@@ -83,7 +82,7 @@
         <div class="contact-box" style="text-align:left; padding:0; border:none;">
           <div class="contact-tag">Электронная почта</div>
           <a href="mailto:metiz-elektrod@mail.ru" style="text-decoration: none; color: inherit;">
-            <div class="contact-value" style="font-size:18px; transition: color 0.2s;" onmouseover="this.style.color='var(--brand)'" onmouseout="this.style.color='inherit'">metiz-elektrod@mail.ru</div>
+            <div class="contact-value contact-value--hoverable" style="font-size:18px;">metiz-elektrod@mail.ru</div>
           </a>
           <div class="contact-sub">Для официальных запросов</div>
         </div>
@@ -118,8 +117,8 @@
     </div>
     
     <div class="footer-socials">
-      <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">VK</a>
-      <a href="https://t.me/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;">TG</a>
+      <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;"><i class="fab fa-vk" aria-hidden="true"></i><span class="visually-hidden">VK</span></a>
+      <a href="https://t.me/metizelektrod" target="_blank" class="social-btn" style="text-decoration: none; color: inherit;"><i class="fab fa-telegram" aria-hidden="true"></i><span class="visually-hidden">Telegram</span></a>
     </div>
   </div>
 </footer>

@@ -2,8 +2,9 @@
 
 /* ===== ПЕРЕМЕННЫЕ И БАЗОВЫЕ НАСТРОЙКИ ===== */
 :root {
-  --brand: #FF5733;
-  --brand-hover: #E04E2A;
+  /* --brand: #1E3A5F; */
+  --brand: #ff5733;
+  --brand-hover: #14293F;
   --dark: #0F172A;
   --dark-light: #1E293B;
   --gray-bg: #F8FAFC;
@@ -89,7 +90,7 @@ footer {
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 3px;
   border: 1px solid var(--dark);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -98,14 +99,13 @@ footer {
 .hero-btn:hover, .btn-primary:hover {
   background: var(--brand);
   border-color: var(--brand);
-  transform: translateY(-1px);
 }
 
 .form-input {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid #D1D5DB;
-  border-radius: 6px;
+  border-radius: 3px;
   font-family: inherit;
   font-weight: 500;
   font-size: 16px;
@@ -117,7 +117,7 @@ footer {
 
 .form-input:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(255, 87, 51, 0.15);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.15);
 }
 
 /* ===== HEADER ===== */
@@ -200,7 +200,7 @@ footer {
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 3px;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
@@ -221,7 +221,7 @@ footer {
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
-  color: #4B5563;
+  color: #1E293B ;
 }
 
 .icon-btn:hover {
@@ -332,7 +332,7 @@ footer {
   top: 0;
   width: 45%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(255, 87, 51, 0) 0%, rgba(255, 87, 51, 0.03) 100%);
+  background: linear-gradient(90deg, rgba(30, 58, 95, 0) 0%, rgba(30, 58, 95, 0.03) 100%);
   pointer-events: none;
   z-index: 1;
 }
@@ -433,12 +433,12 @@ footer {
 }
 
 /* Цветовые темы для баннеров */
-.banner-welding .banner-badge { color: #FF5733; }
-.banner-welding .banner-divider { background: #FF5733; }
-.banner-welding .accent { color: #FF5733; }
-.banner-welding .banner-btn { background: #FF5733; }
+.banner-welding .banner-badge { color: #1E3A5F; }
+.banner-welding .banner-divider { background: #1E3A5F; }
+.banner-welding .accent { color: #1E3A5F; }
+.banner-welding .banner-btn { background: #1E3A5F; }
 .banner-welding .banner-btn i { color: #FFFFFF; }
-.banner-welding .banner-btn:hover { background: #E04E2A; }
+.banner-welding .banner-btn:hover { background: #14293F; }
 
 .banner-fasteners .banner-badge { color: #3B82F6; }
 .banner-fasteners .banner-divider { background: #3B82F6; }
@@ -486,7 +486,7 @@ footer {
 .hero-slider-dot.active {
   background: var(--brand);
   width: 24px;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 .hero-slider-dot:hover {
@@ -544,7 +544,7 @@ footer {
   font-size: 18px;
   font-weight: 400;
   margin-bottom: 36px;
-  color: #4B5563;
+  color: #1E293B ;
 }
 
 .about-grid {
@@ -557,7 +557,7 @@ footer {
   padding: 20px 24px;
   border: 1px solid var(--border-color);
   background: white;
-  border-radius: 6px;
+  border-radius: 3px;
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
@@ -646,7 +646,7 @@ footer {
   top: 0;
   width: 45%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(255, 87, 51, 0) 0%, rgba(255, 87, 51, 0.03) 100%);
+  background: linear-gradient(90deg, rgba(30, 58, 95, 0) 0%, rgba(30, 58, 95, 0.03) 100%);
   pointer-events: none;
   z-index: 1;
 }
@@ -724,7 +724,7 @@ footer {
   text-transform: uppercase;
   letter-spacing: 1px;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 3px;
   transition: all 0.2s ease;
   border: none;
   cursor: pointer;
@@ -747,12 +747,12 @@ footer {
 }
 
 /* Цветовые темы для about баннеров */
-.about-banner-welding .about-banner-badge { color: #FF5733; }
-.about-banner-welding .about-banner-divider { background: #FF5733; }
-.about-banner-welding .accent { color: #FF5733; }
-.about-banner-welding .about-banner-btn { background: #FF5733; }
+.about-banner-welding .about-banner-badge { color: #1E3A5F; }
+.about-banner-welding .about-banner-divider { background: #1E3A5F; }
+.about-banner-welding .accent { color: #1E3A5F; }
+.about-banner-welding .about-banner-btn { background: #1E3A5F; }
 .about-banner-welding .about-banner-btn i { color: #FFFFFF; }
-.about-banner-welding .about-banner-btn:hover { background: #E04E2A; }
+.about-banner-welding .about-banner-btn:hover { background: #14293F; }
 
 .about-banner-fasteners .about-banner-badge { color: #3B82F6; }
 .about-banner-fasteners .about-banner-divider { background: #3B82F6; }
@@ -799,13 +799,13 @@ footer {
 .about-slider-dot.active {
   background: var(--brand);
   width: 20px;
-  border-radius: 10px;
+  border-radius: 3px;
 }
 
 /* ===== TICKER ===== */
 .ticker-wrap {
-  background: var(--brand);
-  height: 44px;
+  background: var(--dark);
+  height: 40px;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -816,15 +816,15 @@ footer {
 .ticker {
   display: flex;
   white-space: nowrap;
-  animation: ticker 30s linear infinite;
-  color: white;
+  animation: ticker 65s linear infinite;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .ticker span {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
 }
 
 @keyframes ticker {
@@ -862,7 +862,7 @@ footer {
 
 .brand-item {
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 3px;
   padding: 20px;
   text-align: center;
   font-size: 16px;
@@ -870,14 +870,13 @@ footer {
   background: var(--gray-bg);
   transition: all 0.2s;
   cursor: default;
-  color: #4B5563;
+  color: #1E293B ;
 }
 
 .brand-item:hover {
   background: var(--dark);
   color: var(--white);
   border-color: var(--dark);
-  transform: translateY(-2px);
 }
 
 /* ===== CONTACTS ===== */
@@ -911,6 +910,14 @@ footer {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 6px;
+}
+
+.contact-value--hoverable {
+  transition: color 0.2s ease;
+}
+
+.contact-value--hoverable:hover {
+  color: var(--brand);
 }
 
 .contact-sub {
@@ -973,7 +980,7 @@ footer {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-radius: 6px;
+  border-radius: 3px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -1057,7 +1064,7 @@ footer {
   width: 36px;
   height: 36px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1154,7 +1161,7 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  border-radius: 8px;
+  border-radius: 3px;
   width: 100%;
 }
 
@@ -1162,7 +1169,7 @@ footer {
   display: flex;
   width: 100%;
   border: 1px solid #D1D5DB;
-  border-radius: 6px;
+  border-radius: 3px;
   overflow: hidden;
   transition: border-color 0.2s ease;
 }
@@ -1236,7 +1243,7 @@ footer {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid #D1D5DB;
-  border-radius: 6px;
+  border-radius: 3px;
   font-family: inherit;
   font-weight: 600;
   font-size: 14px;
@@ -1256,7 +1263,7 @@ footer {
 
 .sort-select-top:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(255, 87, 51, 0.1);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
 }
 
 /* ===== ДРОПДАУН КАТЕГОРИЙ ===== */
@@ -1269,7 +1276,7 @@ footer {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid #D1D5DB;
-  border-radius: 6px;
+  border-radius: 3px;
   font-family: inherit;
   font-weight: 600;
   font-size: 14px;
@@ -1307,7 +1314,7 @@ footer {
   overflow-y: auto;
   background: white;
   border: 1px solid #E5E7EB;
-  border-radius: 6px;
+  border-radius: 3px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   z-index: 1100;
   padding: 4px 0;
@@ -1367,7 +1374,7 @@ footer {
 
 .product-card {
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--white);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
@@ -1379,9 +1386,8 @@ footer {
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
   border-color: #CBD5E1;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 .product-img {
@@ -1486,7 +1492,7 @@ footer {
 /* ===== SKELETON ===== */
 .skeleton-card {
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
+  border-radius: 3px;
   display: flex;
   flex-direction: column;
   background: white;
@@ -1613,7 +1619,7 @@ footer {
   padding: 16px 24px;
   font-weight: 600;
   font-size: 13px;
-  border-radius: 8px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1673,7 +1679,7 @@ footer {
   max-width: 100%;
   max-height: 90vh;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 3px;
   background: white;
 }
 
@@ -1712,7 +1718,7 @@ footer {
 
 .modal-content {
   border: 1px solid var(--border-color) !important;
-  border-radius: 12px !important;
+  border-radius: 4px !important;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
   position: relative;
   background: white;
@@ -1810,7 +1816,7 @@ footer {
   height: 40px;
   padding: 0 12px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   background: white;
   color: var(--dark);
   font-size: 14px;
@@ -1948,7 +1954,7 @@ footer {
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 3px;
   transition: all 0.2s ease;
   white-space: nowrap;
   flex: 0 0 auto; /* вместо flex: 1 */
@@ -2137,7 +2143,7 @@ footer {
     width: 90%;
     max-width: 400px;
     max-height: 60vh;
-    border-radius: 12px;
+    border-radius: 4px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     padding: 8px 0;
     opacity: 0;
@@ -2172,14 +2178,14 @@ footer {
 
   .search-wrapper-top {
     flex-direction: column;
-    border-radius: 6px;
+    border-radius: 3px;
     border: 1px solid #D1D5DB;
   }
 
   .search-input-top {
     padding: 14px 16px;
     font-size: 15px;
-    border-radius: 6px 6px 0 0;
+    border-radius: 3px 6px 0 0;
     border-bottom: 1px solid #E5E7EB;
   }
 
@@ -3034,7 +3040,7 @@ footer {
   width: 100%;
   padding: 10px 40px 10px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   font-size: 14px;
   background: white;
   outline: none;
@@ -3058,7 +3064,7 @@ footer {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   font-size: 14px;
   background: white;
   cursor: pointer;
@@ -3099,7 +3105,7 @@ footer {
   color: white;
   border: none;
   padding: 12px;
-  border-radius: 6px;
+  border-radius: 3px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -3136,7 +3142,7 @@ footer {
   height: 44px;
   padding: 0 16px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   background: white;
   color: var(--dark);
   font-size: 14px;
@@ -3278,7 +3284,7 @@ footer {
   padding: 12px 16px;
   background: var(--white);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 3px;
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -3315,7 +3321,7 @@ footer {
   background: var(--white);
   padding: 16px 20px;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 3px;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
   margin-bottom: 28px;
   display: flex;
@@ -3345,7 +3351,7 @@ footer {
   width: 100%;
   padding: 11px 16px;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 3px;
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -3375,7 +3381,7 @@ footer {
 .catalog-filter-bar .search-input-top:focus,
 .catalog-filter-bar select:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(255, 87, 51, 0.08);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.08);
 }
 
 .catalog-filter-bar .search-input-top:hover,
@@ -3389,42 +3395,43 @@ footer {
     top: 70px;
     padding: 14px 16px;
     gap: 10px;
-    border-radius: 8px;
+    border-radius: 3px;
     margin-bottom: 20px;
   }
 }
 
 @media (max-width: 768px) {
+  /* На ≤768px .catalog-filter-bar теряет собственный "вид" (фон/рамку/тень) —
+     видимую карточку рисует единый мобильный блок в конце файла
+     (.filter-toggle-mobile / .filter-dropdown-body). Здесь остаются
+     только структурные свойства самого контейнера. */
   .catalog-filter-bar {
-    top: 60px;
-    padding: 12px 14px;
-    gap: 8px;
-    border-radius: 6px;
-    margin-bottom: 16px;
+    position: relative;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    gap: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    margin-bottom: 20px;
   }
-  
+
   .catalog-filter-bar .search-input-top,
   .catalog-filter-bar select {
-    font-size: 13px;
-    padding: 10px 14px;
-    padding-right: 32px;
+    font-size: 16px; /* не меньше 16px — иначе Safari на iOS зумит страницу при фокусе */
+    padding: 12px 14px;
+    padding-right: 34px;
   }
 }
 
 @media (max-width: 480px) {
-  .catalog-filter-bar {
-    top: 56px;
-    padding: 10px 12px;
-    gap: 6px;
-    border-radius: 6px;
-    margin-bottom: 12px;
-  }
-  
   .catalog-filter-bar .search-input-top,
   .catalog-filter-bar select {
-    font-size: 12px;
-    padding: 9px 12px;
-    padding-right: 30px;
+    font-size: 16px;
+    padding: 11px 12px;
+    padding-right: 32px;
   }
 }
 
@@ -3442,7 +3449,7 @@ footer {
   width: 100%;
   padding: 12px 16px;
   border: 2px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 3px;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -3458,7 +3465,7 @@ footer {
 
 .custom-dropdown .dropdown-header.active {
   border-color: var(--brand);
-  box-shadow: 0 0 0 4px rgba(255, 87, 51, 0.1);
+  box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.1);
 }
 
 .custom-dropdown .dropdown-header .arrow {
@@ -3478,7 +3485,7 @@ footer {
   overflow-y: auto;
   background: var(--white);
   border: 2px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 3px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   opacity: 0;
   visibility: hidden;
@@ -3666,7 +3673,7 @@ footer {
   padding: 10px 24px;
   background: var(--white);
   border: 2px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 3px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -3729,7 +3736,7 @@ footer {
   gap: 16px;
   background: var(--white);
   padding: 16px 20px;
-  border-radius: 10px;
+  border-radius: 3px;
   border: 1px solid var(--border-color);
 }
 
@@ -3766,7 +3773,7 @@ footer {
   gap: 8px;
   padding: 10px 18px;
   border: 2px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 3px;
   font-size: 12px;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
@@ -3780,7 +3787,6 @@ footer {
 .admin-btn:hover {
   border-color: var(--brand);
   color: var(--brand);
-  transform: translateY(-1px);
 }
 
 .admin-btn-primary {
@@ -3820,14 +3826,14 @@ footer {
 .admin-btn-sm {
   padding: 6px 14px;
   font-size: 11px;
-  border-radius: 6px;
+  border-radius: 3px;
 }
 
 .admin-btn-icon {
   width: 34px;
   height: 34px;
   padding: 0;
-  border-radius: 8px;
+  border-radius: 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3838,7 +3844,7 @@ footer {
   width: 100%;
   overflow-x: auto;
   background: var(--white);
-  border-radius: 12px;
+  border-radius: 4px;
   border: 1px solid var(--border-color);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
@@ -3890,7 +3896,7 @@ footer {
 .status-badge {
   display: inline-block;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 4px;
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
@@ -3963,7 +3969,7 @@ footer {
 
 .admin-modal {
   background: var(--white);
-  border-radius: 16px;
+  border-radius: 4px;
   width: 100%;
   max-width: 650px;
   max-height: 90vh;
@@ -3994,7 +4000,7 @@ footer {
   top: 0;
   background: var(--white);
   z-index: 10;
-  border-radius: 16px 16px 0 0;
+  border-radius: 4px 16px 0 0;
 }
 
 .admin-modal-header h2 {
@@ -4047,7 +4053,7 @@ footer {
   width: 100%;
   padding: 10px 14px;
   border: 2px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 3px;
   font-size: 14px;
   font-weight: 500;
   font-family: 'Inter', sans-serif;
@@ -4059,7 +4065,7 @@ footer {
 
 .admin-modal-body .form-group .form-control:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 4px rgba(255, 87, 51, 0.08);
+  box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.08);
 }
 
 .admin-modal-body .form-group .form-control::placeholder {
@@ -4101,7 +4107,7 @@ footer {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 3px;
   border: 2px solid var(--border-color);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -4127,7 +4133,7 @@ footer {
   width: 80px;
   height: 80px;
   border: 2px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 3px;
   overflow: hidden;
   background: var(--gray-bg);
 }
@@ -4180,7 +4186,7 @@ footer {
 .stats-card {
   background: var(--white);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 20px 24px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -4221,7 +4227,7 @@ footer {
 .chart-card {
   background: var(--white);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 20px 24px;
   margin-bottom: 24px;
 }
@@ -4268,7 +4274,7 @@ footer {
   .admin-modal {
     max-width: 100%;
     margin: 10px;
-    border-radius: 12px;
+    border-radius: 4px;
   }
   
   .admin-modal-header {
@@ -4310,7 +4316,7 @@ footer {
     white-space: nowrap;
     padding: 6px 14px;
     font-size: 9px;
-    border-radius: 6px;
+    border-radius: 3px;
   }
   
   .admin-table th,
@@ -4468,7 +4474,7 @@ footer {
 
 .shop-modal-card {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 4px;
   border: 1px solid var(--border-color);
   width: 100%;
   max-width: 520px;
@@ -4548,7 +4554,7 @@ footer {
   font-size: 11px;
   font-weight: 700;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: 3px;
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -4565,7 +4571,7 @@ footer {
   font-size: 11px;
   font-weight: 800;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: 3px;
   backdrop-filter: blur(4px);
 }
 
@@ -4580,7 +4586,7 @@ footer {
 .shop-modal-thumb {
   width: 50px;
   height: 50px;
-  border-radius: 6px;
+  border-radius: 3px;
   overflow: hidden;
   cursor: pointer;
   opacity: 0.5;
@@ -4649,13 +4655,13 @@ footer {
   padding: 12px 16px;
   background: var(--gray-bg);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 3px;
 }
 
 .shop-modal-info-item .info-icon {
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border-radius: 3px;
   background: #FFF7ED;
   color: var(--brand);
   display: flex;
@@ -4771,7 +4777,7 @@ footer {
   max-width: 100%;
   max-height: 85vh;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 3px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
 }
 
@@ -4801,14 +4807,14 @@ footer {
   background: var(--brand);
   color: #FFFFFF;
   border: none;
-  border-radius: 8px;
+  border-radius: 3px;
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   min-height: 48px; /* Сенсорная зона для мобильных */
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
 }
 
 .universal-route-btn i {
@@ -4818,12 +4824,7 @@ footer {
 
 .universal-route-btn:hover {
   background: var(--brand-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
-}
-
-.universal-route-btn:hover i {
-  transform: translateX(3px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
 }
 
 .universal-route-btn:active {
@@ -4839,7 +4840,7 @@ footer {
 
   .shop-modal-card {
     max-width: 100%;
-    border-radius: 20px 20px 0 0;
+    border-radius: 4px 20px 0 0;
     max-height: 85vh;
     animation: shopModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -4930,7 +4931,7 @@ footer {
 
 .gallery-nav-btn:hover {
   background: var(--brand);
-  transform: translateY(-50%) scale(1.1);
+  transform: translateY(-50%);
 }
 
 .gallery-nav-btn.gallery-prev {
@@ -4951,7 +4952,7 @@ footer {
   font-size: 10px;
   font-weight: 700;
   padding: 2px 10px;
-  border-radius: 12px;
+  border-radius: 4px;
   backdrop-filter: blur(4px);
   z-index: 5;
   pointer-events: none;
@@ -4971,7 +4972,7 @@ footer {
   max-width: 100%;
   max-height: 85vh;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 3px;
   background: white;
 }
 
@@ -4997,7 +4998,7 @@ footer {
 
 .img-zoom-nav:hover {
   background: var(--brand);
-  transform: translateY(-50%) scale(1.05);
+  transform: translateY(-50%);
 }
 
 .img-zoom-prev {
@@ -5018,7 +5019,7 @@ footer {
   font-weight: 600;
   background: rgba(15, 23, 42, 0.6);
   padding: 4px 16px;
-  border-radius: 16px;
+  border-radius: 4px;
   backdrop-filter: blur(4px);
   white-space: nowrap;
 }
@@ -5233,75 +5234,7 @@ footer {
   .about-slider-dot.active {
     background: var(--brand) !important;
     width: 26px !important;
-    border-radius: 6px !important;
-  }
-}
-
-/* ------------------------------------------------------------
-   2. КОМПАКТНЫЙ СВОРАЧИВАЕМЫЙ ФИЛЬТР В КАТАЛОГЕ
-   ------------------------------------------------------------ */
-@media (max-width: 768px) {
-  .catalog-filter-bar {
-    position: relative !important;
-    top: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-bottom: 20px !important;
-    padding: 8px !important;
-    background: #F8FAFC !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 10px !important;
-    box-shadow: none !important;
-  }
-
-  /* Кнопка сворачивания/разворачивания фильтров */
-  .catalog-filter-toggle-btn {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 12px 16px;
-    background: var(--dark);
-    color: white;
-    font-size: 14px;
-    font-weight: 700;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-
-  .catalog-filter-toggle-btn i {
-    transition: transform 0.3s ease;
-  }
-
-  /* Скрываем само содержимое фильтра по умолчанию на мобильных */
-  .catalog-filter-bar .catalog-filter-content {
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border-color);
-  }
-
-  /* Класс для открытого состояния */
-  .catalog-filter-bar.is-open .catalog-filter-content {
-    display: flex !important;
-  }
-
-  .catalog-filter-bar.is-open .catalog-filter-toggle-btn i.arrow-icon {
-    transform: rotate(180deg);
-  }
-}
-
-@media (min-width: 769px) {
-  .catalog-filter-toggle-btn {
-    display: none !important; /* На ПК кнопка скрыта */
-  }
-  .catalog-filter-content {
-    display: flex !important;
-    flex-direction: column;
-    gap: 12px;
+    border-radius: 3px !important;
   }
 }
 
@@ -5359,7 +5292,7 @@ footer {
     max-height: 88dvh !important; /* Занимает не более 88% высоты видимого экрана */
     display: flex !important;
     flex-direction: column !important;
-    border-radius: 16px !important;
+    border-radius: 4px !important;
     overflow: hidden !important;
   }
 
@@ -5418,31 +5351,8 @@ footer {
   }
 }
 
-@media (min-width: 769px) {
-  .filter-toggle-mobile {
-    display: none !important;
-  }
-  .filter-dropdown-body {
-    display: flex !important;
-    flex-direction: column;
-    gap: 12px;
-  }
-}
-
-/* На мобильных устройствах (<= 768px) */
+/* ===== МОБИЛЬНЫЙ ФИЛЬТР (единый блок) ===== */
 @media (max-width: 768px) {
-  .catalog-filter-bar {
-    position: relative !important;
-    top: 0 !important;
-    width: 100% !important;
-    margin-bottom: 20px !important;
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  /* Кнопка-триггер */
   .filter-toggle-mobile {
     display: flex !important;
     align-items: center;
@@ -5450,90 +5360,31 @@ footer {
     width: 100%;
     padding: 14px 18px;
     background: var(--dark);
-    color: #ffffff;
+    color: var(--white);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: 0.2px;
     border: none;
-    border-radius: 10px;
+    border-radius: 3px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
   }
-
   .filter-toggle-mobile .arrow-icon {
     transition: transform 0.3s ease;
   }
-
-  /* 🔥 СКРЫВАЕМ ФИЛЬТРЫ ПО УМОЛЧАНИЮ */
-  .filter-dropdown-body {
-    display: none; /* Ничего не висит на экране! */
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 10px;
-    padding: 16px;
-    background: #ffffff;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
-    animation: fadeInDropdown 0.25s ease;
-  }
-
-  /* 🔥 СОСТОЯНИЕ КОГДА КЛИКНУЛИ НА КНОПКУ (РАСКРЫТО) */
-  .catalog-filter-bar.is-open .filter-dropdown-body {
-    display: flex !important;
-  }
-
-  .catalog-filter-bar.is-open .filter-toggle-mobile .arrow-icon {
-    transform: rotate(180deg);
-  }
-}
-
-@keyframes fadeInDropdown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ============================================================
-   ГАРАНТИРОВАННЫЙ ВЫПАДАЮЩИЙ ФИЛЬТР (ЧЕРЕЗ ID)
-   ============================================================ */
-@media (max-width: 768px) {
-  /* Кнопка открытия на мобильном */
-  .filter-toggle-mobile {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 14px 18px;
-    background: #0F172A !important;
-    color: #ffffff !important;
-    font-size: 14px;
-    font-weight: 700;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-  }
-
-  .filter-toggle-mobile .arrow-icon {
-    transition: transform 0.3s ease;
-  }
-
-  /* По умолчанию выпадающий контент СКРЫТ */
   #catalogFilterBar .filter-dropdown-body {
     display: none !important;
   }
-
-  /* Показываем контент, когда на родителя повешен класс .is-open */
   #catalogFilterBar.is-open .filter-dropdown-body {
     display: flex !important;
     flex-direction: column;
     gap: 12px;
     margin-top: 10px;
     padding: 16px;
-    background: #ffffff;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
   }
-
   #catalogFilterBar.is-open .filter-toggle-mobile .arrow-icon {
     transform: rotate(180deg);
   }
