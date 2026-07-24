@@ -23,7 +23,7 @@ app.use(compression());
 
 // 🔥 СТРОГАЯ НАСТРОЙКА CORS (Строка app.use(cors()) внизу удалена!)
 const cors = require('cors');
-const allowedOrigins = [process.env.APP_URL || 'https://metizelektrod.ru', 'http://localhost:3000'];
+const allowedOrigins = [process.env.APP_URL || 'https://metizelektrod.ru', 'http://localhost:3000', 'https://metiz.onrender.com'];
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
