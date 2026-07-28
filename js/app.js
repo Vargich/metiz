@@ -1,4 +1,3 @@
-
 import API from "./api.js";
 import { initYandexMap, initPickupMap } from "./map.js";
 
@@ -73,6 +72,20 @@ async function loadPage(path) {
 
     const newTitle = doc.querySelector("title");
     if (newTitle) document.title = newTitle.innerText;
+
+    // ✅ Обновляем мета-теги (SEO и Open Graph)
+    const newMetaTags = doc.querySelectorAll('meta[name], meta[property]');
+    newMetaTags.forEach(newMeta => {
+      const attrName = newMeta.hasAttribute('name') ? 'name' : 'property';
+      const attrValue = newMeta.getAttribute(attrName);
+      let oldMeta = document.head.querySelector(`meta[${attrName}="${attrValue}"]`);
+      
+      if (oldMeta) {
+        oldMeta.setAttribute('content', newMeta.getAttribute('content'));
+      } else {
+        document.head.appendChild(newMeta.cloneNode());
+      }
+    });
 
     const newMain = doc.querySelector("main");
     if (newMain) {
@@ -234,7 +247,7 @@ async function initNewProducts() {
             </div>
             <div class="product-info">
               <h3 class="product-title" title="${p.name}">${p.name}</h3>
-              <div class="product-category-label">${p.category_name || "Новинки"}</div>
+              
             </div>
           </div>
         `;
@@ -407,7 +420,7 @@ async function renderProducts(page = 1) {
             </div>
             <div class="product-info">
               <h3 class="product-title" title="${p.name}">${p.name}</h3>
-              <div class="product-category-label">${p.category_name || "Каталог"}</div>
+              
             </div>
           </div>
         `;
@@ -541,7 +554,7 @@ async function initPromoProducts() {
             </div>
             <div class="product-info">
               <h3 class="product-title" title="${p.name}">${p.name}</h3>
-              <div class="product-category-label">${p.category_name || 'Рекомендации'}</div>
+              
             </div>
           </div>
         `;
@@ -725,7 +738,7 @@ async function initCatalog(params) {
     updateCatalogUrl(currentPage, currentFilter, currentSearch, true);
   }
 
-  // ==== СОРТИРОВКА (кастомный дропдаун) ====
+  // ==== СОРТИРОВКА (Yandex Market Style) ====
   const sortContainer = document.querySelector(".catalog-sort-container");
   if (sortContainer) {
     const sortOptions = [
@@ -734,137 +747,67 @@ async function initCatalog(params) {
     ];
 
     sortContainer.innerHTML = `
-      <div class="custom-dropdown" id="sortDropdown">
-        <div class="dropdown-header" id="sortHeader">
-          <span id="sortSelected">${sortOptions.find((o) => o.value === currentSort)?.label || "По умолчанию"}</span>
-          <span class="arrow"><i class="fas fa-chevron-down"></i></span>
-        </div>
-        <div class="dropdown-list" id="sortList">
-          ${sortOptions
-            .map(
-              (o) => `
-            <div class="dropdown-item ${o.value === currentSort ? "active" : ""}" data-value="${o.value}">${o.label}</div>
-          `,
-            )
-            .join("")}
+      <div class="ym-filter-section">
+        <h4 class="ym-filter-title">Сортировка</h4>
+        <div class="ym-filter-list" id="sortList">
+          ${sortOptions.map(o => `
+            <label class="ym-radio">
+              <input type="radio" name="sort" value="${o.value}" ${o.value === currentSort ? 'checked' : ''}>
+              <span class="ym-radio-text">${o.label}</span>
+            </label>
+          `).join('')}
         </div>
       </div>
     `;
 
-    // JavaScript для дропдауна сортировки
-    const sortDropdown = document.getElementById("sortDropdown");
-    const sortHeader = document.getElementById("sortHeader");
-    const sortList = document.getElementById("sortList");
-    const sortSelected = document.getElementById("sortSelected");
-
-    if (sortDropdown && sortHeader && sortList) {
-      sortHeader.addEventListener("click", (e) => {
-        e.stopPropagation();
-        // Закрываем другие дропдауны
-        document.querySelectorAll(".dropdown-list.open").forEach((el) => {
-          if (el !== sortList) el.classList.remove("open");
-        });
-        document.querySelectorAll(".dropdown-header.active").forEach((el) => {
-          if (el !== sortHeader) el.classList.remove("active");
-        });
-        sortList.classList.toggle("open");
-        sortHeader.classList.toggle("active");
+    sortContainer.querySelectorAll('input[name="sort"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderProducts(1);
       });
-
-      sortList.querySelectorAll(".dropdown-item").forEach((item) => {
-        item.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const value = item.dataset.value;
-          const text = item.textContent;
-
-          currentSort = value;
-          sortSelected.textContent = text;
-
-          sortList.querySelectorAll(".dropdown-item").forEach((el) => {
-            el.classList.toggle("active", el.dataset.value === value);
-          });
-
-          sortList.classList.remove("open");
-          sortHeader.classList.remove("active");
-
-          renderProducts(1);
-        });
-      });
-    }
+    });
   }
 
-  // ==== КАТЕГОРИИ (кастомный дропдаун) ====
-  const categoryContainer = document.querySelector(
-    ".catalog-category-container",
-  );
+  // ==== КАТЕГОРИИ (Yandex Market Style) ====
+  const categoryContainer = document.querySelector(".catalog-category-container");
   if (categoryContainer) {
     try {
       const cats = await API.categories.getAll();
       allCategories = cats;
 
       categoryContainer.innerHTML = `
-        <div class="custom-dropdown" id="categoryDropdown">
-          <div class="dropdown-header" id="categoryHeader">
-            <span id="categorySelected">${currentFilter === "all" ? "Все категории" : cats.find((c) => c.slug === currentFilter)?.name || "Все категории"}</span>
-            <span class="arrow"><i class="fas fa-chevron-down"></i></span>
-          </div>
-          <div class="dropdown-list" id="categoryList">
-            <div class="dropdown-item ${currentFilter === "all" ? "active" : ""}" data-value="all">Все категории</div>
-            ${cats.map((c) => `<div class="dropdown-item ${c.slug === currentFilter ? "active" : ""}" data-value="${c.slug}">${c.name}</div>`).join("")}
+        <div class="ym-filter-section">
+          <h4 class="ym-filter-title">Категории</h4>
+          <div class="ym-filter-list" id="categoryList">
+            <label class="ym-radio">
+              <input type="radio" name="category" value="all" ${currentFilter === 'all' ? 'checked' : ''}>
+              <span class="ym-radio-text">Все товары</span>
+            </label>
+            ${cats.map(c => `
+              <label class="ym-radio">
+                <input type="radio" name="category" value="${c.slug}" ${c.slug === currentFilter ? 'checked' : ''}>
+                <span class="ym-radio-text">${c.name}</span>
+              </label>
+            `).join('')}
           </div>
         </div>
       `;
 
-      // JavaScript для дропдауна категорий
-      const catDropdown = document.getElementById("categoryDropdown");
-      const catHeader = document.getElementById("categoryHeader");
-      const catList = document.getElementById("categoryList");
-      const catSelected = document.getElementById("categorySelected");
-
-      if (catDropdown && catHeader && catList) {
-        catHeader.addEventListener("click", (e) => {
-          e.stopPropagation();
-          // Закрываем другие дропдауны
-          document.querySelectorAll(".dropdown-list.open").forEach((el) => {
-            if (el !== catList) el.classList.remove("open");
-          });
-          document.querySelectorAll(".dropdown-header.active").forEach((el) => {
-            if (el !== catHeader) el.classList.remove("active");
-          });
-          catList.classList.toggle("open");
-          catHeader.classList.toggle("active");
+      categoryContainer.querySelectorAll('input[name="category"]').forEach(input => {
+        input.addEventListener('change', (e) => {
+          currentFilter = e.target.value;
+          const pageParam = `?page=1${currentFilter !== 'all' ? `&category=${currentFilter}` : ''}`;
+          window.history.replaceState({}, "", `/catalog${pageParam}`);
+          renderProducts(1);
         });
-
-        catList.querySelectorAll(".dropdown-item").forEach((item) => {
-          item.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const value = item.dataset.value;
-            const text = item.textContent;
-        
-            currentFilter = value;
-            catSelected.textContent = text;
-        
-            catList.querySelectorAll(".dropdown-item").forEach((el) => {
-              el.classList.toggle("active", el.dataset.value === value);
-            });
-        
-            catList.classList.remove("open");
-            catHeader.classList.remove("active");
-        
-            // ✅ Сохраняем страницу 1 при смене категории
-            const pageParam = `?page=1${value !== 'all' ? `&category=${value}` : ''}`;
-            window.history.replaceState({}, "", `/catalog${pageParam}`);
-        
-            renderProducts(1);
-          });
-        });
-      }
+      });
     } catch (err) {
-      // console.error("Categories error:", err);
+      console.error("Categories error:", err);
     }
   }
 
   // ===== ПОИСК =====
+
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
     searchInput.value = currentSearch;
@@ -1285,15 +1228,68 @@ window.toggleSidebar = toggleSidebar;
 
 document.addEventListener("DOMContentLoaded", bootstrap);
 // ===== УНИВЕРСАЛЬНЫЙ ОБРАБОТЧИК КНОПКИ ФИЛЬТРА (фаза захвата) =====
+function closeMobileFilter() {
+  const filterBar = document.getElementById('catalogFilterBar');
+  if (filterBar) filterBar.classList.remove('is-open');
+  document.body.style.overflow = '';
+  const overlayEl = document.querySelector('.mobile-filter-overlay');
+  if (overlayEl) overlayEl.classList.remove('open');
+}
+
 document.addEventListener('click', function(e) {
-    const toggleBtn = e.target.closest('#filterToggleBtn');
-    if (toggleBtn) {
-        e.preventDefault();
-        e.stopPropagation(); // Останавливаем всплытие, чтобы другие обработчики не мешали
-        const filterBar = document.getElementById('catalogFilterBar');
-        if (filterBar) {
-            filterBar.classList.toggle('is-open');
-            // console.log('Filter toggled (capture), is-open:', filterBar.classList.contains('is-open'));
+  const toggleBtn = e.target.closest('#filterToggleBtn');
+  const closeBtn = e.target.closest('.mobile-filter-close, .ym-apply-btn');
+  const overlay = e.target.closest('.mobile-filter-overlay');
+
+  if (toggleBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const filterBar = document.getElementById('catalogFilterBar');
+    if (filterBar) {
+      filterBar.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+
+      // 1. Оверлей
+      let overlayEl = document.querySelector('.mobile-filter-overlay');
+      if (!overlayEl) {
+        overlayEl = document.createElement('div');
+        overlayEl.className = 'mobile-filter-overlay';
+        document.body.appendChild(overlayEl);
+        overlayEl.addEventListener('click', closeMobileFilter);
+      }
+      setTimeout(() => overlayEl.classList.add('open'), 10);
+
+      // 2. Структура шторки (если еще не создана)
+      const body = filterBar.querySelector('.filter-dropdown-body');
+      if (body && !body.querySelector('.mobile-filter-header')) {
+        const scrollWrapper = document.createElement('div');
+        scrollWrapper.className = 'mobile-filter-scroll';
+        
+        // Переносим элементы в скролл-обертку
+        while(body.firstChild) {
+          scrollWrapper.appendChild(body.firstChild);
         }
+        
+        const header = document.createElement('div');
+        header.className = 'mobile-filter-header';
+        header.innerHTML = `
+            <h3>Фильтры</h3>
+            <button type="button" class="mobile-filter-close">&times;</button>
+        `;
+        
+        const footer = document.createElement('div');
+        footer.className = 'mobile-filter-footer';
+        footer.innerHTML = `<button type="button" class="ym-apply-btn">Показать товары</button>`;
+        
+        body.appendChild(header);
+        body.appendChild(scrollWrapper);
+        body.appendChild(footer);
+      }
     }
+  } else if (closeBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeMobileFilter();
+  }
 }, true); // <-- true включает фазу захвата

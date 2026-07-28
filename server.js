@@ -1,5 +1,5 @@
 require('dotenv').config(); 
-
+const sharp = require('sharp');
 const express = require('express');
 const path = require('path');
 const fs = require('fs-extra');
@@ -254,19 +254,8 @@ const sanitizeFilename = (str) => {
     return str.toLowerCase().replace(/[^a-z0-9а-яё\s-]/gi, '').replace(/[\s-]+/g, '-').replace(/(^-|-$)/g, '');
 };
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = './image/';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname);
-        const safeName = req.body.name ? sanitizeFilename(req.body.name) : 'file';
-        const randomStr = Math.random().toString(36).slice(2, 6); 
-        cb(null, `${safeName}_${randomStr}${ext}`);
-    }
-});
+// 🔥 ИСПОЛЬЗУЕМ ХРАНИЛИЩЕ В ПАМЯТИ ДЛЯ SHARP
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
@@ -279,16 +268,46 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// 🔥 ОГРАНИЧЕНИЕ ВЕСА ФАЙЛА ДО 5 МБ (ЗАЩИТА ОТ DOS)
 const upload = multer({ 
     storage, 
-    limits: { fileSize: 5 * 1024 * 1024 },
+    limits: { fileSize: 5 * 1024 * 1024 }, // Защита: не больше 5 МБ
     fileFilter 
 });
 
+// Middleware для оптимизации изображений на лету
+const processImages = async (req, res, next) => {
+    if (!req.files || req.files.length === 0) return next();
+    
+    const dir = './image/';
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    try {
+        await Promise.all(req.files.map(async (file) => {
+            const safeName = req.body.name ? sanitizeFilename(req.body.name) : 'file';
+            const randomStr = Math.random().toString(36).slice(2, 6);
+            // Принудительно сохраняем как .webp
+            const filename = `${safeName}_${randomStr}.webp`;
+            const filepath = path.join(dir, filename);
+
+            // Обрабатываем буфер файла через sharp
+            await sharp(file.buffer)
+                .resize({ width: 1200, withoutEnlargement: true }) // Не увеличиваем мелкие, но ужимаем огромные
+                .webp({ quality: 80 }) // Конвертация в WebP
+                .toFile(filepath);
+
+            // Подменяем данные файла
+            file.filename = filename;
+            file.path = filepath;
+        }));
+        next();
+    } catch (error) {
+        logger.error(`Ошибка оптимизации фото: ${error.message}`);
+        return res.status(500).json({ error: 'Ошибка при обработке изображений' });
+    }
+};
+
 app.use(express.json());
 app.use(cookieParser());
-
 // Кэширование статических файлов
 app.use('/image', express.static(path.join(__dirname, 'image'), {
     maxAge: '30d',
@@ -481,7 +500,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 // Добавление товара (мультизагрузка файлов)
-app.post('/api/products', authenticateToken, isAdminMiddleware, upload.any(), async (req, res, next) => {
+app.post('/api/products', authenticateToken, isAdminMiddleware, upload.any(), processImages, async (req, res, next) => {
     try {
         const { name, price, quantity, unit, category_id, badge, description, article } = req.body;
         
@@ -516,7 +535,7 @@ app.post('/api/products', authenticateToken, isAdminMiddleware, upload.any(), as
 });
 
 // Обновление товара (мультизагрузка файлов)
-app.put('/api/products/:id', authenticateToken, isAdminMiddleware, upload.any(), async (req, res, next) => {
+app.put('/api/products/:id', authenticateToken, isAdminMiddleware, upload.any(), processImages, async (req, res, next) => {
     try {
         const { name, price, quantity, unit, category_id, badge, description, article } = req.body;
         
@@ -804,7 +823,7 @@ app.get('/api/shops/all', authenticateToken, isAdminMiddleware, async (req, res)
     }
 });
 
-app.post('/api/shops', authenticateToken, isAdminMiddleware, upload.any(), async (req, res, next) => {
+app.post('/api/shops', authenticateToken, isAdminMiddleware, upload.any(),processImages, async (req, res, next) => {
     try {
         const { name, address, city, phone, worktime, coords, route } = req.body;
         if (!address || !phone) return res.status(400).json({ error: 'Адрес и телефон обязательны' });
@@ -838,7 +857,7 @@ app.post('/api/shops', authenticateToken, isAdminMiddleware, upload.any(), async
     }
 });
 
-app.put('/api/shops/:id', authenticateToken, isAdminMiddleware, upload.any(), async (req, res, next) => {
+app.put('/api/shops/:id', authenticateToken, isAdminMiddleware, upload.any(), processImages, async (req, res, next) => {
     try {
         const { name, address, city, phone, worktime, coords, route, is_active } = req.body;
         

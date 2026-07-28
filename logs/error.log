@@ -7,3 +7,4 @@
 {"level":"error","message":"[Unhandled Error] 500 - update or delete on table \"products\" violates foreign key constraint \"order_items_product_id_fkey\" on table \"order_items\" - /api/products - DELETE - 127.0.0.1","timestamp":"2026-07-01 13:51:34"}
 {"level":"error","message":"[Unhandled Error] 500 - read ETIMEDOUT - /api/shops/1","timestamp":"2026-07-24 21:07:34"}
 {"level":"error","message":"[Unhandled Error] 500 - read ETIMEDOUT - /api/shops/3","timestamp":"2026-07-24 21:08:19"}
+{"level":"error","message":"Ошибка пагинированного каталога: read ETIMEDOUT","timestamp":"2026-07-28 17:33:23"}
