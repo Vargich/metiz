@@ -6,73 +6,107 @@
   <title>Пользовательское соглашение — Метиз Электрод</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
+  <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="Условия использования сайта-каталога ИП Варгич В.Л. — Метиз Электрод." />
 </head>
 <body>
+
+  <!-- ШАПКА -->
   <header class="shop-header">
-    <div class="container shop-header__container">
+    <div class="shop-header__container container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
       
-      <nav class="shop-nav">
-        <a href="/" class="active">Главная</a>
+      <a href="tel:+78445790099" class="header-phone-btn header-phone-mobile">
+        <i class="fas fa-phone-alt"></i>
+        <span>+7 (84457) 9-00-99</span>
+      </a>
+      
+      <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <nav class="shop-nav" id="shopNav">
+        <a href="/">Главная</a>
         <a href="/catalog">Каталог</a>
         <a href="/about">О нас</a>
         <a href="/contacts">Контакты</a>
       </nav>
       
-      <!-- <div class="shop-header__actions">
-        <div id="auth-actions" style="display: flex; gap: 8px;">
-          <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
-          <button class="icon-btn" onclick="handleLogout()" id="logout-btn" style="display:none; color: #EF4444;"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
-        <button class="icon-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-count">0</span></button>
-      </div> -->
+      <div class="shop-header__actions">
+        <a href="tel:+78445790099" class="header-phone-btn header-phone-desktop">
+          <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+        </a>
+      </div>
     </div>
-    
   </header>
 
-  <main id="main-content">
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
+  <main id="main-content" class="container">
+    <h1 class="visually-hidden">Пользовательское соглашение Метиз Электрод</h1>
     <section class="about-section border-dark" style="min-height: 60vh;">
-      <div style="padding: 80px 40px; max-width: 900px; margin: 0 auto; width: 100%;">
+      <div style="padding: 60px 40px; max-width: 900px; margin: 0 auto; width: 100%;">
         <h2 class="about-tag">Документы</h2>
-        <div class="about-title" style="font-size: 40px;">Пользовательское соглашение</div>
-        <div style="margin-top: 40px; font-weight: 500; opacity: 0.8; line-height: 1.8;">
-          <p style="margin-bottom: 24px;">Используя сайт "Метиз Электрод", вы соглашаетесь с условиями данного соглашения.</p>
-          <h3 style="margin-bottom: 16px; font-weight: 900;">1. Регистрация и оформление заказов</h3>
-          <p style="margin-bottom: 24px;">Для оформления заказа Пользователь обязуется предоставить достоверную информацию о себе. Сайт оставляет за собой право отменить заказ при подозрении на мошенничество.</p>
-          <h3 style="margin-bottom: 16px; font-weight: 900;">2. Цены и наличие</h3>
-          <p style="margin-bottom: 24px;">Информация о товарах, их наличии и ценах носит справочный характер и не является публичной офертой (ст. 437 ГК РФ). Итоговая стоимость фиксируется в момент подтверждения заказа.</p>
+        <div class="about-title" style="font-size: 32px; margin-bottom: 40px;">Пользовательское соглашение</div>
+        
+        <div style="margin-top: 40px; font-weight: 500; opacity: 0.85; line-height: 1.8; font-size: 14px;">
+          <p style="margin-bottom: 24px;">Настоящее Пользовательское соглашение регулирует отношения между ИП Варгичем В.Л. (далее — Владелец сайта) и пользователем сети Интернет (далее — Пользователь), возникающие при использовании сайта-каталога «Метиз Электрод».</p>
+          
+          <h3 style="margin-bottom: 16px; font-weight: 900; color: var(--dark);">1. Статус каталога (Не является публичной офертой)</h3>
+          <p style="margin-bottom: 24px;">Сайт является справочно-информационным ресурсом (электронным каталогом продукции). <strong>Информация, представленная на сайте (включая цены, ориентировочные остатки, технические характеристики, маркоразмеры), носит исключительно ознакомительный характер и не является публичной офертой</strong>, определяемой положениями Статьи 437 (2) Гражданского кодекса РФ. Итоговая стоимость, сроки поставки и наличие продукции фиксируются в коммерческом предложении (КП) или счете, выставляемом менеджером компании.</p>
+          
+          <h3 style="margin-bottom: 16px; font-weight: 900; color: var(--dark);">2. Порядок отправки заявок и запросов</h3>
+          <p style="margin-bottom: 24px;">Формирование списка интересующих позиций, отправка сообщений через формы связи или заказ обратного звонка не обязательны к исполнению и не являются сделкой купли-продажи. Все запросы обрабатываются отделами продаж в рабочее время для дальнейшего согласования условий договора.</p>
+
+          <h3 style="margin-bottom: 16px; font-weight: 900; color: var(--dark);">3. Права и интеллектуальная собственность</h3>
+          <p style="margin-bottom: 24px;">Все графические и текстовые материалы, элементы дизайна, структура каталога и товарные знаки принадлежат Владельцу сайта или их законным правообладателям. Копирование и использование материалов в коммерческих целях без согласования запрещены.</p>
+
+          <h3 style="margin-bottom: 16px; font-weight: 900; color: var(--dark);">4. Ограничение ответственности</h3>
+          <p style="margin-bottom: 24px;">Владелец сайта оставляет за собой право вносить изменения в ассортимент и информацию о товарах без предварительного уведомления. Владелец сайта не несет ответственности за возможные технические сбои, вызванные действиями третьих лиц или провайдеров связи.</p>
         </div>
       </div>
     </section>
   </main>
-  <footer style="border-top:1px solid var(--dark);">
+
+  <!-- ФУТЕР -->
+  <footer style="border-top:1px solid var(--border-color);">
     <div class="footer-benefits">
-        <div class="benefit-item">
-            <div class="benefit-title">Налоги</div>
-            <div class="benefit-desc">Работаем с НДС</div>
-        </div>
-        <div class="benefit-item">
-            <div class="benefit-title">Склад</div>
-            <div class="benefit-desc">1000+ позиций в наличии</div>
-        </div>
-        <div class="benefit-item">
-            <div class="benefit-title">Оплата</div>
-            <div class="benefit-desc">Безнал и наличные</div>
-        </div>
+      <div class="benefit-item">
+        <div class="benefit-title">Налоги</div>
+        <div class="benefit-desc">Работаем с НДС</div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title">Склад</div>
+        <div class="benefit-desc">3000+ позиций в наличии</div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title">Оплата</div>
+        <div class="benefit-desc">Безнал и наличные</div>
+      </div>
     </div>
-    <div class="footer-bottom">
-        <div class="footer-copy">© <span id="current-year"></span> MetizElektrod Industrial</div>
-        <div class="footer-links">
-            <a href="/policy">Политика</a>
-            <a href="/terms">Условия</a>
-        </div>
-        <div class="footer-socials">
-            <div class="social-btn">VK</div>
-            <div class="social-btn">TG</div>
-        </div>
+    <div class="footer-bottom container">
+      <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
+      
+      <div class="footer-links">
+        <a href="/admin-login">Админ-панель</a>
+        <a href="/policy">Политика конфиденциальности</a>
+        <a href="/terms">Пользовательское соглашение</a>
+      </div>
+      
+      <div class="footer-socials">
+        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn"><i class="fab fa-vk" aria-hidden="true"></i><span class="visually-hidden">VK</span></a>
+        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn"><i class="fab fa-telegram" aria-hidden="true"></i><span class="visually-hidden">Telegram</span></a>
+      </div>
     </div>
-</footer>
-<script type="module" src="/js/app.js"></script>
+  </footer>
+
   <script type="module" src="/js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const yearEl = document.getElementById('current-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    });
+  </script>
 </body>
 </html>

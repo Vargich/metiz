@@ -59,6 +59,42 @@ async function navigate(path) {
   await loadPage(path);
 }
 
+// В app.js
+let currentView = localStorage.getItem('catalogView') || 'grid';
+
+function initViewToggle() {
+  const grid = document.getElementById("productsGrid");
+  const btns = document.querySelectorAll(".view-btn");
+  
+  if (!grid || !btns.length) return;
+
+  // Применяем сохраненный вид
+  if (currentView === 'list') {
+    grid.classList.add('list-view');
+  }
+
+  btns.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === currentView);
+    
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.view;
+      currentView = view;
+      localStorage.setItem('catalogView', view);
+      
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      if (view === 'list') {
+        grid.classList.add('list-view');
+      } else {
+        grid.classList.remove('list-view');
+      }
+    });
+  });
+}
+
+// Вызовите initViewToggle() внутри функции initCatalog()
+
 async function loadPage(path) {
   const main = document.getElementById("main-content");
   if (!main) return;
@@ -149,7 +185,7 @@ function getProductImageHtml(p) {
           <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
           <line x1="12" y1="22.08" x2="12" y2="12"></line>
         </svg>
-        <span>Нет фото</span>
+        <!-- <span>Нет фото</span>-->
       </div>
     `;
   }
@@ -221,7 +257,7 @@ async function initNewProducts() {
                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
               </svg>
-              <span>Нет фото</span>
+              <!-- <span>Нет фото</span>-->
             </div>
           `;
         } else {
@@ -394,7 +430,7 @@ async function renderProducts(page = 1) {
                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
               </svg>
-              <span>Нет фото</span>
+              <!-- <span>Нет фото</span>-->
             </div>
           `;
         } else {
@@ -528,7 +564,7 @@ async function initPromoProducts() {
                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
               </svg>
-              <span>Нет фото</span>
+              <!-- <span>Нет фото</span>-->
             </div>
           `;
         } else {
@@ -722,6 +758,7 @@ function updateCatalogUrl(page = 1, category = currentFilter, search = currentSe
 }
 // ===== ИНИЦИАЛИЗАЦИЯ КАТАЛОГА =====
 async function initCatalog(params) {
+  initViewToggle();
   const grid = document.getElementById("productsGrid");
   if (!grid) {
     // console.warn("ProductsGrid not found, retrying...");

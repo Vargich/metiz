@@ -3,39 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Вход в Админку — Метиз Электрод</title>
+  <title>Вход в систему — Метиз Электрод</title>
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
 </head>
-<body style="background:var(--gray-bg); height:100vh; display:flex; align-items:center; justify-content:center;">
+<body style="background: var(--gray-bg); min-height: 100vh; display: flex; flex-direction: column;">
   
-  <div style="background:white; border:2px solid var(--dark); padding:40px; width:100%; max-width:400px; box-shadow: 20px 20px 0 var(--dark);">
-    <div style="margin-bottom:2rem;">
-      <div style="width:48px;height:48px;background:var(--brand);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
-        <i class="fas fa-user-shield" style="color:white; font-size: 20px;"></i>
+  <!-- Лаконичная шапка с логотипом -->
+  <header style="padding: 30px 40px; display: flex; justify-content: center; width: 100%;">
+    <a href="/" class="shop-logo" style="text-decoration: none;">Метиз<span class="text-brand">Электрод</span></a>
+  </header>
+
+  <!-- Центральный блок -->
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);">
+      
+      <!-- Иконка и заголовок -->
+      <div style="text-align: center; margin-bottom: 32px;">
+        <div style="width: 56px; height: 56px; background: rgba(255, 87, 51, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+          <i class="fas fa-shield-alt text-brand" style="font-size: 24px;"></i>
+        </div>
+        <h2 style="font-size: 24px; font-weight: 900; letter-spacing: -0.5px; color: var(--dark); margin-bottom: 8px;">Панель Управления</h2>
+        <p style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Доступ только для авторизованного персонала</p>
       </div>
-      <h2 style="font-size:1.5rem;font-weight:900;text-transform:uppercase; letter-spacing: -1px;">Панель<br/>Управления</h2>
-      <p style="font-size:10px; opacity:0.5; margin-top:5px; font-weight:900; text-transform:uppercase;">Доступ только для персонала</p>
-    </div>
 
-    <div style="margin-bottom:2rem;">
-      <input type="text" id="adminContact" placeholder="EMAIL ИЛИ ТЕЛЕФОН" 
-        style="width:100%;padding:15px;border:2px solid var(--dark);font-weight:700;outline:none;margin-bottom:1rem;font-size:12px;" />
-      <input type="password" id="adminPassword" placeholder="ПАРОЛЬ" 
-        style="width:100%;padding:15px;border:2px solid var(--dark);font-weight:700;outline:none;margin-bottom:1rem;font-size:12px;" />
-    </div>
+      <!-- Поля ввода -->
+      <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; color: var(--text-muted);">Email или телефон</label>
+          <input type="text" id="adminContact" placeholder="admin@mail.ru" class="form-input" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; color: var(--text-muted);">Пароль</label>
+          <input type="password" id="adminPassword" placeholder="Введите пароль" class="form-input" />
+        </div>
+      </div>
 
-    <button onclick="handleAdminLogin()" style="width:100%;padding:15px;background:var(--dark);color:white;border:none;font-weight:900;text-transform:uppercase;cursor:pointer;letter-spacing: 1px; transition: 0.3s;" onmouseover="this.style.background='var(--brand)'" onmouseout="this.style.background='var(--dark)'">Авторизоваться</button>
-    
-    <a href="/" style="display:block; text-align:center; margin-top:20px; font-size:10px; font-weight:900; color:inherit; text-decoration:none; opacity:0.5; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">НА ГЛАВНУЮ САЙТА</a>
-  </div>
+      <!-- Кнопка -->
+      <button onclick="handleAdminLogin()" id="loginBtn" class="hero-btn" style="width: 100%; justify-content: center; text-transform: uppercase; letter-spacing: 1px; font-size: 13px;">
+        Войти
+      </button>
+      
+      <!-- Ссылка назад -->
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="/" style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--dark)'" onmouseout="this.style.color='var(--text-muted)'">
+          <i class="fas fa-arrow-left" style="margin-right: 6px;"></i>Вернуться на сайт
+        </a>
+      </div>
+
+    </div>
+  </main>
 
   <script>
     window.handleAdminLogin = async () => {
-      const contact = document.getElementById('adminContact').value;
-      const password = document.getElementById('adminPassword').value;
+      const contact = document.getElementById('adminContact').value.trim();
+      const password = document.getElementById('adminPassword').value.trim();
+      const btn = document.getElementById('loginBtn');
 
-      if (!contact || !password) return alert('Заполните все поля!');
+      if (!contact || !password) return alert('Пожалуйста, заполните все поля.');
+
+      // Индикация загрузки
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Вход...';
+      btn.style.opacity = '0.8';
 
       try {
         const response = await fetch('/api/admin/login', {
@@ -45,15 +76,22 @@
         });
         
         const data = await response.json();
+        
         if (response.ok && data.user) {
           // Сохраняем признак админа в хранилище
           localStorage.setItem('adminUser', JSON.stringify(data.user));
           window.location.href = '/admin'; // Перекидываем в админку
         } else {
           alert(data.error || 'Неверный логин или пароль');
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          btn.style.opacity = '1';
         }
       } catch (err) {
         alert('Ошибка соединения с сервером');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        btn.style.opacity = '1';
       }
     };
 

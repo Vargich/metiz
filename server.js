@@ -82,6 +82,9 @@ const pool = new Pool({
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 5432,
     database: process.env.DB_NAME || 'metiz_elektrod',
+    ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // 🔥 ДАННЫЕ SMTP ИЗ ПЕРЕМЕННЫХ ОКРУЖЕНИЯ (.env)
@@ -241,6 +244,94 @@ await run(`CREATE INDEX IF NOT EXISTS idx_products_price ON products(price)`);
 await run(`CREATE INDEX IF NOT EXISTS idx_products_name ON products(name)`);
 await run(`CREATE INDEX IF NOT EXISTS idx_products_article ON products(article)`);
 }
+
+// ==========================================
+// 🔥 YML-ФИД ДЛЯ ЯНДЕКС БИЗНЕСА И ДИРЕКТА
+// ==========================================
+app.get('/yandex-feed.xml', async (req, res) => {
+    try {
+        const baseUrl = process.env.APP_URL || 'https://metizelektrod.ru';
+        
+        // 1. Получаем все категории
+        const categories = await queryAll("SELECT id, name FROM categories");
+        
+        // 2. Получаем товары (Только те, что есть в наличии или доступны под заказ)
+        // В вашей БД это товары с quantity > 0 или in_stock = 1
+        const products = await queryAll(`
+            SELECT id, name, article, price, category_id, image, description, quantity, in_stock 
+            FROM products 
+            WHERE quantity > 0 OR in_stock = 1
+        `);
+
+        // 3. Формируем "шапку" YML (XML)
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+        xml += `<yml_catalog date="${new Date().toISOString()}">\n`;
+        xml += `  <shop>\n`;
+        xml += `    <name>Метиз Электрод</name>\n`;
+        xml += `    <company>ИП Варгич В.Л.</company>\n`;
+        xml += `    <url>${baseUrl}</url>\n`;
+        xml += `    <currencies><currency id="RUB" rate="1"/></currencies>\n`;
+
+        // 4. Добавляем дерево категорий
+        xml += `    <categories>\n`;
+        categories.forEach(cat => {
+            xml += `      <category id="${cat.id}">${cat.name}</category>\n`;
+        });
+        xml += `    </categories>\n`;
+
+        // 5. Перебираем и добавляем товары (Офферы)
+        xml += `    <offers>\n`;
+        products.forEach(prod => {
+            // Флаг available нужен Яндексу, чтобы понимать, можно ли купить "прямо сейчас"
+            const available = (Number(prod.quantity) > 0) ? 'true' : 'false';
+            
+            xml += `      <offer id="${prod.id}" available="${available}">\n`;
+            
+            // Ссылка на товар (зависит от того, как у вас открывается товар, например, через поиск по каталогу)
+            xml += `        <url>${baseUrl}/catalog?search=${encodeURIComponent(prod.name)}</url>\n`;
+            
+            // Цена
+            xml += `        <price>${prod.price}</price>\n`;
+            xml += `        <currencyId>RUB</currencyId>\n`;
+            
+            // Категория
+            if (prod.category_id) {
+                xml += `        <categoryId>${prod.category_id}</categoryId>\n`;
+            }
+            
+            // Картинка (добавляем домен, если путь относительный)
+            if (prod.image) {
+                const imgUrl = prod.image.startsWith('/') ? `${baseUrl}${prod.image}` : prod.image;
+                xml += `        <picture>${imgUrl}</picture>\n`;
+            }
+            
+            // Название (Используем CDATA для защиты от спецсимволов вроде <, >, &)
+            xml += `        <name><![CDATA[${prod.name}]]></name>\n`;
+            
+            // Артикул (Очень полезно для B2B и Яндекса)
+            if (prod.article) {
+                xml += `        <vendorCode><![CDATA[${prod.article}]]></vendorCode>\n`;
+            }
+            
+            // Описание
+            if (prod.description) {
+                xml += `        <description><![CDATA[${prod.description}]]></description>\n`;
+            }
+            
+            xml += `      </offer>\n`;
+        });
+        xml += `    </offers>\n`;
+        xml += `  </shop>\n`;
+        xml += `</yml_catalog>`;
+
+        // 6. Отправляем готовый XML с правильным заголовком
+        res.set('Content-Type', 'application/xml');
+        res.send(xml);
+    } catch (error) {
+        logger.error(`Ошибка генерации YML-фида: ${error.message}`);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 // ==========================================
 // 4. МИДДЛВАРЫ И МУЛЬТЕР
@@ -974,6 +1065,59 @@ app.use(async (req, res, next) => {
         }
     }
     next();
+});
+
+// Настройка загрузчика специально для документов (до 10 МБ)
+const uploadSpec = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10 мегабайт
+    fileFilter: (req, file, cb) => {
+        // Разрешаем только документы
+        const allowedTypes = /xls|xlsx|doc|docx|pdf/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        if (extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Разрешены только файлы Excel, Word и PDF'));
+    }
+});
+
+// Маршрут приема спецификаций
+app.post('/api/send-spec', uploadSpec.single('file'), async (req, res) => {
+    try {
+        const { name, contact } = req.body;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({ error: 'Файл спецификации не прикреплен' });
+        }
+
+        // Формируем электронное письмо
+        const mailOptions = {
+            from: process.env.SMTP_USER, // Ваша почта из .env
+            to: 'metiz-elektrod@mail.ru', // Куда отправлять (рабочая почта менеджеров)
+            subject: `🔥 Новая спецификация на расчет от: ${name}`,
+            text: `Поступила новая заявка на расчет (Спецификация) с сайта Метиз Электрод.\n\n` +
+                  `👤 Клиент / Компания: ${name}\n` +
+                  `📞 Контакт для связи: ${contact}\n\n` +
+                  `Файл со списком позиций прикреплен к этому письму.`,
+            attachments: [
+                {
+                    filename: file.originalname,
+                    content: file.buffer // Берем файл прямо из оперативной памяти
+                }
+            ]
+        };
+
+        // Отправляем письмо через уже настроенный у вас transporter
+        await transporter.sendMail(mailOptions);
+        
+        logger.info(`Спецификация от ${name} успешно отправлена на почту.`);
+        res.json({ success: true });
+    } catch (err) {
+        logger.error(`Ошибка отправки спецификации: ${err.message}`);
+        res.status(500).json({ error: 'Ошибка отправки почты' });
+    }
 });
 
 initDatabase().then(async () => {

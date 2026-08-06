@@ -7,99 +7,119 @@
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" />
   <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="Политика обработки персональных данных ИП Варгич В.Л. — Метиз Электрод Камышин." />
 </head>
 <body>
+
+  <!-- ШАПКА -->
   <header class="shop-header">
-    <div class="container shop-header__container">
+    <div class="shop-header__container container">
       <a href="/" class="shop-logo">Метиз<span class="text-brand">Электрод</span></a>
       
-      <nav class="shop-nav">
+      <a href="tel:+78445790099" class="header-phone-btn header-phone-mobile">
+        <i class="fas fa-phone-alt"></i>
+        <span>+7 (84457) 9-00-99</span>
+      </a>
+      
+      <button class="burger-btn" id="burgerBtn" aria-label="Открыть меню">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <nav class="shop-nav" id="shopNav">
         <a href="/">Главная</a>
         <a href="/catalog">Каталог</a>
         <a href="/about">О нас</a>
         <a href="/contacts">Контакты</a>
       </nav>
       
-      <!-- <div class="shop-header__actions">
-        <div id="auth-actions" style="display: flex; gap: 8px;">
-          <button class="icon-btn" onclick="openAuthModal()" id="login-btn"><i class="fas fa-user"></i></button>
-          <button class="icon-btn" onclick="handleLogout()" id="logout-btn" style="display:none; color: #EF4444;"><i class="fas fa-sign-out-alt"></i></button>
-        </div>
-        <button class="icon-btn" onclick="openCart()"><i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-count">0</span></button>
-      </div> -->
+      <div class="shop-header__actions">
+        <a href="tel:+78445790099" class="header-phone-btn header-phone-desktop">
+          <i class="fas fa-phone-alt" style="margin-right: 6px;"></i><span>+7 (84457) 9-00-99</span>
+        </a>
+      </div>
     </div>
   </header>
 
-  <main id="main-content">
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
+  <main id="main-content" class="container">
+    <h1 class="visually-hidden">Политика обработки персональных данных Метиз Электрод</h1>
     <section class="about-section border-dark" style="min-height: 60vh;">
       <div style="padding: 60px 40px; max-width: 900px; margin: 0 auto; width: 100%;">
         <h2 class="about-tag">Документ</h2>
         <div class="about-title" style="font-size: 32px; margin-bottom: 40px;">Политика обработки персональных данных</div>
         
-        <div style="font-weight: 500; opacity: 0.8; line-height: 1.8; font-size: 14px;">
-          <p style="margin-bottom: 24px;">Настоящая Политика составлена в соответствии с требованиями Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных» и определяет порядок обработки персональных данных и меры по обеспечению их безопасности ИП Варгичем В.Л.</p>
+        <div style="font-weight: 500; opacity: 0.85; line-height: 1.8; font-size: 14px;">
+          <p style="margin-bottom: 24px;">Настоящая Политика составлена в соответствии с требованиями Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных» и определяет порядок обработки персональных данных и меры по обеспечению их безопасности ИП Варгичем В.Л. (далее — Оператор).</p>
           
-          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">1. Какие данные мы собираем</h3>
-          <p style="margin-bottom: 12px;">Оператор обрабатывает следующие персональные данные Пользователя в случае их добровольного предоставления:</p>
+          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">1. Общие положения и собираемые данные</h3>
+          <p style="margin-bottom: 12px;">Сайт носит информационный характер (электронный каталог промышленного крепежа и сварочных материалов). В случае заполнении форм обратной связи, запроса коммерческих предложений или отправки заявок Оператор может обрабатывать:</p>
           <ul style="margin-bottom: 24px; padding-left: 20px;">
-            <li>Фамилия, Имя, Отчество (при наличии) или псевдоним;</li>
             <li>Контактный номер телефона;</li>
             <li>Адрес электронной почты (Email);</li>
-            <li>Реквизиты организации (для юридических лиц: наименование, ИНН, юридический адрес);</li>
-            <li>Обезличенные цифровые следы: IP-адрес, данные файлов cookie, информация о браузере, история посещений и геолокация.</li>
+            <li>Имя пользователя или название организации (ИНН, КПП);</li>
+            <li>Обезличенные цифровые данные: файлы cookie, IP-адрес, тип браузера, геолокация и история посещений страниц каталога.</li>
           </ul>
 
-          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">2. Цели обработки данных</h3>
-          <p style="margin-bottom: 24px;">Идентификация пользователя на сайте, оформление, подтверждение и доставка заказов, предоставление доступа к Личному кабинету, выставление счетов на оплату для юридических и физических лиц, обратная связь и улучшение качества работы интернет-магазина.</p>
+          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">2. Цели обработки персональных данных</h3>
+          <p style="margin-bottom: 24px;">Обработка данных осуществляется исключительно в целях: предоставления консультаций по наличию и характеристикам товаров, расчета и выставления коммерческих предложений (счетов), организации доставки продукции, а также анализа работы и улучшения качества информационного каталога.</p>
 
-          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">3. Локализация и защита данных</h3>
-          <p style="margin-bottom: 24px;">Все базы данных, содержащие персональные данные граждан Российской Федерации, физически расположены на серверах на территории РФ. Мы применяем современные методы шифрования, безопасные протоколы передачи данных (HTTPS) и организационно-технические меры для защиты от несанкционированного доступа или утечек информации.</p>
+          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">3. Локализация, хранение и защита данных</h3>
+          <p style="margin-bottom: 24px;">Все базы данных, используемые для хранения технической информации, расположены на серверах на территории Российской Федерации. Оператор применяет необходимые организационные и технические меры (включая SSL-шифрование) для защиты информации от несанкционированного доступа.</p>
 
-          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">4. Права пользователя (Субъекта ПД)</h3>
-          <p style="margin-bottom: 24px;">Пользователь имеет право в любой момент отозвать согласие на обработку данных, запросить удаление, изменение или выгрузку своих данных из информационной системы, направив официальное обращение Оператору по электронной почте.</p>
-
-          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">5. Контакты Оператора ПД</h3>
-          <p style="margin-bottom: 8px;">Для любых запросов, связанных с изменением, блокировкой или удалением ваших персональных данных, обращайтесь по следующим официальным реквизитам:</p>
+          <h3 style="margin-bottom: 12px; font-weight: 900; color: var(--dark);">4. Права Пользователя и отзыв согласия</h3>
+          <p style="margin-bottom: 8px;">Вы можете в любой момент запросить удаление, изменение ваших данных или отозвать согласие на обработку, направив письменное обращение на электронную почту Оператора:</p>
           <ul style="margin-bottom: 24px; padding-left: 20px; list-style: none;">
             <li><strong>Индивидуальный предприниматель:</strong> Варгич Вадим Леонидович</li>
             <li><strong>ИНН:</strong> 343608258210</li>
             <li><strong>ОГРНИП:</strong> 306345321600035</li>
-            <li><strong>Юридический адрес:</strong> 403893, Волгоградская обл., г. Камышин, ул. Спартаковская, д. 75, кв. 2</li>
             <li><strong>Фактический адрес (Офис):</strong> г. Камышин, 2-й железнодорожный переезд, корпус 1</li>
-            <li><strong>Электронная почта:</strong> <a href="mailto:metiz-elektrod@mail.ru" style="color:var(--brand); text-decoration:underline;">metiz-elektrod@mail.ru</a> (в теме письма указать «Персональные данные»)</li>
+            <li><strong>Электронная почта:</strong> <a href="mailto:metiz-elektrod@mail.ru" style="color:var(--brand); text-decoration:underline;">metiz-elektrod@mail.ru</a></li>
           </ul>
         </div>
       </div>
     </section>
   </main>
-  
- <footer style="border-top:1px solid var(--dark);">
+
+  <!-- ФУТЕР -->
+  <footer style="border-top:1px solid var(--border-color);">
     <div class="footer-benefits">
-        <div class="benefit-item">
-            <div class="benefit-title">Налоги</div>
-            <div class="benefit-desc">Работаем с НДС</div>
-        </div>
-        <div class="benefit-item">
-            <div class="benefit-title">Склад</div>
-            <div class="benefit-desc">1000+ позиций в наличии</div>
-        </div>
-        <div class="benefit-item">
-            <div class="benefit-title">Оплата</div>
-            <div class="benefit-desc">Безнал и наличные</div>
-        </div>
+      <div class="benefit-item">
+        <div class="benefit-title">Налоги</div>
+        <div class="benefit-desc">Работаем с НДС</div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title">Склад</div>
+        <div class="benefit-desc">3000+ позиций в наличии</div>
+      </div>
+      <div class="benefit-item">
+        <div class="benefit-title">Оплата</div>
+        <div class="benefit-desc">Безнал и наличные</div>
+      </div>
     </div>
-    <div class="footer-bottom">
-        <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
-        <div class="footer-links">
-            <a href="/policy">Политика</a>
-            <a href="/terms">Условия</a>
-        </div>
-        <div class="footer-socials">
-            <div class="social-btn">VK</div>
-            <div class="social-btn">TG</div>
-        </div>
+    <div class="footer-bottom container">
+      <div class="footer-copy">© <span id="current-year"></span> ИП Варгич В.Л.</div>
+      
+      <div class="footer-links">
+        <a href="/admin-login">Админ-панель</a>
+        <a href="/policy">Политика конфиденциальности</a>
+        <a href="/terms">Пользовательское соглашение</a>
+      </div>
+      
+      <div class="footer-socials">
+        <a href="https://vk.com/metizelektrod" target="_blank" class="social-btn"><i class="fab fa-vk" aria-hidden="true"></i><span class="visually-hidden">VK</span></a>
+        <a href="https://t.me/metizelektrod" target="_blank" class="social-btn"><i class="fab fa-telegram" aria-hidden="true"></i><span class="visually-hidden">Telegram</span></a>
+      </div>
     </div>
-</footer>
-<script type="module" src="/js/app.js"></script>
+  </footer>
+
+  <script type="module" src="/js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const yearEl = document.getElementById('current-year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    });
+  </script>
 </body>
 </html>
