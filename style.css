@@ -6203,8 +6203,8 @@ main#main-content.container {
 }
 
 /* 2. Возвращаем ограничения .container тем блокам, которым это нужно (контакты, каталог) */
-main#main-content.container > *:not(.about-fullscreen):not(.promo-section):not(.new-section):not(.brands-section):not(.ticker-wrap):not(.footer-benefits):not(.about-section) {
-  max-width: var(--max-site-width) !important;
+main#main-content.container > *:not(.about-fullscreen):not(.promo-section):not(.new-section):not(.brands-section):not(.ticker-wrap):not(.footer-benefits):not(.about-section):not(.contacts-section) {
+ max-width: var(--max-site-width) !important;
   margin-left: auto !important;
   margin-right: auto !important;
   padding-left: var(--container-padding) !important;
@@ -6219,7 +6219,8 @@ main#main-content.container > *:not(.about-fullscreen):not(.promo-section):not(.
 .brands-section,
 .ticker-wrap, 
 .footer-benefits,
-.about-section {
+.about-section,
+.contacts-section {
   width: 100% !important;
   max-width: 100% !important;
   position: relative !important;
@@ -6337,5 +6338,35 @@ main#main-content.container > *:not(.about-fullscreen):not(.promo-section):not(.
   }
   .contacts-map-content {
     min-height: 400px !important;
+  }
+}
+
+/* ============================================================
+   ФИКС МАСШТАБИРОВАНИЯ (ЗУМА) ДЛЯ СТРАНИЦЫ КОНТАКТОВ
+   ============================================================ */
+.container .contacts-grid,
+.container .contacts-map-wrapper,
+.contacts-grid,
+.contacts-map-wrapper {
+  position: static !important;
+  transform: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0 !important;
+}
+
+.contacts-map-sidebar {
+  padding-left: 0 !important;
+}
+
+.container .new-section {
+  padding-left: 40px !important;
+  padding-right: 40px !important;
+}
+
+@media (max-width: 576px) {
+  .container .new-section {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
 }

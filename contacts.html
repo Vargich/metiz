@@ -9,6 +9,7 @@
   <title>Контакты и адреса складов — Метиз Электрод</title>
   <meta name="description" content="Адреса складов, пунктов выдачи и телефоны компании Метиз Электрод в Камышине и Петров-Вале." />
 
+  <!-- Локальные стили для железного адаптива, чтобы не зависеть от кэша style.css -->
   
 </head>
 <body style="background: var(--white);">
@@ -44,93 +45,88 @@
   </div>
 </header>
 
-<!-- ОСНОВНОЙ КОНТЕНТ В СТРОГОМ РОДНОЙ СЕТКЕ (container) -->
 <main id="main-content" class="container">
   
   <!-- 1. ЗАГОЛОВОК -->
-  <section class="new-section" style="background: var(--gray-bg); border-radius: var(--radius-md); margin-top: 40px; margin-bottom: 40px; padding: 40px;">
-    <div class="about-tag">Отдел продаж и логистики</div>
-    <h1 class="about-title" style="margin-bottom: 24px;">Связь и логистика</h1>
-    <p class="about-p" style="max-width: 600px; margin-bottom: 32px;">
-      Прямые контакты отделов и адреса складов. Отправьте нам спецификацию, и мы оперативно подготовим счет с учетом оптовых скидок и наличия на базах.
-    </p>
-    <button onclick="openSpecModal()" class="hero-btn">
-      <i class="fas fa-file-invoice" style="margin-right: 8px;"></i> Заказать расчет
-    </button>
+  <section class="contacts-section" style="background: var(--gray-bg); padding: 60px 0; margin-bottom: 40px; margin-top: 40px;">
+    <div class="container">
+      <div class="about-tag">Отдел продаж и логистики</div>
+      <h1 class="about-title" style="margin-bottom: 24px;">Связь и логистика</h1>
+      <p class="about-p" style="max-width: 600px; margin-bottom: 32px;">
+        Прямые контакты отделов и адреса складов. Отправьте нам спецификацию, и мы оперативно подготовим счет с учетом оптовых скидок и наличия на базах.
+      </p>
+      <button onclick="openSpecModal()" class="hero-btn">
+        <i class="fas fa-file-invoice" style="margin-right: 8px;"></i> Заказать расчет
+      </button>
+    </div>
   </section>
 
   <!-- 2. СЕТКА КОНТАКТОВ -->
-  <section class="contacts-grid" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-bottom: 40px;">
-    <div class="contact-box" >
-      <div class="contact-tag">Отдел продаж</div>
-      <a href="tel:+78445790099" class="contact-value contact-value--hoverable" style="text-decoration: none; color: inherit;">+7(84457) 9-00-99</a>
-      <div class="contact-sub">Розничные заказы и наличие</div>
-    </div>
-    
-    <div class="contact-box" >
-      <div class="contact-tag" style="color: var(--brand);">Оптовым клиентам</div>
-      <a href="tel:+79610893812" class="contact-value contact-value--hoverable" style="text-decoration: none; color: inherit;">+7(961)089-38-12</a>
-      <div class="contact-sub">Снабжение предприятий</div>
-    </div>
+  <section class="contacts-section" style="border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-bottom: 40px; background: white;">
+    <div class="container" style="padding-top: 0 !important; padding-bottom: 0 !important;">
+      <div class="contacts-grid" style="margin: 0; border-bottom: none;">
+        <div class="contact-box" style="background: white;">
+          <div class="contact-tag">Отдел продаж</div>
+          <a href="tel:+78445790099" class="contact-value contact-value--hoverable" style="text-decoration: none; color: inherit;">+7(84457) 9-00-99</a>
+          <div class="contact-sub">Розничные заказы и наличие</div>
+        </div>
+        
+        <div class="contact-box" >
+          <div class="contact-tag" style="color: var(--brand);">Оптовым клиентам</div>
+          <a href="tel:+79610893812" class="contact-value contact-value--hoverable" style="text-decoration: none; color: inherit;">+7(961)089-38-12</a>
+          <div class="contact-sub">Снабжение предприятий</div>
+        </div>
 
-    <div class="contact-box" >
-      <div class="contact-tag">Электронная почта</div>
-      <a href="mailto:metiz-elektrod@mail.ru" class="contact-value contact-value--hoverable" style="text-decoration: none; color: inherit; font-size: 20px;">metiz-elektrod@mail.ru</a>
-      <div class="contact-sub">Официальные запросы</div>
+        <div class="contact-box" style="background: white;">
+          <div class="contact-tag">Электронная почта</div>
+          <a href="mailto:metiz-elektrod@mail.ru" class="contact-value contact-value--hoverable" style="text-decoration: none; color: inherit; font-size: 20px;">metiz-elektrod@mail.ru</a>
+          <div class="contact-sub">Официальные запросы</div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- 3. КАРТА И ФИЛИАЛЫ -->
-  <section class="contacts-map-wrapper" style="display: flex; border: 1px solid var(--border-color); overflow: hidden; margin-bottom: 40px; min-height: 500px; background: white;">
-    
-    <!-- Левая панель (Список) -->
-    <div class="contacts-map-sidebar" style="display: flex; flex-direction: column; width: 380px; flex-shrink: 0; border-right: 1px solid var(--border-color);">
-      <div style="padding: 30px; border-bottom: 1px solid var(--border-color); background: white;">
-        <h2 class="about-tag" style="margin-bottom: 8px;">Логистика</h2>
-        <div class="about-title" style="font-size: 24px; margin-bottom: 0;">Наши склады</div>
-      </div>
-      <div id="shops" style="flex: 1; overflow-y: auto; max-height: 500px; background: white;">
-        <!-- Заполняется через map.js -->
+  <section class="contacts-section" style="border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-bottom: 40px; background: white;">
+    <div class="container" style="padding-top: 0 !important; padding-bottom: 0 !important;">
+      <div class="contacts-map-wrapper" style="display: flex; border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); min-height: 500px; background: white;">
+        
+        <!-- Левая панель -->
+        <div class="contacts-map-sidebar" style="display: flex; flex-direction: column; width: 380px; flex-shrink: 0; border-right: 1px solid var(--border-color); background: var(--gray-bg);">
+          <div style="padding: 30px; border-bottom: 1px solid var(--border-color); background: white;">
+            <h2 class="about-tag" style="margin-bottom: 8px;">Логистика</h2>
+            <div class="about-title" style="font-size: 24px; margin-bottom: 0;">Наши склады</div>
+          </div>
+          <div id="shops" style="flex: 1; overflow-y: auto; max-height: 500px; background: white;">
+            <!-- Заполняется через map.js -->
+          </div>
+        </div>
+        
+        <!-- Правая панель (Карта) -->
+        <div class="contacts-map-content" style="flex: 1; position: relative; min-height: 400px;">
+          <div id="map" style="position: absolute; inset: 0; width: 100%; height: 100%;"></div>
+        </div>
+        
       </div>
     </div>
-    
-    <!-- Правая панель (Карта) -->
-    <div class="contacts-map-content" style="flex: 1; position: relative; min-height: 400px;">
-      <div id="map" style="position: absolute; inset: 0; width: 100%; height: 100%;"></div>
-    </div>
-    
   </section>
 
   <!-- 4. РЕКВИЗИТЫ -->
-  <section class="new-section" style="background: var(--gray-bg); border-radius: var(--radius-md); text-align: center; padding: 40px; margin-bottom: 40px;">
-    <div class="about-tag" style="margin-bottom: 12px;">Юридическая информация</div>
-    <div style="font-size: 20px; font-weight: 800; color: var(--dark); margin-bottom: 8px;">ИП Варгич Вадим Леонидович</div>
-    <div style="font-size: 16px; color: var(--text-muted);">
-      <strong>ИНН:</strong> 343608258210 &nbsp; | &nbsp; <strong>ОГРНИП:</strong> 306345321600035
+  <section class="contacts-section" style="background: var(--gray-bg); padding: 40px 0; margin-bottom: 40px; text-align: center;">
+    <div class="container">
+      <div class="about-tag" style="margin-bottom: 12px;">Юридическая информация</div>
+      <div style="font-size: 20px; font-weight: 800; color: var(--dark); margin-bottom: 8px;">ИП Варгич Вадим Леонидович</div>
+      <div style="font-size: 16px; color: var(--text-muted);">
+        <strong>ИНН:</strong> 343608258210 &nbsp; | &nbsp; <strong>ОГРНИП:</strong> 306345321600035
+      </div>
     </div>
   </section>
-
-  <!-- 5. ПРЕИМУЩЕСТВА ФУТЕРА -->
-  <!-- <section class="footer-benefits" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden;">
-    <div class="benefit-item">
-      <div class="benefit-title">Налоги</div>
-      <div class="benefit-desc">Работаем с НДС</div>
-    </div>
-    <div class="benefit-item">
-      <div class="benefit-title">Склад</div>
-      <div class="benefit-desc">3000+ позиций в наличии</div>
-    </div>
-    <div class="benefit-item">
-      <div class="benefit-title">Оплата</div>
-      <div class="benefit-desc">Безнал и наличные</div>
-    </div>
-  </section> -->
 
 </main>
 
 <!-- ТЕМНЫЙ MEGA-FOOTER -->
 <footer class="mega-footer">
-  <div class="container">
+  <div class="mega-footer-container">
     <div class="mega-footer-grid">
       
       <!-- Колонка 1: О компании -->
@@ -254,7 +250,7 @@
   </div>
 </div>
 
-<!-- СКРИПТЫ -->
+<script type="module" src="/js/app.js"></script>
 <script type="module">
   import { initYandexMap } from './js/map.js';
   
@@ -328,8 +324,6 @@
     }
   });
 </script>
-
-<script type="module" src="/js/app.js"></script>
 
 </body>
 </html>
